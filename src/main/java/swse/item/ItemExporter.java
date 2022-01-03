@@ -494,6 +494,7 @@ public class ItemExporter extends BaseExporter {
         if(stunSetting != null && stunSetting.toLowerCase().contains("yes") && stunDamageDie == null){
             stunDamageDie = damageDie;
         }
+
         if("Amphistaff".equalsIgnoreCase(itemName)){
             damageDie = null;
             damageType = null;

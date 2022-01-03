@@ -200,6 +200,15 @@ public class FeatExporter extends BaseExporter {
             case "Force Training":
                 attributes.add(Attribute.create("forceTraining", "true"));
                 break;
+            case "Dual Weapon Mastery I":
+                attributes.add(Attribute.create("dualWeaponModifier", "-5"));
+                break;
+            case "Dual Weapon Mastery II":
+                attributes.add(Attribute.create("dualWeaponModifier", "-2"));
+                break;
+            case "Dual Weapon Mastery III":
+                attributes.add(Attribute.create("dualWeaponModifier", "0"));
+                break;
             default:
         }
         if (itemName.startsWith("Martial Arts ")) {
@@ -262,11 +271,11 @@ public class FeatExporter extends BaseExporter {
             choice.withOption("AVAILABLE_EXOTIC_WEAPON_PROFICIENCY", new Option().withPayload("AVAILABLE_EXOTIC_WEAPON_PROFICIENCY"));
             return choice;
         } else if ("Double Attack".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Double Attack");
             choice.withOption("AVAILABLE_DOUBLE_ATTACK", new Option().withPayload("AVAILABLE_DOUBLE_ATTACK"));
             return choice;
         } else if ("Triple Attack".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Proficient Weapon to use Triple Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Triple Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Triple Attack");
             choice.withOption("AVAILABLE_TRIPLE_ATTACK", new Option().withPayload("AVAILABLE_TRIPLE_ATTACK"));
             return choice;
         } else if ("Savage Attack".equals(itemName)) {

@@ -23,13 +23,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.character_class.StartingFeats;
+import swse.common.Attribute;
 import swse.common.BaseExporter;
 import swse.common.Category;
 import swse.common.Choice;
 import swse.common.ItemType;
 import swse.common.Option;
 import swse.common.ProvidedItem;
-import swse.common.Attribute;
 
 public class SpeciesExporter extends BaseExporter
 {
@@ -145,11 +145,32 @@ public class SpeciesExporter extends BaseExporter
                 .withProvided(getSpeciesSpecificChoice(speciesName))
                 .withProvided(Speed.getSpeed(content, speciesName))
                 .withProvided(AgeCategories.getAgeCategories(content))
+                .withProvided(getSize(content))
                 .withProvided(getWeaponFamiliarity (speciesName))
                 .withProvided(getBonusTree(speciesName))
                 .withProvided(getBonusItems(speciesName));
 
         return Lists.newArrayList(species.toJSON());
+    }
+
+    private static Collection<Object> getSize(Element content) {
+        Set<Object> size = new HashSet<>();
+
+        Elements lis = content.select("li");
+
+        for(Element li : lis){
+            String text = li.text();
+            final String[] toks = text.split(":");
+            if(toks.length > 1) {
+                String speciesCategory = toks[0].trim();
+                if (speciesCategory.endsWith("Size")) {
+                    String category = speciesCategory.split(" ")[0];
+                    size.add(ProvidedItem.create(category, ItemType.TRAIT));
+                }
+            }
+        }
+
+        return size;
     }
 
     private static List<Attribute> getBonusTree(String speciesName) {

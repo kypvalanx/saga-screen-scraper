@@ -105,4 +105,8 @@ class Talent extends FoundryItem<Talent>
             return this;
         }
 
+    public Talent withPossibleProviders(List<String> talentProviders) {
+        this.talentProviders.addAll(talentProviders);
+        return this;
+    }
 }

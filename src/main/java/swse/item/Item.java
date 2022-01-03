@@ -84,7 +84,8 @@ class Item extends FoundryItem<Item> {
                 attributeObject.add(createAttribute("keywords", keywords));
 //                attributes.add(createAttribute("modes", modes));
                 attributeObject.add(createAttribute("damageDie", damageDie));
-                attributeObject.add(createAttribute("stunDamageDie", stunDamageDie));
+               // attributeObject.add(createAttribute("stunDamageDie", stunDamageDie));
+        modes.add(Mode.create("Stun", List.of(Attribute.create("stunDamageDie", stunDamageDie))));
                 attributeObject.add(createAttribute("damageType", damageType));
                 attributeObject.add(createAttribute("unarmedDamage", unarmedDamage));
                 attributeObject.add(createAttribute("unarmedModifier", unarmedModifier));

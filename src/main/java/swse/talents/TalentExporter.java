@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -118,6 +119,7 @@ public class TalentExporter extends BaseExporter
 
         List<ProvidedItem> categories = ProvidedItem.getTraits(doc);
 
+        List<String> possibleProviders = categories.stream().map(item -> item.getName().equals("Talent Trees") ? null : item.getName()).filter(Objects::nonNull).collect(Collectors.toList());
         allCategories.addAll( categories);
 
         String tradition = getTradition(itemName, content);
@@ -140,6 +142,7 @@ public class TalentExporter extends BaseExporter
                             .withPrerequisite(prerequisite)
                             .withTalentTree(itemName)
                             .withProvided(categories)
+                            .withPossibleProviders(possibleProviders)
                             .withForceTradition(tradition)
                     .withProvided(attributes).toJSON());
                 }
@@ -175,6 +178,7 @@ public class TalentExporter extends BaseExporter
                     .withPrerequisite(prerequisite)
                     .withTalentTree(itemName)
                     .withProvided(categories)
+                    .withPossibleProviders(possibleProviders)
                     .withForceTradition(tradition).toJSON());
         }
 

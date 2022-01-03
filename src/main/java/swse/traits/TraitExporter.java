@@ -30,6 +30,7 @@ import swse.util.Util;
 public class TraitExporter extends BaseExporter {
 
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\traits.json";
+    public static final String UNARMED_DAMAGE_DIE = "unarmedDamageDie";
     private static int num = 0;
 
     public static void main(String[] args) {
@@ -574,22 +575,22 @@ public class TraitExporter extends BaseExporter {
     private static Attribute getUnarmedDieSize(String itemName) {
         switch (itemName) {
             case "Colossal":
-                return Attribute.create("unarmedDamageDie",12);
+                return Attribute.create(UNARMED_DAMAGE_DIE,12);
             case "Gargantuan":
-                return Attribute.create("unarmedDamageDie",10);
+                return Attribute.create(UNARMED_DAMAGE_DIE,10);
             case "Huge":
-                return Attribute.create("unarmedDamageDie",8);
+                return Attribute.create(UNARMED_DAMAGE_DIE,8);
             case "Large":
-                return Attribute.create("unarmedDamageDie",6);
+                return Attribute.create(UNARMED_DAMAGE_DIE,6);
             case "Medium":
-                return Attribute.create("unarmedDamageDie",4);
+                return Attribute.create(UNARMED_DAMAGE_DIE,4);
             case "Small":
-                return Attribute.create("unarmedDamageDie",3);
+                return Attribute.create(UNARMED_DAMAGE_DIE,3);
             case "Tiny":
-                return Attribute.create("unarmedDamageDie",2);
+                return Attribute.create(UNARMED_DAMAGE_DIE,2);
             case "Diminutive":
             case "Fine":
-                return Attribute.create("unarmedDamageDie",1);
+                return Attribute.create(UNARMED_DAMAGE_DIE,1);
             default:
                 return null;
         }
