@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
@@ -40,6 +42,8 @@ public class SpeciesExporter extends BaseExporter
     public static Set<String> allCategories = new HashSet();
     public static Set<String> keys = new HashSet();
     private static List<String> allSpecies = new ArrayList<>();
+    public static final Pattern BONUS_FEAT_PATTERN = Pattern.compile("gain one bonus Feat at 1st level");
+    public static final Pattern DAMAGE_REDUCTION = Pattern.compile("Damage Reduction (\\d*)");
 
 
     public static void main(String[] args)
@@ -148,9 +152,37 @@ public class SpeciesExporter extends BaseExporter
                 .withProvided(getSize(content))
                 .withProvided(getWeaponFamiliarity (speciesName))
                 .withProvided(getBonusTree(speciesName))
-                .withProvided(getBonusItems(speciesName));
+                .withProvided(getManualBonusItems(speciesName))
+                .withProvided(getBonusItems(content));
 
         return Lists.newArrayList(species.toJSON());
+    }
+
+    private static Collection<?> getBonusItems(Element content) {
+        List<Object> provided = new ArrayList<>();
+
+        for (Element child : content.select("p,li")) {
+//            if(child.children().isEmpty()) {
+            provided.addAll(getTrait(child));
+//            } else {
+//                provided.addAll(getBonusItems(child));
+//            }
+        }
+        return provided;
+    }
+
+    private static Collection<?> getTrait(Element child) {
+
+        List<Object> provided = new ArrayList<>();
+        Matcher bonusFeat = BONUS_FEAT_PATTERN.matcher(child.text());
+        if(bonusFeat.find()){
+            provided.add(ProvidedItem.create("Bonus Feat", ItemType.TRAIT));
+        }
+        Matcher damageReduction = DAMAGE_REDUCTION.matcher(child.text());
+        if(damageReduction.find()){
+            provided.add(ProvidedItem.create("Damage Reduction " + damageReduction.group(1), ItemType.TRAIT));
+        }
+        return provided;
     }
 
     private static Collection<Object> getSize(Element content) {
@@ -300,7 +332,7 @@ public class SpeciesExporter extends BaseExporter
         return choices;
     }
 
-    private static List<Object> getBonusItems(String speciesName)
+    private static List<Object> getManualBonusItems(String speciesName)
     {
         List<Object> attributes = new ArrayList<>();
         for(String item: getBonusItemList(speciesName)){

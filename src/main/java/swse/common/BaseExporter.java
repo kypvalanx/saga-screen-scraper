@@ -43,6 +43,7 @@ public class BaseExporter
 
         try
         {
+            jsonOutputFile.getParentFile().mkdirs();
             jsonOutputFile.createNewFile();
         } catch (IOException e)
         {

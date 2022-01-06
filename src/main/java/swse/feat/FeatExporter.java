@@ -3,6 +3,7 @@ package swse.feat;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,11 +15,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import swse.common.Attribute;
 import swse.common.BaseExporter;
 import swse.common.Category;
 import swse.common.Choice;
 import swse.common.Option;
-import swse.common.Attribute;
 import swse.prerequisite.Prerequisite;
 import swse.util.Context;
 
@@ -122,9 +123,37 @@ public class FeatExporter extends BaseExporter {
                 .withProvided(payloadChoice)
                 .withPrerequisite(prerequisite)
                 .withCategories(categories)
+                .withProvided(getGeneratedAttributes(content))
                 .withProvided(getAttributes(itemName)).toJSON());
 
         return feats;
+    }
+
+    private static Collection<?> getGeneratedAttributes(Element content) {
+        List<Object> provided = new ArrayList<>();
+
+        for (Element child : content.children()) {
+            if (child.text().contains(":")) {
+                final String[] split = child.text().split(":");
+                final String label = split[0];
+                final String payload = split[1].trim();
+
+                switch (label){
+                    case "Special":
+                        if(payload.startsWith("You can select this Feat multiple times") ||
+                                payload.startsWith("You may select this Feat multiple times") ||
+                                payload.startsWith("You can take this Feat more than once") ||
+                                payload.startsWith("You can gain this Feat multiple times")||
+                                payload.startsWith("You can take this Feat multiple times")||
+                                payload.startsWith("You may take this Feat more than once")||
+                                payload.startsWith("This Feat may be selected multiple times")){
+                            provided.add(Attribute.create("takeMultipleTimes", "true"));
+                        }
+                    default:
+                }
+            }
+        }
+        return provided;
     }
 
     private static Prerequisite getPrerequisites(String itemName, Prerequisite prerequisite) {
@@ -199,6 +228,7 @@ public class FeatExporter extends BaseExporter {
                 break;
             case "Force Training":
                 attributes.add(Attribute.create("forceTraining", "true"));
+                attributes.add(Attribute.create("provides", "Force Powers:MAX(1 + @WISMOD,1)"));
                 break;
             case "Dual Weapon Mastery I":
                 attributes.add(Attribute.create("dualWeaponModifier", "-5"));

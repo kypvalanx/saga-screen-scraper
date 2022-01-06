@@ -131,13 +131,13 @@ public class TraitExporter extends BaseExporter {
     private static Set<JSONObject> getSpeedTraits() {
         Set<JSONObject> response = new HashSet<>();
         for (int speed = 1; speed < 21; speed++) {
-            response.add(swse.traits.Trait.create("Base Speed " + speed).toJSON());
-            response.add(swse.traits.Trait.create("Swim Speed " + speed).toJSON());
-            response.add(swse.traits.Trait.create("Fly Speed " + speed).toJSON());
-            response.add(swse.traits.Trait.create("Wheeled Speed " + speed).toJSON());
-            response.add(swse.traits.Trait.create("Walking Speed " + speed).toJSON());
-            response.add(swse.traits.Trait.create("Tracked Speed " + speed).toJSON());
-            response.add(swse.traits.Trait.create("Hover Speed " + speed).toJSON());
+            response.add(swse.traits.Trait.create("Base Speed " + speed).withProvided(Attribute.create("speed", "Base Speed " + speed)).toJSON());
+            response.add(swse.traits.Trait.create("Swim Speed " + speed).withProvided(Attribute.create("speed", "Swim Speed " + speed)).toJSON());
+            response.add(swse.traits.Trait.create("Fly Speed " + speed).withProvided(Attribute.create("speed", "Fly Speed " + speed)).toJSON());
+            response.add(swse.traits.Trait.create("Wheeled Speed " + speed).withProvided(Attribute.create("speed", "Wheeled Speed " + speed)).toJSON());
+            response.add(swse.traits.Trait.create("Walking Speed " + speed).withProvided(Attribute.create("speed", "Walking Speed " + speed)).toJSON());
+            response.add(swse.traits.Trait.create("Tracked Speed " + speed).withProvided(Attribute.create("speed", "Tracked Speed " + speed)).toJSON());
+            response.add(swse.traits.Trait.create("Hover Speed " + speed).withProvided(Attribute.create("speed", "Hover Speed " + speed)).toJSON());
         }
         response.add(swse.traits.Trait.create("Stationary Speed 0").toJSON());
         return response;
@@ -643,14 +643,12 @@ public class TraitExporter extends BaseExporter {
     }
 
     private static Attribute getDamageReduction(String itemName) {
-        if (itemName.startsWith("Damage Reduction ")) {
+        if (itemName.startsWith("Damage Reduction ") || "Armor Plating".equals(itemName)) {
             Pattern damageReductionPattern = Pattern.compile("Damage Reduction (\\d*)");
             Matcher m = damageReductionPattern.matcher(itemName);
             if (m.find()) {
-                return Attribute.create("withProvided", Integer.parseInt(m.group(1)));
+                return Attribute.create("damageReduction", Integer.parseInt(m.group(1)));
             }
-        } else if ("Armor Plating".equals(itemName)) {
-            return Attribute.create("withProvided", 2);
         }
         return null;
     }
@@ -681,6 +679,10 @@ public class TraitExporter extends BaseExporter {
         if (content == null) {
             return null;
         }
+        if(itemName.equals("Bonus Feat")){
+            return Attribute.create("provides", "General Feats");
+        }
+
         BonusFeat bonusFeat = null;
 
         if (itemName.startsWith("Condition")) {
