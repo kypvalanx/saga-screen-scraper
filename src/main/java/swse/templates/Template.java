@@ -7,9 +7,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-public class Template extends FoundryItem
+public class Template extends FoundryItem<Template> implements Copyable<Template>
 {
     private String cost;
     private String templateType;
@@ -80,5 +81,9 @@ public class Template extends FoundryItem
     {
         this.suffix = suffix;
         return this;
+    }
+
+    public Template copy() {
+        return null;
     }
 }

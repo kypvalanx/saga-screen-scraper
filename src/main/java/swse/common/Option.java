@@ -1,14 +1,16 @@
 package swse.common;
 
+import com.google.common.base.MoreObjects;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 
-public class Option implements JSONy
+public class Option implements JSONy, Copyable<Option>
 {
     List<ProvidedItem> providedItems = new ArrayList<>();
+    List<Attribute> attributes = new ArrayList<>();
     private String payload;
 
 
@@ -32,11 +34,29 @@ public class Option implements JSONy
     }
 
     @Override
-    public String toString()
-    {
-        return "Option{" +
-                "providedItems=" + providedItems +
-                ", payload='" + payload + '\'' +
-                '}';
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("providedItems", providedItems)
+                .add("attributes", attributes)
+                .add("payload", payload)
+                .toString();
+    }
+
+    @Override
+    public Option copy() {
+        final Option option = new Option()
+                .withPayload(payload);
+        for (ProvidedItem providedItem : providedItems){
+            option.withProvidedItem(providedItem.copy());
+        }
+        for (Attribute attribute : attributes){
+            option.withAttribute(attribute.copy());
+        }
+        return option;
+    }
+
+    public Option withAttribute(Attribute attribute) {
+        attributes.add(attribute);
+        return this;
     }
 }

@@ -2,8 +2,10 @@ package swse.item;
 
 import java.util.List;
 import swse.common.Attribute;
+import swse.common.Copyable;
+import static swse.util.Util.cloneList;
 
-public class Mode {
+public class Mode implements Copyable<Mode> {
     private final List<Attribute> attributes;
     private final List<Mode> modes;
     private final String name;
@@ -46,5 +48,10 @@ public class Mode {
 
     public String getGroup() {
         return group;
+    }
+
+    @Override
+    public Mode copy() {
+        return new  Mode(name, group, cloneList(attributes), cloneList(modes));
     }
 }

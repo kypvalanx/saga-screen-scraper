@@ -5,9 +5,10 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.common.Category;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-class Feat extends FoundryItem<Feat>
+class Feat extends FoundryItem<Feat> implements Copyable<Feat>
 {
 //    private String fortDefenceBonus;
 //    private String refDefenceBonus;
@@ -51,5 +52,10 @@ class Feat extends FoundryItem<Feat>
         }
         this.categories.addAll(categories);
         return this;
+    }
+
+    @Override
+    public Feat copy() {
+        return null;
     }
 }

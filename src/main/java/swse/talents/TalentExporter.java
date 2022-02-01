@@ -16,9 +16,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
-import swse.common.BaseExporter;
-import swse.common.ProvidedItem;
 import swse.common.Attribute;
+import swse.common.BaseExporter;
+import swse.common.Category;
+import swse.common.Choice;
+import swse.common.ItemType;
+import swse.common.Option;
+import swse.common.ProvidedItem;
 import swse.prerequisite.Prerequisite;
 import swse.util.Context;
 
@@ -55,7 +59,7 @@ public class TalentExporter extends BaseExporter
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\talents.csv";
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\talents.json";
     private static int num = 0;
-    private static Set<ProvidedItem> allCategories = new HashSet<>();
+    private static Set<Category> allCategories = new HashSet<Category>();
     private static List<String> allTalents = new ArrayList<>();
 
     public static void main(String[] args)
@@ -73,6 +77,7 @@ public class TalentExporter extends BaseExporter
 
         //System.out.println(allTalents.stream().map(feat -> "\""+feat+"\"").collect(Collectors.toList()));
 
+        System.out.println("Generated " + entries.size() + " of 1381");
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
     }
 
@@ -115,11 +120,11 @@ public class TalentExporter extends BaseExporter
             return new ArrayList<>();
         }
 
-        Element content = doc.getElementsByClass("mw-parser-output").first();
+        Element content = doc.getElementsByClass("page__main").first();
 
-        List<ProvidedItem> categories = ProvidedItem.getTraits(doc);
+        Set<Category> categories = Category.getCategories(doc.getElementsByClass("page-footer").first());
 
-        List<String> possibleProviders = categories.stream().map(item -> item.getName().equals("Talent Trees") ? null : item.getName()).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> possibleProviders = categories.stream().map(item -> item.getValue().equals("Talent Trees") ? null : item.getValue()).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         allCategories.addAll( categories);
 
         String tradition = getTradition(itemName, content);
@@ -134,7 +139,6 @@ public class TalentExporter extends BaseExporter
             if((element.tag().equals(Tag.valueOf("h4")) && element.getElementsByClass("mw-headline").size()>0))
             {
                 if(talentName != null && !talentName.isEmpty()){
-                    List<Attribute> attributes = getAttributes(talentName);
 
                     talents.add(Talent.create(talentName)
                             .withTelentTreeUrl("https://swse.fandom.com" + itemLink)
@@ -144,7 +148,8 @@ public class TalentExporter extends BaseExporter
                             .withProvided(categories)
                             .withPossibleProviders(possibleProviders)
                             .withForceTradition(tradition)
-                    .withProvided(attributes).toJSON());
+                    .withProvided(getAttributes(talentName))
+                            .toJSON());
                 }
 
                 talentName = element.getElementsByClass("mw-headline").first().text();
@@ -179,17 +184,26 @@ public class TalentExporter extends BaseExporter
                     .withTalentTree(itemName)
                     .withProvided(categories)
                     .withPossibleProviders(possibleProviders)
-                    .withForceTradition(tradition).toJSON());
+                    .withForceTradition(tradition)
+                    .withProvided(getAttributes(talentName))
+                    .toJSON());
         }
 
         return talents;
     }
 
-    private static List<Attribute> getAttributes(String itemName) {
-        List<Attribute> attributes = new ArrayList<>();
+    private static List<Object> getAttributes(String itemName) {
+        List<Object> attributes = new ArrayList<>();
 
         if ("Noble Fencing Style".equals(itemName)){
             attributes.add(Attribute.create("finesseStat", "CHA"));
+        }
+        if ("Stolen Form".equals(itemName)){
+            attributes.add(Attribute.create("takeMultipleTimes", true));
+            attributes.add(ProvidedItem.create("#payload#", ItemType.TALENT));
+            attributes.add(new Choice("Choose one Talent from the Lightsaber Forms Talent Tree:")
+                    .withNoOptionsDescription("There are no available Talents remaining in the Lightsaber Forms Talent Tree")
+                    .withOption("AVAILABLE_LIGHTSABER_FORMS", new Option().withPayload("AVAILABLE_LIGHTSABER_FORMS")));
         }
 
         return attributes;

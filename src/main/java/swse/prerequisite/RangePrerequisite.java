@@ -33,4 +33,9 @@ class RangePrerequisite extends Prerequisite
                 .add("type", type)
                 .toString();
     }
+
+    @Override
+    public Prerequisite copy() {
+        return new RangePrerequisite(plainText, type, low, high);
+    }
 }

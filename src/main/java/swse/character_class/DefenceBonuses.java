@@ -4,31 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
-import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
-import swse.common.JSONy;
 import swse.common.Attribute;
 
-class DefenceBonuses implements JSONy
+public class DefenceBonuses
 {
-    private final Integer reflex;
-    private final Integer fortitude;
-    private final Integer will;
     public static final Pattern REFLEX_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (their|your) (fortitude defense, )?reflex defense");
     public static final Pattern FORTITUDE_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (their|your) fortitude defense");
     public static final Pattern WILL_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (their|your) (fortitude defense, reflex defense, and )?will defense");
 
-    public DefenceBonuses(Integer reflex, Integer fortitude, Integer will)
-    {
-        this.reflex = reflex;
-        this.fortitude = fortitude;
-        this.will = will;
-    }
-
-    static List<Attribute> getDefenseBonuses(Elements entries)
+    public static List<Attribute> getDefenseBonuses(Elements entries)
     {
         List<Attribute> attributes = new ArrayList<>();
         boolean found = false;
@@ -68,21 +55,5 @@ class DefenceBonuses implements JSONy
         }
 
         return attributes;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "DefenceBonuses{" +
-                "reflex=" + reflex +
-                ", fortitude=" + fortitude +
-                ", will=" + will +
-                '}';
-    }
-
-    @Nonnull
-    public JSONObject toJSON()
-    {
-        return new JSONObject().put("reflex", reflex).put("fortitude",fortitude).put("will", will);
     }
 }

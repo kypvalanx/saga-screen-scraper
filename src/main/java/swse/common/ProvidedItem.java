@@ -11,7 +11,7 @@ import swse.prerequisite.AndPrerequisite;
 import swse.prerequisite.Prerequisite;
 
 //identifies a trait that should be added as opposed to a complete trait
-public class ProvidedItem implements JSONy
+public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
 {
     private final String name;
     private final ItemType type;
@@ -58,7 +58,7 @@ public class ProvidedItem implements JSONy
     }
 
     public static List<ProvidedItem> getTraits(Element content){
-        return content.select("li.category").stream().map(Element::text).map(text -> text.replace("Condition ", "Conditional ")).map(t -> create(t, ItemType.TRAIT)).collect(Collectors.toList());
+        return content.select("a.newcategory").stream().map(Element::text).map(text -> text.replace("Condition ", "Conditional ")).map(t -> create(t, ItemType.TRAIT)).collect(Collectors.toList());
     }
 
     @Nonnull
@@ -87,5 +87,10 @@ public class ProvidedItem implements JSONy
     @Override
     public int hashCode() {
         return Objects.hashCode(name, type, prerequisite);
+    }
+
+    @Override
+    public ProvidedItem copy() {
+        return new ProvidedItem(name, type, prerequisite.copy());
     }
 }

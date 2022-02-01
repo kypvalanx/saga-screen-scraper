@@ -4,10 +4,11 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
-import swse.common.FoundryItem;
 import swse.common.Category;
+import swse.common.Copyable;
+import swse.common.FoundryItem;
 
-class Affiliation extends FoundryItem {
+class Affiliation extends FoundryItem implements Copyable<Affiliation> {
 
     public Affiliation(String name) {
         super(name);
@@ -38,5 +39,10 @@ class Affiliation extends FoundryItem {
     public Affiliation withCategories(Set<Category> categories) {
         this.categories.addAll(categories);
         return this;
+    }
+
+    @Override
+    public Affiliation copy() {
+        return null;
     }
 }

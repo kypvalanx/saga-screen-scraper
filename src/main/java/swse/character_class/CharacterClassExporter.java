@@ -8,6 +8,7 @@ import java.util.List;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import swse.common.Attribute;
 import swse.common.BaseExporter;
 import swse.common.Choice;
 import swse.common.ItemType;
@@ -16,14 +17,12 @@ import swse.common.ProvidedItem;
 import swse.prerequisite.Prerequisite;
 import swse.util.Context;
 
-public class CharacterClassExporter extends BaseExporter
-{
+public class CharacterClassExporter extends BaseExporter {
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\classes.json";
     private static List<String> allClasses = new ArrayList<>();
 
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         List<String> classLinkList = new ArrayList<String>();
         classLinkList.add("/wiki/Jedi");
         classLinkList.add("/wiki/Noble");
@@ -69,8 +68,7 @@ public class CharacterClassExporter extends BaseExporter
         classLinkList.add("/wiki/Martial_Arts_Master");
 
         List<JSONObject> entries = new ArrayList<>();
-        for (String speciesLink : classLinkList)
-        {
+        for (String speciesLink : classLinkList) {
             entries.addAll(parseItem(speciesLink, false));
         }
 
@@ -80,24 +78,20 @@ public class CharacterClassExporter extends BaseExporter
     }
 
 
-    private static Collection<? extends JSONObject> parseItem(String itemLink, boolean overwrite)
-    {
-        if (null == itemLink)
-        {
+    private static Collection<? extends JSONObject> parseItem(String itemLink, boolean overwrite) {
+        if (null == itemLink) {
             return new ArrayList<>();
         }
 
         Document doc = getDoc(itemLink, overwrite);
 
-        if (doc == null)
-        {
+        if (doc == null) {
             return new ArrayList<>();
         }
 
         String itemName = getItemName(doc);
 
-        if ("home".equals(itemName))
-        {
+        if ("home".equals(itemName)) {
             return new ArrayList<>();
         }
 
@@ -110,36 +104,69 @@ public class CharacterClassExporter extends BaseExporter
         content.select("div.toc").remove();
         content.select("table:not([class])").remove();
 
-        Choice classChoice = getClassChoice(itemName);
-
         Context.setValue("name", itemName);
         JSONObject characterClass = CharacterClass.create(itemName)
                 .withLeveledStats(Levels.getLeveledStats(content.select("table"), itemName))
                 .withProvided(ClassSkill.getClassSkills(content.select("p,ul,h4")))
-                .withProvided(HitPoints.getHitPoints(content.select("p,h4")))
+                .withProvided(HitPoints.getHitPoints(content.select("p,h4"), itemName))
                 .withProvided(ForcePoints.getForcePoints(content.select("p,h4,h3")))
                 .withProvided(DefenceBonuses.getDefenseBonuses(content.select("p,h4")))
                 .withPrerequisite(Prerequisite.getClassPrerequisite(content.select("p,ul,h4")))
                 .withProvided(StartingFeats.getStartingFeats(content.select("p,ul,h4")))
-                .withProvided(classChoice)
+                .withProvided(getClassChoice(itemName))
+                .withProvided(getClassType(itemName))
+                .withProvided(getProvidedItems(itemName))
                 .withDescription(getDescription(content)).toJSON();
 
         return Lists.newArrayList(characterClass);
     }
 
-    private static Choice getClassChoice(String itemName)
-    {
-        if("Technician".equals(itemName)){
+    private static Collection<Object> getProvidedItems(String itemName) {
+        Collection<Object> items = new ArrayList<>();
+
+        if ("Beast".equals(itemName)) {
+            items.add(Attribute.create("intelligenceMax", 2));
+        }
+
+        return items;
+    }
+
+    private static Collection<?> getClassType(String itemName) {
+        List<Object> classTypes = new ArrayList<>();
+        classTypes.add(Attribute.create("isHeroic", !List.of("Beast", "Nonheroic").contains(itemName)));
+        classTypes.add(Attribute.create("isPrestige", !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
+        return classTypes;
+    }
+
+    private static Choice getClassChoice(String itemName) {
+        if ("Technician".equals(itemName)) {
             return new Choice("Select a Starting Feat:")
                     .isFirstLevel(true)
-            .withOption("Skill Focus (Mechanics)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Mechanics))", ItemType.TRAIT)))
-            .withOption("Skill Focus (Treat Injury)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Treat Injury))", ItemType.TRAIT)))
-            .withOption("Skill Focus (Use Computer)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Use Computer))", ItemType.TRAIT)));
-        }else if("Jedi".equals(itemName)){
+                    .withOption("Skill Focus (Mechanics)",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Mechanics))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Mechanics)", ItemType.FEAT)))
+                    .withOption("Skill Focus (Treat Injury)",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Treat Injury))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Treat Injury)", ItemType.FEAT)))
+                    .withOption("Skill Focus (Use Computer)",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Use Computer))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Use Computer)", ItemType.FEAT)))
+                    .withOption("Skill Focus (Knowledge (Bureaucracy))",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Bureaucracy)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Bureaucracy))", ItemType.FEAT)))
+                    .withOption("Skill Focus (Knowledge (Galactic Lore))",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Galactic Lore)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Galactic Lore))", ItemType.FEAT)))
+                    .withOption("Skill Focus (Knowledge (Life Sciences))",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Life Sciences)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Life Sciences))", ItemType.FEAT)))
+                    .withOption("Skill Focus (Knowledge (Physical Sciences))",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Physical Sciences)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Physical Sciences))", ItemType.FEAT)))
+                    .withOption("Skill Focus (Knowledge (Social Sciences))",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Social Sciences)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Social Sciences))", ItemType.FEAT)))
+                    .withOption("Skill Focus (Knowledge (Tactics))",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Tactics)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Tactics))", ItemType.FEAT)))
+                    .withOption("Skill Focus (Knowledge (Technology))",
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Technology)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Technology))", ItemType.FEAT)));
+        } else if ("Jedi".equals(itemName)) {
 
             return new Choice("Select a Starting Weapon:")
                     .isFirstLevel(true).withOneOption("On First level you receive:")
-            .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.ITEM)));
+                    .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.ITEM)));
         }
         return null;
     }

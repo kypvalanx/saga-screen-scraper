@@ -221,7 +221,7 @@ public class FeatExporter extends BaseExporter {
                 break;
             case "Force Sensitivity":
                 attributes.add(Attribute.create("forceSensitivity", "true"));
-                attributes.add(Attribute.create("bonusTalentTree", "Force Talent"));
+                attributes.add(Attribute.create("bonusTalentTree", "Force Talent Tree"));
                 break;
             case "Weapon Finesse":
                 attributes.add(Attribute.create("finesseStat", "DEX"));
@@ -238,6 +238,23 @@ public class FeatExporter extends BaseExporter {
                 break;
             case "Dual Weapon Mastery III":
                 attributes.add(Attribute.create("dualWeaponModifier", "0"));
+                break;
+            case "Skill Training":
+                attributes.add(Attribute.create("trainedSkills", "1"));
+                break;
+            case "Improved Defenses":
+                attributes.add(Attribute.create("fortitudeDefenseBonus", "1"));
+                attributes.add(Attribute.create("willDefenseBonus", "1"));
+                attributes.add(Attribute.create("reflexDefenseBonus", "1"));
+                break;
+            case "Armor Proficiency (Light)":
+                attributes.add(Attribute.create("armorProficiency", "light"));
+                break;
+            case "Armor Proficiency (Medium)":
+                attributes.add(Attribute.create("armorProficiency", "medium"));
+                break;
+            case "Armor Proficiency (Heavy)":
+                attributes.add(Attribute.create("armorProficiency", "heavy"));
                 break;
             default:
         }
@@ -279,7 +296,7 @@ public class FeatExporter extends BaseExporter {
                 "Use the Force"
         };
         if (SKILL_FOCUS.equals(itemName)) {
-            Choice choice = new Choice("Select a Skill to Focus on");
+            Choice choice = new Choice("Select a Skill to Focus on", "You have no trained skills that you haven't already taken this feat for.");
             choice.withOneOption("You have the following skill available for Focus");
             choice.withOption("AVAILABLE_SKILL_FOCUS", new Option().withPayload("AVAILABLE_SKILL_FOCUS"));
             return choice;

@@ -3,10 +3,11 @@ package swse.forceRegimens;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
-import swse.common.FoundryItem;
 import swse.common.Category;
+import swse.common.Copyable;
+import swse.common.FoundryItem;
 
-class ForceRegimen extends FoundryItem<ForceRegimen> {
+class ForceRegimen extends FoundryItem<ForceRegimen> implements Copyable<ForceRegimen> {
 
     public ForceRegimen(String name) {
         super(name);
@@ -28,5 +29,10 @@ class ForceRegimen extends FoundryItem<ForceRegimen> {
     public ForceRegimen withCategories(Set<Category> categories) {
         this.categories.addAll(categories);
         return this;
+    }
+
+    @Override
+    public ForceRegimen copy() {
+        return null;
     }
 }

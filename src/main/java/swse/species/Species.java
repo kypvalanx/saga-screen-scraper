@@ -1,11 +1,11 @@
 package swse.species;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-public class Species extends FoundryItem<Species>
+public class Species extends FoundryItem<Species> implements Copyable<Species>
 {
     public Species(String name)
     {
@@ -26,5 +26,8 @@ public class Species extends FoundryItem<Species>
         return json;
     }
 
-    //TODO move this up or remove?  seems weird to have a chatch all but it is handy
+    @Override
+    public Species copy() {
+        return null;
+    }
 }

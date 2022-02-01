@@ -1,16 +1,16 @@
 package swse.talents;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
+import swse.common.Category;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
-import swse.common.ProvidedItem;
 import swse.prerequisite.Prerequisite;
 
-class Talent extends FoundryItem<Talent>
+class Talent extends FoundryItem<Talent> implements Copyable<Talent>
 {
     public static final String FORCE_TALENT = "Force Talent Tree";
     private final List<String> talentProviders;
@@ -59,34 +59,21 @@ class Talent extends FoundryItem<Talent>
             return this;
         }
 
-        public Talent withCategories(Set<ProvidedItem> categories)
+        @Override
+        public Talent withProvided(Collection<?> objects)
         {
-            Set<ProvidedItem> filtered = new HashSet<>();
-            for(ProvidedItem cat:categories){
-                if(cat.getName().equals("Talent Trees")){
-                    continue;
+            super.withProvided(objects);
+            for(Object o:objects){
+                if(o instanceof Category){
+
+                    if (((Category) o).getValue().equals("Force Talent Trees"))
+                    {
+                        this.bonusTalentTree = FORCE_TALENT;
+                        break;
+                    }
                 }
 
-                if (cat.getName().equals("Force Talent Trees"))
-                {
-                    this.bonusTalentTree = FORCE_TALENT;
-                    filtered.add(cat);
-                    break;
-                }
-                if(cat.getName().endsWith(" Tree")){
-                    //this is the name of the talent tree it's alreadyprovided by the page name.
-                    continue;
-                    //printUnique("TALENTTREE:"+cat.getTraits());
-                }
-                if(cat.getName().endsWith(" Trees")){
 
-                    //filtered.add(cat);
-                    talentProviders.add(cat.getName());
-                    //printUnique("CLASS:"+cat.getTraits());
-                } else {
-
-                    //printUnique("??:"+cat.getTraits());
-                }
             }
             return this;
         }
@@ -108,5 +95,10 @@ class Talent extends FoundryItem<Talent>
     public Talent withPossibleProviders(List<String> talentProviders) {
         this.talentProviders.addAll(talentProviders);
         return this;
+    }
+
+    @Override
+    public Talent copy() {
+        return null;
     }
 }

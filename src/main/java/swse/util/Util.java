@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import swse.common.Copyable;
 import swse.common.ProvidedItem;
 import swse.prerequisite.OrPrerequisite;
 
@@ -115,4 +117,14 @@ public class Util
 
         return categories.stream().map(el -> el.select("a").first().attr("href")).collect(Collectors.toList());
     }
+
+    public static <L extends Copyable> List<L> cloneList(List<L> list){
+        List<L> newList = new LinkedList<>();
+        if(list != null) {
+            for (L el : list) {
+                newList.add((L) el.copy());
+            }
+        }
+        return newList;
+}
 }

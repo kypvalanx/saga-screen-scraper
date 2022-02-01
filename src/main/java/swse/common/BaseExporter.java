@@ -136,7 +136,7 @@ public class BaseExporter
 
     private static String clean(String itemPageLink)
     {
-        return itemPageLink.replace(":", "");
+        return itemPageLink.replace(":", "").replace("?", "").replace("=", "");
     }
 
     protected static void drawProgressBar(double v)
@@ -167,12 +167,12 @@ public class BaseExporter
         }
         for (Element element : content.children()){
             String text = element.text().toLowerCase();
-            if(text.contains("weapon type:") || text.contains("size:") || text.contains("cost:") || text.contains("damage:") || text.contains("stun setting:")|| text.contains("type:")|| text.contains("weight:")|| text.contains("rate of fire:")|| text.contains("availability:")){
+            if(text.contains("return to main article") || text.contains("weapon type:") || text.contains("size:") || text.contains("cost:") || text.contains("damage:") || text.contains("stun setting:")|| text.contains("type:")|| text.contains("weight:")|| text.contains("rate of fire:")|| text.contains("availability:")){
                 element.remove();
             }
         }
 
-        return content.toString();
+        return content.toString().trim();
     }
 
 }

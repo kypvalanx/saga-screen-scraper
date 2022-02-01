@@ -2,9 +2,10 @@ package swse.character_class;
 
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-class CharacterClass extends FoundryItem<CharacterClass>
+class CharacterClass extends FoundryItem<CharacterClass> implements Copyable<CharacterClass>
 {
     private Levels leveledStatMap;
 
@@ -40,4 +41,7 @@ class CharacterClass extends FoundryItem<CharacterClass>
         }
 
 
+    public CharacterClass copy() {
+        return null;
+    }
 }

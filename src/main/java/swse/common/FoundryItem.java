@@ -9,9 +9,10 @@ import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.item.Mode;
 import swse.prerequisite.Prerequisite;
+import static swse.util.Util.cloneList;
 
 public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
-    protected final String name;
+    protected String name;
     protected String description;
     protected Prerequisite prerequisite;
     protected String image;
@@ -26,6 +27,17 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         this.categories = new ArrayList<>();
         this.attributes =  new ArrayList<>();
         this.providedItems =  new ArrayList<>();
+    }
+
+    public FoundryItem(FoundryItem<?> foundryItem) {
+        this.name = foundryItem.name;
+        this.description = foundryItem.description;
+        this.prerequisite = foundryItem.prerequisite.copy();
+        this.image = foundryItem.image;
+        this.choices = cloneList(foundryItem.choices);
+        this.categories = cloneList(foundryItem.categories);
+        this.attributes = cloneList(foundryItem.attributes);
+        this.providedItems = cloneList(foundryItem.providedItems);
     }
 
     public static JSONObject constructModes(List<Mode> modes) {
@@ -67,6 +79,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         }
         if (categories != null) {
             data.put("categories", JSONy.toArray(categories));
+            //categories.forEach(category -> providedItems.add(ProvidedItem.create(category.getValue(), ItemType.TRAIT)));
         }
         data.put("providedItems",JSONy.toArray(providedItems));
 
@@ -166,4 +179,11 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         this.prerequisite = prerequisite;
         return (T) this;
     }
+
+    public T withName(String name) {
+        this.name = name;
+        return (T) this;
+    }
+
+
 }

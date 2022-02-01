@@ -3,10 +3,11 @@ package swse.forceSecrets;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
-import swse.common.FoundryItem;
 import swse.common.Category;
+import swse.common.Copyable;
+import swse.common.FoundryItem;
 
-class ForceSecret extends FoundryItem<ForceSecret> {
+class ForceSecret extends FoundryItem<ForceSecret>  implements Copyable<ForceSecret> {
     public ForceSecret(String name) {
         super(name);
     }
@@ -26,5 +27,10 @@ class ForceSecret extends FoundryItem<ForceSecret> {
     public ForceSecret withCategories(Set<Category> categories) {
         this.categories.addAll(categories);
         return this;
+    }
+
+    @Override
+    public ForceSecret copy() {
+        return null;
     }
 }

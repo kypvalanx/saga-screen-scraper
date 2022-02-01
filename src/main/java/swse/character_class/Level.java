@@ -3,9 +3,10 @@ package swse.character_class;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-public class Level extends FoundryItem<Level> {
+public class Level extends FoundryItem<Level>  implements Copyable<Level> {
     private final int level;
     private Integer roughBAB;
     private List<Feature> parseFeatures;
@@ -52,5 +53,10 @@ public class Level extends FoundryItem<Level> {
 
     public int getLevel() {
         return level;
+    }
+
+    @Override
+    public Level copy() {
+        return null;
     }
 }

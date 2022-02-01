@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.google.common.base.MoreObjects;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
+import static swse.util.Util.cloneList;
 
 public class OrPrerequisite extends Prerequisite
 {
@@ -50,5 +51,10 @@ public class OrPrerequisite extends Prerequisite
                 .add("plainText", plainText)
                 .add("type", type)
                 .toString();
+    }
+
+    @Override
+    public Prerequisite copy() {
+        return new OrPrerequisite(plainText, cloneList(children), count);
     }
 }

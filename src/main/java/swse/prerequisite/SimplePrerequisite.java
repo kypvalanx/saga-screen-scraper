@@ -30,4 +30,9 @@ public class SimplePrerequisite extends Prerequisite
                 .add("type", type)
                 .toString();
     }
+
+    @Override
+    public Prerequisite copy() {
+        return new SimplePrerequisite(plainText, type, requirement);
+    }
 }

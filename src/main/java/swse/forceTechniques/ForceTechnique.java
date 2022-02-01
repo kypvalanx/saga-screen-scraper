@@ -3,10 +3,11 @@ package swse.forceTechniques;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
-import swse.common.FoundryItem;
 import swse.common.Category;
+import swse.common.Copyable;
+import swse.common.FoundryItem;
 
-class ForceTechnique extends FoundryItem<ForceTechnique> {
+class ForceTechnique extends FoundryItem<ForceTechnique> implements Copyable<ForceTechnique> {
     public ForceTechnique(String name) {
         super(name);
     }
@@ -26,5 +27,10 @@ class ForceTechnique extends FoundryItem<ForceTechnique> {
     public ForceTechnique withCategories(Set<Category> categories) {
         this.categories.addAll(categories);
         return this;
+    }
+
+    @Override
+    public ForceTechnique copy() {
+        return null;
     }
 }

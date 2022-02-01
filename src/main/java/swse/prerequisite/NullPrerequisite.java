@@ -17,4 +17,9 @@ class NullPrerequisite extends Prerequisite
     {
         return new JSONObject().put("text", plainText).put("type", type);
     }
+
+    @Override
+    public Prerequisite copy() {
+        return new NullPrerequisite(plainText);
+    }
 }

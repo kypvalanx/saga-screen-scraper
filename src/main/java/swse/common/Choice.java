@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 
-public class Choice implements JSONy
+public class Choice implements JSONy, Copyable<Choice>
 {
     private boolean isFirstLevel = false;
     private final String description;
@@ -77,5 +77,17 @@ public class Choice implements JSONy
                 ", options=" + options +
                 ", oneOption='" + oneOption + '\'' +
                 '}';
+    }
+
+//    private final Map<String, Option> options = new HashMap();
+//    private String oneOption;
+    @Override
+    public Choice copy() {
+        Choice copy = new Choice(description, noAvailableOptionsDescription)
+                .isFirstLevel(isFirstLevel).withOneOption(oneOption);
+        for(Map.Entry<String, Option> entity: options.entrySet()){
+            copy.withOption(entity.getKey(),entity.getValue().copy());
+        }
+        return copy;
     }
 }

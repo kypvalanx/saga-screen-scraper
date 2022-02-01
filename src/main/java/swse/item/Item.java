@@ -1,50 +1,23 @@
 package swse.item;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.common.Attribute;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
+import static swse.util.Util.cloneList;
 
-class Item extends FoundryItem<Item> {
+class Item extends FoundryItem<Item> implements Copyable<Item> {
     private String type;
     private String subtype;
     private String size;
     private String cost;
     private String weight;
     private String availability;
-    private String baseItem;
     private String source;
-    private String bonusToReflexDefense;
-    private String bonusToFortitudeDefense;
-    private String maximumDexterityBonus;
-    private String splash;
-    private String heirloomBonus;
-    private String seeAlso;
-    private String baseSpeed;
-    private String requires;
-    private String trigger;
-    private String recurrence;
-    private String rejectionAttackBonus;
-    private String installationCost;
-    private String upgradePointCost;
-    private String challengeLevel;
-    private List<String> skillChecks;
-    private List<String> special;
-    private List<String> keywords;
-    private Boolean isThrowable;
-    private Boolean isReach;
-    private List<Mode> modes;
-    private String damageDie;
-    private String stunDamageDie;
-    private String damageType;
-    private Integer unarmedDamage;
-    private String unarmedModifier;
-    private String prefix;
-    private String suffix;
+    private List<Mode> modes = new LinkedList<>();
 
     public static Item create(String itemName) {
         return new Item(itemName);
@@ -56,45 +29,9 @@ class Item extends FoundryItem<Item> {
 
     @Nonnull
     public JSONObject toJSON() {
-
         JSONObject json = super.toJSON();
         JSONObject data = json.getJSONObject("data");
-        json.put("type",  type.toLowerCase());
-
-        List<JSONObject> attributeObject = new ArrayList<>();
-        attributeObject.add(createAttribute("baseItem", baseItem));
-        attributeObject.add(createAttribute("isThrowable", isThrowable));
-                attributeObject.add(createAttribute("isReach", isReach));
-                attributeObject.add(createAttribute("reflexDefenseBonus", bonusToReflexDefense));
-                attributeObject.add(createAttribute("fortitudeDefenseBonus", bonusToFortitudeDefense));
-                attributeObject.add(createAttribute("maximumDexterityBonus", maximumDexterityBonus));
-                attributeObject.add(createAttribute("rejectionAttackBonus", rejectionAttackBonus));
-                attributeObject.add(createAttribute("splash", splash));
-                attributeObject.add(createAttribute("heirloomBonus", heirloomBonus));
-                attributeObject.add(createAttribute("seeAlso", seeAlso));
-                attributeObject.add(createAttribute("baseSpeed", baseSpeed));
-                attributeObject.add(createAttribute("requires", requires));
-                attributeObject.add(createAttribute("trigger", trigger));
-                attributeObject.add(createAttribute("recurrence", recurrence));
-                attributeObject.add(createAttribute("installationCost", installationCost));
-                attributeObject.add(createAttribute("upgradePointCost",upgradePointCost));
-                attributeObject.add(createAttribute("challengeLevel", challengeLevel));
-                attributeObject.add(createAttribute("skillChecks", skillChecks));
-                attributeObject.add(createAttribute("special", special));
-                attributeObject.add(createAttribute("keywords", keywords));
-//                attributes.add(createAttribute("modes", modes));
-                attributeObject.add(createAttribute("damageDie", damageDie));
-               // attributeObject.add(createAttribute("stunDamageDie", stunDamageDie));
-        modes.add(Mode.create("Stun", List.of(Attribute.create("stunDamageDie", stunDamageDie))));
-                attributeObject.add(createAttribute("damageType", damageType));
-                attributeObject.add(createAttribute("unarmedDamage", unarmedDamage));
-                attributeObject.add(createAttribute("unarmedModifier", unarmedModifier));
-                attributeObject.add(createAttribute("prefix", prefix));
-                attributeObject.add(createAttribute("suffix", suffix));
-
-                for(Attribute attribute : attributes){
-                    attributeObject.add(createAttribute(attribute.getKey(), attribute.getValue()));
-                }
+        json.put("type", type.toLowerCase());
 
         data
                 .put("subtype", subtype)
@@ -102,7 +39,6 @@ class Item extends FoundryItem<Item> {
                 .put("cost", cost)
                 .put("weight", weight)
                 .put("availability", availability)
-                .put("attributes", createAttributes(attributeObject.stream().filter(Objects::nonNull).collect(Collectors.toList())))
                 .put("modes", constructModes(modes))
                 .put("source", source);
         return json;
@@ -120,174 +56,174 @@ class Item extends FoundryItem<Item> {
     }
 
     public Item withCost(String cost) {
-                this.cost = cost;
+        this.cost = cost;
         return this;
     }
 
-    public Item withSize(String size)  {
+    public Item withSize(String size) {
         this.size = size;
         return this;
     }
 
-    public Item withWeight(String weight)  {
+    public Item withWeight(String weight) {
         this.weight = weight;
         return this;
     }
 
-    public Item withSource(String source)  {
+    public Item withSource(String source) {
         this.source = source;
         return this;
     }
 
-    public Item withAvailability(String availability)  {
+    public Item withAvailability(String availability) {
         this.availability = availability;
         return this;
     }
 
-    public Item withBaseItem(String baseItem)  {
-        this.baseItem = baseItem;
+
+    public Item withSplash(String splash) {
+        this.withProvided(Attribute.create("splash", splash));
         return this;
     }
 
-    public Item withBonusToReflexDefense(String bonusToReflexDefense)  {
-        this.bonusToReflexDefense = bonusToReflexDefense;
+    public Item withHeirloomBonus(String heirloomBonus) {
+        this.withProvided(Attribute.create("heirloomBonus", heirloomBonus));
         return this;
     }
 
-    public Item withBonusToFortitudeDefense(String bonusToFortitudeDefense)  {
-        this.bonusToFortitudeDefense = bonusToFortitudeDefense;
+    public Item withSeeAlso(String seeAlso) {
+        this.withProvided(Attribute.create("seeAlso", seeAlso));
         return this;
     }
 
-    public Item withMaxDexterityBonus(String maximumDexterityBonus)  {
-        this.maximumDexterityBonus = maximumDexterityBonus;
+    public Item withBaseSpeed(String baseSpeed) {
+        this.withProvided(Attribute.create("baseSpeed", baseSpeed));
         return this;
     }
 
-    public Item withSplash(String splash)  {
-        this.splash = splash;
+    public Item withRequires(String requires) {
+        this.withProvided(Attribute.create("requires", requires));
         return this;
     }
 
-    public Item withHeirloomBonus(String heirloomBonus)  {
-        this.heirloomBonus = heirloomBonus;
+    public Item withTrigger(String trigger) {
+        this.withProvided(Attribute.create("trigger", trigger));
         return this;
     }
 
-    public Item withSeeAlso(String seeAlso)   {
-        this.seeAlso = seeAlso;
+    public Item withRecurrence(String recurrence) {
+        this.withProvided(Attribute.create("recurrence", recurrence));
         return this;
     }
 
-    public Item withBaseSpeed(String baseSpeed)   {
-        this.baseSpeed = baseSpeed;
-        return this;
-    }
-
-    public Item withRequires(String requires)   {
-        this.requires = requires;
-        return this;
-    }
-
-    public Item withTrigger(String trigger)   {
-        this.trigger = trigger;
-        return this;
-    }
-
-    public Item withRecurrence(String recurrence)   {
-        this.recurrence = recurrence;
-        return this;
-    }
-
-    public Item withSkillChecks(List<String> skillChecks)    {
-        this.skillChecks = new ArrayList<>();
-        for(String s : skillChecks){
-            //printUnique(s);
+    public Item withSkillChecks(List<String> skillChecks) {
+        for (String s : skillChecks) {
+            attributes.add(Attribute.create("skillCheck", s));
         }
 
 
         return this;
     }
 
-    public Item withRejectionAttackBonus(String rejectionAttackBonus)     {
-        this.rejectionAttackBonus = rejectionAttackBonus;
+    public Item withRejectionAttackBonus(String rejectionAttackBonus) {
+        this.withProvided(Attribute.create("rejectionAttackBonus", rejectionAttackBonus));
         return this;
     }
 
-    public Item withInstallationCost(String installationCost)     {
-        this.installationCost = installationCost;
+    public Item withInstallationCost(String installationCost) {
+        this.withProvided(Attribute.create("installationCost", installationCost));
         return this;
     }
 
-    public Item withUpgradePointCost(String upgradePointCost)     {
-        this.upgradePointCost = upgradePointCost;
+    public Item withUpgradePointCost(String upgradePointCost) {
+        this.withProvided(Attribute.create("upgradePointCost", upgradePointCost));
         return this;
     }
 
-    public Item withChallengeLevel(String challengeLevel)   {
-        this.challengeLevel = challengeLevel;
+    public Item withChallengeLevel(String challengeLevel) {
+        this.withProvided(Attribute.create("challengeLevel", challengeLevel));
         return this;
     }
 
-    public Item withSpecial(List<String> specials)   {
-        if(specials != null){
-        for (String special : specials){
-            if(special.toLowerCase().contains("can be thrown")){
-                this.isThrowable = true;
-            }else if(special.toLowerCase().contains("is a reach weapon")){
-                this.isReach = true;
-            }else {
-                //printUnique(special);
+    public Item withSpecial(List<String> specials) {
+        if (specials != null) {
+            for (String special : specials) {
+                if (special.toLowerCase().contains("can be thrown")) {
+                    this.withProvided(Attribute.create("isThrowable", true));
+                } else if (special.toLowerCase().contains("is a reach weapon")) {
+                    this.withProvided(Attribute.create("isReach", true));
+                } else {
+                    this.withProvided(Attribute.create("special", special));
+                }
             }
         }
-        }
-        this.special = specials;
         return this;
     }
 
-    public Item withKeywords(List<String> keywords)   {
-        this.keywords = keywords;
+    public Item withKeywords(List<String> keywords) {
+        this.withProvided(Attribute.create("keywords", keywords));
         return this;
     }
 
     public Item withModes(List<Mode> modes) {
-        this.modes = modes;
+        this.modes.addAll(modes);
         return this;
     }
 
     public Item withDamageDie(String damageDie) {
-        this.damageDie = damageDie;
+        this.withProvided(Attribute.create("damageDie", damageDie));
         return this;
     }
 
-    public Item withStunDamageDie(String stunDamageDie)  {
-        this.stunDamageDie = stunDamageDie;
+    public Item withStunDamageDie(String stunDamageDie) {
+        if(stunDamageDie != null) {
+            modes.add(Mode.create("Stun", List.of(Attribute.create("stunDamageDie", stunDamageDie))));
+        }
         return this;
     }
 
     public Item withDamageType(String damageType) {
-        this.damageType = damageType;
+        this.withProvided(Attribute.create("damageType", damageType));
         return this;
     }
 
     public Item withUnarmedDamage(Integer unarmedDamage) {
-        this.unarmedDamage = unarmedDamage;
+        this.withProvided(Attribute.create("unarmedDamage", unarmedDamage));
         return this;
     }
 
     public Item withUnarmedModifier(String unarmedModifier) {
-        this.unarmedModifier = unarmedModifier;
+        this.withProvided(Attribute.create("unarmedModifier", unarmedModifier));
         return this;
     }
 
-    public Item withPrefix(String prefix) {
-        this.prefix = prefix;
-        return this;
-    }
+    //    protected String image;
+//    protected final List<Attribute> attributes;
+//    protected final List<ProvidedItem> providedItems;
+//    protected final List<Category> categories;
+//    protected final List<Choice> choices;
+    @Override
+    public Item copy() {
+        final Item item = new Item(name)
+                .withDescription(description);
+        if (prerequisite != null) {
+            item.withPrerequisite(prerequisite.copy());
+        }
+        item.withImage(image)
+                .withType(type)
+                .withSubtype(subtype)
+                .withSize(size)
+                .withCost(cost)
+                .withWeight(weight)
+                .withAvailability(availability)
+                .withSource(source)
+                .withModes(cloneList(modes))
+                .withProvided(cloneList(attributes))
+                .withProvided(cloneList(providedItems))
+                .withProvided(cloneList(categories))
+                .withProvided(cloneList(choices));
 
-    public Item withSuffix(String suffix) {
-        this.suffix = suffix;
-        return this;
-    }
+        return item;
 
+    }
 }

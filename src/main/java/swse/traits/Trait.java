@@ -2,9 +2,10 @@ package swse.traits;
 
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
+import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-public class Trait extends FoundryItem<Trait>
+public class Trait extends FoundryItem<Trait> implements Copyable<Trait>
 {
 
     public Trait(String name)
@@ -27,4 +28,7 @@ public class Trait extends FoundryItem<Trait>
     }
 
 
+    public Trait copy() {
+        return null;
+    }
 }

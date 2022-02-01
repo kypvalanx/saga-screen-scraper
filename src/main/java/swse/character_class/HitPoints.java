@@ -22,7 +22,7 @@ class HitPoints
         this.levelUpHitPoints = levelUpHitPoints;
     }
 
-    static List<Attribute> getHitPoints(Elements entries)
+    static List<Attribute> getHitPoints(Elements entries, String itemName)
     {
         List<Attribute> attributes = new ArrayList<>();
         boolean found = false;
@@ -58,6 +58,16 @@ class HitPoints
             {
                 found = true;
             }
+        }
+
+        if("Beast".equals(itemName)){
+            attributes.add(Attribute.create("firstLevelHitPoints", "1d8"));
+            attributes.add(Attribute.create("levelUpHitPoints", "1d8"));
+        }
+
+        if("Nonheroic".equals(itemName)){
+            attributes.add(Attribute.create("firstLevelHitPoints", "1d4"));
+            attributes.add(Attribute.create("levelUpHitPoints", "1d4"));
         }
         return attributes;
     }
