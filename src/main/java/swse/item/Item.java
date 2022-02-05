@@ -170,6 +170,14 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
         return this;
     }
 
+    public Item withProvided(Object object){
+        super.withProvided(object);
+        if(object instanceof Mode){
+            modes.add((Mode)object);
+        }
+        return this;
+    }
+
     public Item withDamageDie(String damageDie) {
         this.withProvided(Attribute.create("damageDie", damageDie));
         return this;
@@ -217,7 +225,7 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
                 .withWeight(weight)
                 .withAvailability(availability)
                 .withSource(source)
-                .withModes(cloneList(modes))
+                .withProvided(cloneList(modes))
                 .withProvided(cloneList(attributes))
                 .withProvided(cloneList(providedItems))
                 .withProvided(cloneList(categories))

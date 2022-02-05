@@ -215,7 +215,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
         {
             return List.of(new OrPrerequisite(text, List.of(
                     new SimplePrerequisite(text, "FEAT", "Double Attack (Advanced Melee Weapon)"),
-                    new SimplePrerequisite(text, "FEAT", "Double Attack (#Exotic Melee Weapon#)"),
+                    new SimplePrerequisite(text, "FEAT", "Double Attack (#payload#)"),
                     new SimplePrerequisite(text, "FEAT", "Double Attack (Lightsabers)")
             )));
         }
@@ -474,7 +474,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
 
         if ("Weapon Focus with chosen Exotic Weapon or Weapon Group".equals(text))//TODO this needs an option
         {
-            return List.of(new SimplePrerequisite(text, "FEAT", "Weapon Focus (#chosen weapon#)"));
+            return List.of(new SimplePrerequisite(text, "FEAT", "Weapon Focus (#payload#)"));
         }
 
 
@@ -507,8 +507,8 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
         if (text.startsWith("Skill Focus") || text.startsWith("Weapon Proficiency")
                 || text.startsWith("Weapon Focus") || text.startsWith("Armor Proficiency")
                 || text.startsWith("Double Attack") || text.startsWith("Exotic Weapon Proficiency")
-                || text.startsWith("Greater Weapon Focus") || text.startsWith("Devastating Attack")
-                || text.startsWith("Penetrating Attack") || text.startsWith("Weapon Specialization")
+                 || text.startsWith("Devastating Attack")
+                || text.startsWith("Penetrating Attack")
                 || text.startsWith("Brutal Attack"))
         {
             final String requirement = text.replace("Chosen Weapon", "#payload#").replace("Chosen Skill", "#payload#");
@@ -516,6 +516,15 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
                 //printUnique(Context.getValue("name"), requirement);
             }
             return List.of(new SimplePrerequisite(requirement, "FEAT", requirement));
+        }
+
+        if (text.startsWith("Greater Weapon Focus") || text.startsWith("Weapon Specialization"))
+        {
+            final String requirement = text.replace("Chosen Weapon", "#payload#").replace("Chosen Skill", "#payload#");
+            if(requirement.contains("#payload#")){
+                //printUnique(Context.getValue("name"), requirement);
+            }
+            return List.of(new SimplePrerequisite(requirement, "TALENT", requirement));
         }
 
         //TODO cleanup

@@ -23,22 +23,13 @@ public class AffiliationExporter extends BaseExporter
     {
         List<String> talentLinks = new ArrayList<String>();
         talentLinks.add("/wiki/Category:Affiliations");
-        //TODO switch to this link.  it is more complete
 
         List<JSONObject> entries = new ArrayList<>();
-//        List<String> orphanedLinks = new ArrayList<>();
-//        orphanedLinks.add("/wiki/The_B%27omarr_Order");
-//        orphanedLinks.add("/wiki/The_Chalactan_Adepts");
-//        orphanedLinks.add("/wiki/The_Je%27daii_Rangers");
-//        for(String talentLink : orphanedLinks){
-//            entries.addAll(parseItem(talentLink, false).stream().map(Tradition::toJSON).collect(Collectors.toList()));
-//        }
+
 
         for(String speciesLink : talentLinks){
             entries.addAll(readItemMenuPage(speciesLink, true));
         }
-
-        //System.out.println(entries.stream().map(feat -> "\""+feat.getString("name")+"\"").collect(Collectors.toList()));
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args,"d"));
     }

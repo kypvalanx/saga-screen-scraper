@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import swse.common.Attribute;
 import swse.common.BaseExporter;
 import swse.common.Category;
 
@@ -101,7 +102,8 @@ public class ForcePowersExporter extends BaseExporter
 //
         List<ForcePower> traditions = new ArrayList<>();
 
-        traditions.add(ForcePower.create(itemName).withDescription(getDescription(content)).withCategories(categories));
+        traditions.add(ForcePower.create(itemName).withDescription(getDescription(content)).withCategories(categories).
+                withProvided(Attribute.create("takeMultipleTimes", "true")));
 
         return traditions;
     }

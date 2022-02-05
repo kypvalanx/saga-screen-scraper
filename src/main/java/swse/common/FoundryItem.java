@@ -150,7 +150,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     public T withProvided(Object object) {
         if(object != null) {
             if(object instanceof Attribute) {
-                this.attributes.add((Attribute)object);
+                attributes.add((Attribute)object);
             } else if(object instanceof Choice){
                 choices.add((Choice)object);
             } else if(object instanceof ProvidedItem){

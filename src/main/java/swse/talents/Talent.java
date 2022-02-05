@@ -86,7 +86,7 @@ class Talent extends FoundryItem<Talent> implements Copyable<Talent>
             return this;
         }
 
-        public Talent withTelentTreeUrl(String talentTreeUrl)
+        public Talent withTalentTreeUrl(String talentTreeUrl)
         {
             this.talentTreeUrl = talentTreeUrl;
             return this;

@@ -8,7 +8,7 @@ import swse.common.Category;
 import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-class Affiliation extends FoundryItem implements Copyable<Affiliation> {
+class Affiliation extends FoundryItem<Affiliation> implements Copyable<Affiliation> {
 
     public Affiliation(String name) {
         super(name);
@@ -27,11 +27,6 @@ class Affiliation extends FoundryItem implements Copyable<Affiliation> {
     public JSONObject toJSON() {
         JSONObject json = super.toJSON();
 
-//        JSONObject data = json.getJSONObject("data");
-//
-//        if (categories != null) {
-//            data.put("categories", JSONy.toArray(categories));
-//        }
 
         return json.put("type", "affiliation");
     }

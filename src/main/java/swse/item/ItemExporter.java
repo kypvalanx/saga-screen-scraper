@@ -1,18 +1,14 @@
 package swse.item;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,80 +46,76 @@ public class ItemExporter extends BaseExporter {
     public static final Mode MODE_SINGLE_SHOT = Mode.create("Single-Shot", "ROF", List.of());
     public static final Mode MODE_BARRAGE = Mode.create("Barrage", "ROF", List.of());
     public static final String TREATED_AS_ATTRIBUTE_KEY = "treatedAs";
-    private static Multimap<String, String> fields = HashMultimap.create();
     public static final String IMAGE_FOLDER = "systems/swse/icon/item";
     public static final String ROOT = "G:/FoundryVTT/Data";
-    private static Set<String> possibleAttributes = new HashSet<>();
-    public static final Pattern ATTACK_PATTERN = Pattern.compile("\\+(\\d*) vs ([()\\w\\s]*)");
-    public static final Pattern DAMAGE_PATTERN = Pattern.compile("^([/\\dd-]*) ?([-+()/\\w\\s;,]*)");
-    public static final Pattern SPECIAL_PATTERN = Pattern.compile("^([\\w\\s+/]*)([\\w\\s()]*)?");
-    private static Set<String> unique = new HashSet<>();
+    private static final Set<String> unique = new HashSet<>();
+    public static final Pattern SHOTS_PER_PACK = Pattern.compile("After (\\d*|one) \\w*, the ([\\w\\s]*) must be \\w*\\.");
 
 
     public static void main(String[] args) {
-        List<String> itemlinks = new ArrayList<String>();
+        List<String> itemLinks = new ArrayList<>();
         //weapons
-        itemlinks.add("/wiki/Advanced_Melee_Weapons");
-        itemlinks.add("/wiki/Exotic_Weapons_(Melee)");
-        itemlinks.add("/wiki/Exotic_Weapons_(Ranged)");
-        itemlinks.add("/wiki/Grenades");
-        itemlinks.add("/wiki/Heavy_Weapons");
-        itemlinks.add("/wiki/Lightsabers");
-        itemlinks.add("/wiki/Mines");
-        itemlinks.add("/wiki/Pistols");
-        itemlinks.add("/wiki/Rifles");
-        itemlinks.add("/wiki/Simple_Weapons_(Melee)");
-        itemlinks.add("/wiki/Simple_Weapons_(Ranged)");
+        itemLinks.add("/wiki/Advanced_Melee_Weapons");
+        itemLinks.add("/wiki/Exotic_Weapons_(Melee)");
+        itemLinks.add("/wiki/Exotic_Weapons_(Ranged)");
+        itemLinks.add("/wiki/Grenades");
+        itemLinks.add("/wiki/Heavy_Weapons");
+        itemLinks.add("/wiki/Lightsabers");
+        itemLinks.add("/wiki/Mines");
+        itemLinks.add("/wiki/Pistols");
+        itemLinks.add("/wiki/Rifles");
+        itemLinks.add("/wiki/Simple_Weapons_(Melee)");
+        itemLinks.add("/wiki/Simple_Weapons_(Ranged)");
         //armor
-        itemlinks.add("/wiki/Light_Armor");
-        itemlinks.add("/wiki/Medium_Armor");
-        itemlinks.add("/wiki/Heavy_Armor");
+        itemLinks.add("/wiki/Light_Armor");
+        itemLinks.add("/wiki/Medium_Armor");
+        itemLinks.add("/wiki/Heavy_Armor");
 //        //general equipment and additional general equipment
-        itemlinks.add("/wiki/Communications_Devices");
-        itemlinks.add("/wiki/Computers_and_Storage_Devices");
-        itemlinks.add("/wiki/Cybernetic_Devices");
-        itemlinks.add("/wiki/Detection_and_Surveillance_Devices");
-        itemlinks.add("/wiki/Explosives");
-        itemlinks.add("/wiki/Life_Support");
-        itemlinks.add("/wiki/Medical_Gear");
-        itemlinks.add("/wiki/Poisons");
-        itemlinks.add("/wiki/CL_1_Hazards");
-        itemlinks.add("/wiki/CL_2_Hazards");
-        itemlinks.add("/wiki/CL_3_Hazards");
-        itemlinks.add("/wiki/CL_4_Hazards");
-        itemlinks.add("/wiki/CL_5_Hazards");
-        itemlinks.add("/wiki/CL_6_Hazards");
-        itemlinks.add("/wiki/CL_7_Hazards");
-        itemlinks.add("/wiki/CL_8_Hazards");
-        itemlinks.add("/wiki/CL_9_Hazards");
-        itemlinks.add("/wiki/CL_10_Hazards");
-        itemlinks.add("/wiki/CL_11_Hazards");
-        itemlinks.add("/wiki/CL_12_Hazards");
-        itemlinks.add("/wiki/CL_13_Hazards");
-        itemlinks.add("/wiki/CL_14_Hazards");
-        itemlinks.add("/wiki/CL_15_Hazards");
-        itemlinks.add("/wiki/CL_20_Hazards");
-        itemlinks.add("/wiki/Survival_Gear");
-        itemlinks.add("/wiki/Tools");
-        itemlinks.add("/wiki/Weapon_and_Armor_Accessories");
-        itemlinks.add("/wiki/Equipment_Upgrades");
+        itemLinks.add("/wiki/Communications_Devices");
+        itemLinks.add("/wiki/Computers_and_Storage_Devices");
+        itemLinks.add("/wiki/Cybernetic_Devices");
+        itemLinks.add("/wiki/Detection_and_Surveillance_Devices");
+        itemLinks.add("/wiki/Explosives");
+        itemLinks.add("/wiki/Life_Support");
+        itemLinks.add("/wiki/Medical_Gear");
+        itemLinks.add("/wiki/Poisons");
+        itemLinks.add("/wiki/CL_1_Hazards");
+        itemLinks.add("/wiki/CL_2_Hazards");
+        itemLinks.add("/wiki/CL_3_Hazards");
+        itemLinks.add("/wiki/CL_4_Hazards");
+        itemLinks.add("/wiki/CL_5_Hazards");
+        itemLinks.add("/wiki/CL_6_Hazards");
+        itemLinks.add("/wiki/CL_7_Hazards");
+        itemLinks.add("/wiki/CL_8_Hazards");
+        itemLinks.add("/wiki/CL_9_Hazards");
+        itemLinks.add("/wiki/CL_10_Hazards");
+        itemLinks.add("/wiki/CL_11_Hazards");
+        itemLinks.add("/wiki/CL_12_Hazards");
+        itemLinks.add("/wiki/CL_13_Hazards");
+        itemLinks.add("/wiki/CL_14_Hazards");
+        itemLinks.add("/wiki/CL_15_Hazards");
+        itemLinks.add("/wiki/CL_20_Hazards");
+        itemLinks.add("/wiki/Survival_Gear");
+        itemLinks.add("/wiki/Tools");
+        itemLinks.add("/wiki/Weapon_and_Armor_Accessories");
+        itemLinks.add("/wiki/Equipment_Upgrades");
 
-        itemlinks.add("/wiki/Advanced_Cybernetics");
-        itemlinks.add("/wiki/Heirloom_Items");
-        itemlinks.add("/wiki/Holocrons");
-        itemlinks.add("/wiki/Implants");
-        itemlinks.add("/wiki/Sith_Artifacts");
-        itemlinks.add("/wiki/Yuuzhan_Vong_Biotech");
+        itemLinks.add("/wiki/Advanced_Cybernetics");
+        itemLinks.add("/wiki/Heirloom_Items");
+        itemLinks.add("/wiki/Holocrons");
+        itemLinks.add("/wiki/Implants");
+        itemLinks.add("/wiki/Sith_Artifacts");
+        itemLinks.add("/wiki/Yuuzhan_Vong_Biotech");
 //        //droid stuff
-        itemlinks.add("/wiki/Locomotion_Systems");
-        itemlinks.add("/wiki/Processor_Systems");
-        itemlinks.add("/wiki/Appendages");
-        itemlinks.add("/wiki/Droid_Accessories");
+        itemLinks.add("/wiki/Locomotion_Systems");
+        itemLinks.add("/wiki/Processor_Systems");
+        itemLinks.add("/wiki/Appendages");
+        itemLinks.add("/wiki/Droid_Accessories");
 
         List<JSONObject> entries = new ArrayList<>();
-        double size = itemlinks.size();
+        double size = itemLinks.size();
         AtomicInteger i = new AtomicInteger();
-        for (String itemLink : itemlinks) {
+        for (String itemLink : itemLinks) {
             entries.addAll(readItemMenuPage(itemLink, true));
             drawProgressBar(i.getAndIncrement() * 100 / size);
         }
@@ -135,6 +127,10 @@ public class ItemExporter extends BaseExporter {
 
     private static Collection<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite) {
         Document doc = getDoc(itemPageLink, overwrite);
+
+        if(doc == null){
+            return List.of();
+        }
 
         Element body = doc.body();
 
@@ -231,8 +227,7 @@ public class ItemExporter extends BaseExporter {
 
         Integer unarmedDamage = null;
         String unarmedModifier = null;
-        List<Attribute> complexAttributes = new ArrayList<>();
-        List<Mode> complexModes = new ArrayList<>();
+        List<Object> attributes = new ArrayList<>();
         String inaccurate;
         String accurate;
         String armorType = null;
@@ -488,19 +483,14 @@ public class ItemExporter extends BaseExporter {
                     }
                 }
             } else {
-                Map<List<Attribute>, List<Mode>> map = parseComplexWeapon(child.text(), itemName);
-                complexAttributes.addAll((List<Attribute>) map.keySet().toArray()[0]);
-                complexModes.addAll((List<Mode>) map.values().toArray()[0]);
+                attributes.addAll(parseComplexWeapon(child.text(), itemName));
             }
         }
-        Map<List<Attribute>, List<Mode>> map = getCustom(itemName);
-        complexAttributes.addAll((List<Attribute>) map.keySet().toArray()[0]);
-        complexModes.addAll((List<Mode>) map.values().toArray()[0]);
 
         itemSubType = standardizeTypes(itemSubType);
         String itemType = getFoundryType(itemSubType);
-        List<Mode> modes = getModes(rateOfFire, itemName);
-        modes.addAll(complexModes);
+        attributes.addAll(getManualAttributes(itemName, itemSubType));
+        attributes.addAll(getModes(rateOfFire, itemName));
         String damageDie = getDamageDie(itemName, damage);
 
         if (damageDie == null && damage != null) {
@@ -553,8 +543,7 @@ public class ItemExporter extends BaseExporter {
                 .withDescription(content.html())
                 .withType(itemType)
                 .withSubtype(itemSubType)
-                .withModes(modes)
-                .withProvided(complexAttributes)
+                .withProvided(attributes)
                 .withDamageDie(damageDie)
                 .withStunDamageDie(stunDamageDie)
                 .withDamageType(damageType)
@@ -649,11 +638,8 @@ public class ItemExporter extends BaseExporter {
         return variants;
     }
 
-    private static Map<List<Attribute>, List<Mode>> parseComplexWeapon(String text, String itemName) {
-        List<Attribute> attributes = new ArrayList<>();
-        List<Mode> modes = new ArrayList<>();
-        Map<List<Attribute>, List<Mode>> map = new HashMap<>();
-        map.put(attributes, modes);
+    private static List<Object> parseComplexWeapon(String text, String itemName) {
+        List<Object> attributes = new ArrayList<>();
 
         if (List.of("Energy Lance", "E-5s Blaster Rifle", "SG-4 Blaster Rifle", "HB-9 Blaster Rifle",
                 "Variable Blaster Rifle", "Sonic Blaster", "Commando Special Rifle", "Heavy Variable Blaster Rifle",
@@ -662,9 +648,10 @@ public class ItemExporter extends BaseExporter {
                 "Sidearm Blaster Pistol", "Gee-Tech 12 Defender", "Retrosaber", "Jury-Rigging a Power Pack Bomb",
                 "Stun Baton", "Squib Battering Ram", "Utility Belt", "Gas Canister", "Power Recharger", "Power Pack",
                 "Enhanced Energy Projector", "Improved Energy Cell", "Tremor Cell", "Slugthrower Pistol", "Slugthrower Rifle").contains(itemName)) {
-            return map;
+            return attributes;
         }
 
+        //Treated As For Range
         if (text.contains("treated")) {
             Pattern TREATED_AS_FOR_RANGE = Pattern.compile("treated as(?: a)? (Rifle|Rifles|Pistol|Simple Weapon \\(Ranged\\)|Simple Weapons \\(Ranged\\))(?:, not a Thrown Weapon,)? for");
             Matcher m = TREATED_AS_FOR_RANGE.matcher(text);
@@ -675,7 +662,6 @@ public class ItemExporter extends BaseExporter {
 
 
         if (text.contains("Power Pack")) {
-            Pattern SHOTS_PER_PACK = Pattern.compile("After (\\d*|one) \\w*, the ([\\w\\s]*) must be \\w*\\.");
             Matcher m = SHOTS_PER_PACK.matcher(text);
             while (m.find()) {
                 String group = m.group(2);
@@ -685,20 +671,20 @@ public class ItemExporter extends BaseExporter {
                 attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, group + ":" + m.group(1)));
                 //printUnique(m.group(0));
             }
-            if (attributes.isEmpty() && modes.isEmpty()) {
+            if (attributes.isEmpty() && attributes.isEmpty()) {
                 //printUnique(itemName,text);
             }
         }
 
-        return map;
+        return attributes;
     }
 
-    private static Map<List<Attribute>, List<Mode>> getCustom(String itemName) {
-        List<Attribute> attributes = new ArrayList<>();
-        List<Mode> modes = new ArrayList<>();
+    private static List<Object> getManualAttributes(String itemName, String itemSubType) {
+        List<Object> attributes = new LinkedList<>();
 
-        Map<List<Attribute>, List<Mode>> map = new HashMap<>();
-        map.put(attributes, modes);
+        if("Lightsabers".equals(itemSubType)){
+            attributes.add(Mode.create("Self-Built", List.of(Attribute.create("toHitModifier", 1))));
+        }
 
         if ("Energy Lance".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:50"));
@@ -707,8 +693,8 @@ public class ItemExporter extends BaseExporter {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:5"));
         }
         if ("SG-4 Blaster Rifle".equals(itemName)) {
-            modes.add(Mode.create("Blaster", "POWER", List.of(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:50"))));
-            modes.add(Mode.create("Harpoon", "POWER", List.of(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Harpoon:1"))));
+            attributes.add(Mode.create("Blaster", "POWER", List.of(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:50"))));
+            attributes.add(Mode.create("Harpoon", "POWER", List.of(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Harpoon:1"))));
         }
         if ("HB-9 Blaster Rifle".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:25"));
@@ -719,16 +705,16 @@ public class ItemExporter extends BaseExporter {
         }
         if ("Variable Blaster Rifle".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:500"));
-            modes.add(Mode.create("3d4", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d4"))));
-            modes.add(Mode.create("3d6", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d6"), Attribute.create(AMMO_USE_MULTIPLIER, "5"))));
-            modes.add(Mode.create("3d8", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"), Attribute.create(AMMO_USE_MULTIPLIER, "10"))));
+            attributes.add(Mode.create("3d4", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d4"))));
+            attributes.add(Mode.create("3d6", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d6"), Attribute.create(AMMO_USE_MULTIPLIER, "5"))));
+            attributes.add(Mode.create("3d8", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"), Attribute.create(AMMO_USE_MULTIPLIER, "10"))));
         }
         if ("Heavy Variable Blaster Rifle".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:500"));
-            modes.add(Mode.create("Ascension gun", "POWER", List.of(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Syntherope:2"))));
-            modes.add(Mode.create("3d6", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d6"))));
-            modes.add(Mode.create("3d8", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"), Attribute.create(AMMO_USE_MULTIPLIER, "10"))));
-            modes.add(Mode.create("3d10", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d10"), Attribute.create(AMMO_USE_MULTIPLIER, "20"))));
+            attributes.add(Mode.create("Ascension gun", "POWER", List.of(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Syntherope:2"))));
+            attributes.add(Mode.create("3d6", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d6"))));
+            attributes.add(Mode.create("3d8", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"), Attribute.create(AMMO_USE_MULTIPLIER, "10"))));
+            attributes.add(Mode.create("3d10", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d10"), Attribute.create(AMMO_USE_MULTIPLIER, "20"))));
         }
         if ("Sonic Blaster".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Proprietary Power Pack:15:11:0.2"));
@@ -751,16 +737,16 @@ public class ItemExporter extends BaseExporter {
         if ("Thunderbolt Repeater Blaster".equals(itemName)) {
             attributes.add(Attribute.create(TO_HIT_MODIFIER, "-5"));
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:20"));
-            modes.add(Mode.create("Braced", List.of(Attribute.create(TO_HIT_MODIFIER, "0"))));
+            attributes.add(Mode.create("Braced", List.of(Attribute.create(TO_HIT_MODIFIER, "0"))));
         }
         if ("Z-6 Rotary Blaster".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:1"));
             attributes.add(Attribute.create(TO_HIT_MODIFIER, "-5"));
-            modes.add(Mode.create("Braced", List.of(Attribute.create(TO_HIT_MODIFIER, "0"))));
+            attributes.add(Mode.create("Braced", List.of(Attribute.create(TO_HIT_MODIFIER, "0"))));
         }
         if ("Retrosaber".equals(itemName)) {
-            modes.add(Mode.create("Overcharge", "POWER", List.of(Attribute.create(DAMAGE_DIE, "2d10"))));
-            modes.add(Mode.create("Burnout", "POWER", List.of(Attribute.create(DAMAGE_DIE, "2d4"))));
+            attributes.add(Mode.create("Overcharge", "POWER", List.of(Attribute.create(DAMAGE_DIE, "2d10"))));
+            attributes.add(Mode.create("Burnout", "POWER", List.of(Attribute.create(DAMAGE_DIE, "2d4"))));
         }
         if ("Slugthrower Pistol".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Slug Clip:10:40:0.2"));
@@ -771,8 +757,8 @@ public class ItemExporter extends BaseExporter {
         if ("WESTAR-M5 Blaster Rifle".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:100"));
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Gas Canister:500"));
-            modes.add(Mode.create("Anti-Personnel", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"))));
-            modes.add(Mode.create("Anti-Vehicle", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d10"),
+            attributes.add(Mode.create("Anti-Personnel", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"))));
+            attributes.add(Mode.create("Anti-Vehicle", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d10"),
                     Attribute.create(AMMO_USE_MULTIPLIER, "10"), Attribute.create(PENETRATION, "5"))));
         }
         if ("DC-19 \"Stealth\" Carbine".equals(itemName)) {
@@ -784,37 +770,37 @@ public class ItemExporter extends BaseExporter {
         }
         if ("Scatter Gun".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "10 Shells:10:20:1"));
-            modes.add(Mode.create("Point-Blank Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"))));
-            modes.add(Mode.create("Short Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "2d8"))));
-            modes.add(Mode.create("Medium Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "0"))));
-            modes.add(Mode.create("Long Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "0"))));
+            attributes.add(Mode.create("Point-Blank Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "3d8"))));
+            attributes.add(Mode.create("Short Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "2d8"))));
+            attributes.add(Mode.create("Medium Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "0"))));
+            attributes.add(Mode.create("Long Range", "POWER", List.of(Attribute.create(DAMAGE_DIE, "0"))));
         }
         if ("DC-15x Sniper Rifle".equals(itemName)) {
             attributes.add(Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:5"));
         }
         if ("DC-17m IWS".equals(itemName)) {
-            modes.add(Mode.create("Blaster Rifle", "POWER", List.of(
+            attributes.add(Mode.create("Blaster Rifle", "POWER", List.of(
                     Attribute.create(DAMAGE_DIE, "3d8"),
                     Attribute.create(STUN_DAMAGE, "3d8"),
                     Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Power Pack:60"),
                     Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Gas Canister:300")
             ), List.of(MODE_SINGLE_SHOT, MODE_AUTOFIRE)));
-            modes.add(Mode.create("Sniper Rifle", "POWER", List.of(
+            attributes.add(Mode.create("Sniper Rifle", "POWER", List.of(
                     Attribute.create(DAMAGE_DIE, "3d8"),
                     Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Sniper Power Pack:5:100:0.5")
             ), List.of(MODE_SINGLE_SHOT)));
-            modes.add(Mode.create("Anti-Armor", "POWER", List.of(
+            attributes.add(Mode.create("Anti-Armor", "POWER", List.of(
                     Attribute.create(DAMAGE_DIE, "4d10"),
                     Attribute.create(AMMUNITION_ATTRIBITE_KEY, "Explosive Shell:1:300:1")
 
             ), List.of(MODE_SINGLE_SHOT)));
-            modes.add(Mode.create("PEP Laser", "POWER", List.of(
+            attributes.add(Mode.create("PEP Laser", "POWER", List.of(
                     Attribute.create(STUN_DAMAGE, "3d6"),
                     Attribute.create(AMMUNITION_ATTRIBITE_KEY, "PEP Cartridge:15:100:0.5")
             ), List.of(MODE_SINGLE_SHOT)));
         }
 
-        return map;
+        return attributes;
     }
 
     private static String getDamageDie(String itemName, String damage) {
@@ -833,7 +819,7 @@ public class ItemExporter extends BaseExporter {
     }
 
     private static List<Mode> getModes(String rateOfFire, String itemName) {
-        List<Mode> modes = new ArrayList<>();
+        List<Mode> modes = new LinkedList<>();
         if (rateOfFire != null && rateOfFire.contains("Autofire")) {
             modes.add(MODE_AUTOFIRE);
         }

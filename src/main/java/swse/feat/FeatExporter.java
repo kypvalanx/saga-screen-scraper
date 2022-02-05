@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +37,45 @@ public class FeatExporter extends BaseExporter {
     private static Set<String> allFeats = new HashSet<>();
 
     public static void main(String[] args) {
-        List<JSONObject> entries = readItemMenuPage("/wiki/Feats");
+        List<String> featLinks = new ArrayList<>();
+        featLinks.add("/wiki/Category:Feats?from=A");
+        featLinks.add("/wiki/Category:Feats?from=B");
+        featLinks.add("/wiki/Category:Feats?from=C");
+        featLinks.add("/wiki/Category:Feats?from=D");
+        featLinks.add("/wiki/Category:Feats?from=E");
+        featLinks.add("/wiki/Category:Feats?from=F");
+        featLinks.add("/wiki/Category:Feats?from=G");
+        featLinks.add("/wiki/Category:Feats?from=H");
+        featLinks.add("/wiki/Category:Feats?from=I");
+        featLinks.add("/wiki/Category:Feats?from=J");
+        featLinks.add("/wiki/Category:Feats?from=K");
+        featLinks.add("/wiki/Category:Feats?from=L");
+        featLinks.add("/wiki/Category:Feats?from=M");
+        featLinks.add("/wiki/Category:Feats?from=N");
+        featLinks.add("/wiki/Category:Feats?from=O");
+        featLinks.add("/wiki/Category:Feats?from=P");
+        featLinks.add("/wiki/Category:Feats?from=Q");
+        featLinks.add("/wiki/Category:Feats?from=R");
+        featLinks.add("/wiki/Category:Feats?from=S");
+        featLinks.add("/wiki/Category:Feats?from=T");
+        featLinks.add("/wiki/Category:Feats?from=U");
+        featLinks.add("/wiki/Category:Feats?from=V");
+        featLinks.add("/wiki/Category:Feats?from=W");
+        featLinks.add("/wiki/Category:Feats?from=X");
+        featLinks.add("/wiki/Category:Feats?from=Y");
+        featLinks.add("/wiki/Category:Feats?from=Z");
+        //featLinks.add("/wiki/Feats");
+
+        List<JSONObject> entries = new ArrayList<>();
+        double size = featLinks.size();
+        AtomicInteger i = new AtomicInteger();
+        for (String itemLink : featLinks) {
+            entries.addAll(readItemMenuPage(itemLink, true));
+            drawProgressBar(i.getAndIncrement() * 100 / size);
+        }
+        System.out.println("processed "+ entries.size() + " of 555");
+
+        //List<JSONObject> entries = readItemMenuPage("/wiki/Feats");
 
 //        JSONArray prereqs = new JSONArray(allPrerequisites);
 //        System.out.println(prereqs);
@@ -47,7 +87,7 @@ public class FeatExporter extends BaseExporter {
     }
 
 
-    private static List<JSONObject> readItemMenuPage(String itemPageLink) {
+    private static List<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite) {
         Document doc = null;
         try {
             doc = Jsoup.connect(ROOT + itemPageLink).get();
@@ -59,24 +99,30 @@ public class FeatExporter extends BaseExporter {
         }
         Element body = doc.body();
 
-        Elements tables = body.getElementsByClass("wikitable");
+        List<String> hrefs = new LinkedList<>();
 
-        Set<String> hrefs = new HashSet<>();
-        tables.forEach(table ->
+        Elements links = body.getElementsByClass("category-page__member-link");
+
+        links.forEach(a -> hrefs.add(a.attr("href")));
         {
-            Elements rows = table.getElementsByTag("tr");
-            rows.forEach(row ->
+            Elements tables = body.getElementsByClass("wikitable");
+
+            tables.forEach(table ->
             {
-                Element first = row.getElementsByTag("td").first();
-                if (first != null) {
-                    Element anchor = first.getElementsByTag("a").first();
-                    if (anchor != null) {
-                        String href = anchor.attr("href");
-                        hrefs.add(href);
+                Elements rows = table.getElementsByTag("tr");
+                rows.forEach(row ->
+                {
+                    Element first = row.getElementsByTag("td").first();
+                    if (first != null) {
+                        Element anchor = first.getElementsByTag("a").first();
+                        if (anchor != null) {
+                            String href = anchor.attr("href");
+                            hrefs.add(href);
+                        }
                     }
-                }
+                });
             });
-        });
+        }
 
         return hrefs.stream().flatMap((Function<String, Stream<JSONObject>>) itemLink -> parseItem(itemLink).stream())
                 .collect(Collectors.toList());
@@ -114,13 +160,11 @@ public class FeatExporter extends BaseExporter {
 
         Set<Category> categories = Category.getCategories(doc);
 
-        Choice payloadChoice = getPayloadChoice(itemName);
-
         List<JSONObject> feats = new ArrayList<>();
 
         feats.add(Feat.create(itemName)
                 .withDescription(getDescription(content))
-                .withProvided(payloadChoice)
+                .withProvided(getPayloadChoice(itemName))
                 .withPrerequisite(prerequisite)
                 .withCategories(categories)
                 .withProvided(getGeneratedAttributes(content))
@@ -135,21 +179,23 @@ public class FeatExporter extends BaseExporter {
         for (Element child : content.children()) {
             if (child.text().contains(":")) {
                 final String[] split = child.text().split(":");
-                final String label = split[0];
-                final String payload = split[1].trim();
+                if(split.length>1) {
+                    final String label = split[0];
+                    final String payload = split[1].trim();
 
-                switch (label){
-                    case "Special":
-                        if(payload.startsWith("You can select this Feat multiple times") ||
-                                payload.startsWith("You may select this Feat multiple times") ||
-                                payload.startsWith("You can take this Feat more than once") ||
-                                payload.startsWith("You can gain this Feat multiple times")||
-                                payload.startsWith("You can take this Feat multiple times")||
-                                payload.startsWith("You may take this Feat more than once")||
-                                payload.startsWith("This Feat may be selected multiple times")){
-                            provided.add(Attribute.create("takeMultipleTimes", "true"));
-                        }
-                    default:
+                    switch (label) {
+                        case "Special":
+                            if (payload.startsWith("You can select this Feat multiple times") ||
+                                    payload.startsWith("You may select this Feat multiple times") ||
+                                    payload.startsWith("You can take this Feat more than once") ||
+                                    payload.startsWith("You can gain this Feat multiple times") ||
+                                    payload.startsWith("You can take this Feat multiple times") ||
+                                    payload.startsWith("You may take this Feat more than once") ||
+                                    payload.startsWith("This Feat may be selected multiple times")) {
+                                provided.add(Attribute.create("takeMultipleTimes", "true"));
+                            }
+                        default:
+                    }
                 }
             }
         }
@@ -179,6 +225,7 @@ public class FeatExporter extends BaseExporter {
                 attributes.add(Attribute.create("hitPointEq", "@charLevel"));
                 break;
             case "Weapon Proficiency":
+            case "Exotic Weapon Proficiency":
                 attributes.add(Attribute.create("weaponProficiency", "#payload#"));
                 break;
             case "Armor Proficiency":
@@ -318,39 +365,39 @@ public class FeatExporter extends BaseExporter {
             choice.withOption("AVAILABLE_EXOTIC_WEAPON_PROFICIENCY", new Option().withPayload("AVAILABLE_EXOTIC_WEAPON_PROFICIENCY"));
             return choice;
         } else if ("Double Attack".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Double Attack");
+            Choice choice = new Choice("Select a Weapon to use with Double Attack.", "You Must Be Focussed in a weapon group or an Exotic Weapon to select it for Double Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Double Attack");
             choice.withOption("AVAILABLE_DOUBLE_ATTACK", new Option().withPayload("AVAILABLE_DOUBLE_ATTACK"));
             return choice;
         } else if ("Triple Attack".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Triple Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Triple Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Triple Attack");
+            Choice choice = new Choice("Select a Weapon to use with Triple Attack.", "You Must have Double Attack for a weapon group or an Exotic Weapon to select it for Triple Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Triple Attack");
             choice.withOption("AVAILABLE_TRIPLE_ATTACK", new Option().withPayload("AVAILABLE_TRIPLE_ATTACK"));
             return choice;
         } else if ("Savage Attack".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Weapon to use with Savage Attack.", "You Must have Double Attack for a weapon group or an Exotic Weapon to select one for Savage Attack.");
             choice.withOption("AVAILABLE_SAVAGE_ATTACK", new Option().withPayload("AVAILABLE_SAVAGE_ATTACK"));
             return choice;
         } else if ("Relentless Attack".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Weapon to use Relentless Attack with.", "You Must have Double Attack for a weapon group or an Exotic Weapon to select one for Relentless Attack.");
             choice.withOption("AVAILABLE_RELENTLESS_ATTACK", new Option().withPayload("AVAILABLE_RELENTLESS_ATTACK"));
             return choice;
         } else if ("Autofire Sweep".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Weapon to use Autofire Sweep with.", "You Must Be Focussed in a weapon group or an Exotic Weapon to select one for Autofire Sweep.");
             choice.withOption("AVAILABLE_AUTOFIRE_SWEEP", new Option().withPayload("AVAILABLE_AUTOFIRE_SWEEP"));
             return choice;
         } else if ("Autofire Assault".equals(itemName)) {
-            Choice choice = new Choice("Select a Proficient Weapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Weapon to use Autofire Assault with.", "You Must Be Focussed in a weapon group or an Exotic Weapon to select one for Autofire Assault.");
             choice.withOption("AVAILABLE_AUTOFIRE_ASSAULT", new Option().withPayload("AVAILABLE_AUTOFIRE_ASSAULT"));
             return choice;
         } else if ("Halt".equals(itemName)) {
-            Choice choice = new Choice("Select a ProficientWeapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Weapon to use Halt with.", "You Must Be Focussed in a weapon group or an Exotic Weapon to select one for Halt.");
             choice.withOption("AVAILABLE_HALT", new Option().withPayload("AVAILABLE_HALT"));
             return choice;
         } else if ("Return Fire".equals(itemName)) {
-            Choice choice = new Choice("Select a ProficientWeapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Weapon to use Return Fire with.", "You Must Be Focussed in a weapon group or an Exotic Weapon to select one for Return Fire.");
             choice.withOption("AVAILABLE_RETURN_FIRE", new Option().withPayload("AVAILABLE_RETURN_FIRE"));
             return choice;
         } else if ("Critical Strike".equals(itemName)) {
-            Choice choice = new Choice("Select a ProficientWeapon to use Double Attack with.", "You Must Be Proficient in a weapon group or an Exotic Weapon to select one for Double Attack.");
+            Choice choice = new Choice("Select a Weapon to use Critical Strike with.", "You Must Be Focussed in a weapon group or an Exotic Weapon to select one for Critical Strike.");
             choice.withOption("AVAILABLE_CRITICAL_STRIKE", new Option().withPayload("AVAILABLE_CRITICAL_STRIKE"));
             return choice;
         }
