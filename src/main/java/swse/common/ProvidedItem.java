@@ -2,6 +2,7 @@ package swse.common;
 
 import com.google.common.base.Objects;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -16,6 +17,11 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     private final String name;
     private final ItemType type;
     private final Prerequisite prerequisite;
+    private final List<Attribute> attributes = new LinkedList<>();
+    private final List<ProvidedItem> providedItems = new LinkedList<>();
+    private final List<Modification> modifications = new LinkedList<>();
+    private final List<NamedCrew> namedCrewMembers = new LinkedList<>();
+    private String equip;
 
     private ProvidedItem(String name, ItemType type, Prerequisite prerequisite){
         this.name = name;
@@ -65,8 +71,16 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     public JSONObject toJSON(){
         JSONObject data = new JSONObject();
         data.put("name", name);
-        data.put("type", type);
+        data.put("type", type.toString());
         data.put("prerequisite", JSONy.toJSON(prerequisite));
+        if(equip != null){
+            data.put("equip", equip);
+        }
+
+        data.put("attributes", JSONy.toArray(attributes));
+        data.put("providedItems", JSONy.toArray(providedItems));
+        data.put("modifications", JSONy.toArray(modifications));
+        data.put("namedCrew", JSONy.toArray(namedCrewMembers));
         return data;
     }
 
@@ -92,5 +106,37 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     @Override
     public ProvidedItem copy() {
         return new ProvidedItem(name, type, prerequisite.copy());
+    }
+
+    public ProvidedItem withProvided(Attribute attribute) {
+        attributes.add(attribute);
+        return this;
+    }
+    public ProvidedItem overwriteProvided(Attribute attribute) {
+        List<Attribute> filtered = attributes.stream().filter(a -> a.getKey().equals(attribute.getKey())).collect(Collectors.toList());
+
+        if(filtered.size() > 0){
+            filtered.forEach(a -> a.withValue(attribute.getValue()));
+        } else {
+            attributes.add(attribute);
+        }
+        return this;
+    }
+    public ProvidedItem withProvided(ProvidedItem providedItem) {
+        providedItems.add(providedItem);
+        return this;
+    }
+    public ProvidedItem withProvided(Modification modification) {
+        modifications.add(modification);
+        return this;
+    }
+    public ProvidedItem withProvided(NamedCrew namedCrew) {
+        namedCrewMembers.add(namedCrew);
+        return this;
+    }
+
+    public ProvidedItem withEquip(String type) {
+        this.equip = type;
+        return this;
     }
 }

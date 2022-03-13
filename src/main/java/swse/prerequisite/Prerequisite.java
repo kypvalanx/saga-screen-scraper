@@ -140,14 +140,17 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
 
     private static Prerequisite create(String plainText, String itemName)
     {
-        String plainText1 = plainText.trim();
-        final List<Prerequisite> prerequisites = parsePrerequisites(plainText1, itemName);
+        final List<Prerequisite> prerequisites = parsePrerequisites(plainText.trim(), itemName);
 
         return merge(prerequisites);
     }
 
     private static List<Prerequisite> parsePrerequisites(String text, String itemName)
     {
+        if("None".equals(text) || "-".equals(text)){
+            return List.of();
+        }
+
         if (text.endsWith("."))
         {
             text = text.substring(0, text.length() - 1);
@@ -200,6 +203,10 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
         {
             text = text.substring(9);
         }
+        if (text.startsWith("*"))
+        {
+            text = text.substring(1);
+        }
 
 
         //if this is wrapped in paired parens, remove them
@@ -227,6 +234,70 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
                     new SimplePrerequisite(text, "FEAT", "Weapon Finesse")
             )));
         }
+
+        //Medium or larger size
+        if ("Colossal or Larger".equals(text) ||
+                "This Weapon System can only be mounted on a Vehicle of Colossal size or larger.".equals(text))
+        {
+            return List.of(new OrPrerequisite(text, List.of(
+                    new SimplePrerequisite(text, "TRAIT", "Colossal"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Frigate)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Cruiser)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Station)")
+            )));
+        }
+
+        //Medium or larger size
+        if ("Colossal (Frigate) or Larger".equals(text) ||
+                "This Weapon System can only be mounted on a Vehicle of Colossal (Frigate) size or larger".equals(text))
+        {
+            return List.of(new OrPrerequisite(text, List.of(
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Frigate)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Cruiser)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Station)")
+            )));
+        }
+
+        //Medium or larger size
+        if ("Colossal or Smaller".equals(text))
+        {
+            return List.of(new OrPrerequisite(text, List.of(
+                    new SimplePrerequisite(text, "TRAIT", "Diminutive"),
+                    new SimplePrerequisite(text, "TRAIT", "Fine"),
+                    new SimplePrerequisite(text, "TRAIT", "Small"),
+                    new SimplePrerequisite(text, "TRAIT", "Medium"),
+                    new SimplePrerequisite(text, "TRAIT", "Large"),
+                    new SimplePrerequisite(text, "TRAIT", "Huge"),
+                    new SimplePrerequisite(text, "TRAIT", "Gargantuan"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal")
+            )));
+        }
+
+        //Medium or larger size
+        if ("Gargantuan or Smaller".equals(text))
+        {
+            return List.of(new OrPrerequisite(text, List.of(
+                    new SimplePrerequisite(text, "TRAIT", "Diminutive"),
+                    new SimplePrerequisite(text, "TRAIT", "Fine"),
+                    new SimplePrerequisite(text, "TRAIT", "Small"),
+                    new SimplePrerequisite(text, "TRAIT", "Medium"),
+                    new SimplePrerequisite(text, "TRAIT", "Large"),
+                    new SimplePrerequisite(text, "TRAIT", "Huge"),
+                    new SimplePrerequisite(text, "TRAIT", "Gargantuan")
+            )));
+        }
+
+        //Medium or larger size
+        if ("Gargantuan or Larger".equals(text))
+        {
+            return List.of(new OrPrerequisite(text, List.of(
+                    new SimplePrerequisite(text, "TRAIT", "Gargantuan"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Frigate)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Cruiser)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Station)")
+            )));
+        }
         //Medium or larger size
         if ("Medium or larger size".equals(text))
         {
@@ -234,8 +305,23 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
                     new SimplePrerequisite(text, "TRAIT", "Medium"),
                     new SimplePrerequisite(text, "TRAIT", "Large"),
                     new SimplePrerequisite(text, "TRAIT", "Huge"),
+                    new SimplePrerequisite(text, "TRAIT", "Gargantuan"),
                     new SimplePrerequisite(text, "TRAIT", "Colossal"),
-                    new SimplePrerequisite(text, "TRAIT", "Gargantuan")
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Frigate)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Cruiser)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Station)")
+            )));
+        }
+        //Medium or larger size
+        if ("Huge or Larger".equals(text))
+        {
+            return List.of(new OrPrerequisite(text, List.of(
+                    new SimplePrerequisite(text, "TRAIT", "Huge"),
+                    new SimplePrerequisite(text, "TRAIT", "Gargantuan"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Frigate)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Cruiser)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Station)")
             )));
         }
         //Small size or larger
@@ -246,8 +332,11 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite>
                     new SimplePrerequisite(text, "TRAIT", "Medium"),
                     new SimplePrerequisite(text, "TRAIT", "Large"),
                     new SimplePrerequisite(text, "TRAIT", "Huge"),
+                    new SimplePrerequisite(text, "TRAIT", "Gargantuan"),
                     new SimplePrerequisite(text, "TRAIT", "Colossal"),
-                    new SimplePrerequisite(text, "TRAIT", "Gargantuan")
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Frigate)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Cruiser)"),
+                    new SimplePrerequisite(text, "TRAIT", "Colossal (Station)")
             )));
         }
         // Trained in at least one Knowledge Skill

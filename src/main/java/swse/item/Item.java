@@ -15,8 +15,6 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
     private String size;
     private String cost;
     private String weight;
-    private String availability;
-    private String source;
     private List<Mode> modes = new LinkedList<>();
 
     public static Item create(String itemName) {
@@ -39,8 +37,7 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
                 .put("cost", cost)
                 .put("weight", weight)
                 .put("availability", availability)
-                .put("modes", constructModes(modes))
-                .put("source", source);
+                .put("modes", constructModes(modes));
         return json;
     }
 
@@ -67,16 +64,6 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
 
     public Item withWeight(String weight) {
         this.weight = weight;
-        return this;
-    }
-
-    public Item withSource(String source) {
-        this.source = source;
-        return this;
-    }
-
-    public Item withAvailability(String availability) {
-        this.availability = availability;
         return this;
     }
 

@@ -12,6 +12,9 @@ import swse.species.SpeciesExporter;
 import swse.traits.TraitExporter;
 import swse.talents.TalentExporter;
 import swse.templates.TemplateExporter;
+import swse.vehicles.models.VehicleExporter;
+import swse.vehicles.stock.templates.VehicleStockTemplateExporter;
+import swse.vehicles.systems.VehicleSystemsExporter;
 
 public class RefreshCompendiums
 {
@@ -29,5 +32,9 @@ public class RefreshCompendiums
         TalentExporter.main(args);
         TemplateExporter.main(args);
         TraitExporter.main(args);
+        VehicleStockTemplateExporter.main(args);
+        VehicleSystemsExporter.main(args);
+        VehicleExporter.main(args);
+
     }
 }

@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,47 +49,17 @@ public class SpeciesExporter extends BaseExporter {
 
 
     public static void main(String[] args) {
-        List<String> speciesLinks = new ArrayList<>();
-        speciesLinks.add("/wiki/Category:Species?from=A");
-        speciesLinks.add("/wiki/Category:Species?from=B");
-        speciesLinks.add("/wiki/Category:Species?from=C");
-        speciesLinks.add("/wiki/Category:Species?from=D");
-        speciesLinks.add("/wiki/Category:Species?from=E");
-        speciesLinks.add("/wiki/Category:Species?from=F");
-        speciesLinks.add("/wiki/Category:Species?from=G");
-        speciesLinks.add("/wiki/Category:Species?from=H");
-        speciesLinks.add("/wiki/Category:Species?from=I");
-        speciesLinks.add("/wiki/Category:Species?from=J");
-        speciesLinks.add("/wiki/Category:Species?from=K");
-        speciesLinks.add("/wiki/Category:Species?from=L");
-        speciesLinks.add("/wiki/Category:Species?from=M");
-        speciesLinks.add("/wiki/Category:Species?from=N");
-        speciesLinks.add("/wiki/Category:Species?from=O");
-        speciesLinks.add("/wiki/Category:Species?from=P");
-        speciesLinks.add("/wiki/Category:Species?from=Q");
-        speciesLinks.add("/wiki/Category:Species?from=R");
-        speciesLinks.add("/wiki/Category:Species?from=S");
-        speciesLinks.add("/wiki/Category:Species?from=T");
-        speciesLinks.add("/wiki/Category:Species?from=U");
-        speciesLinks.add("/wiki/Category:Species?from=V");
-        speciesLinks.add("/wiki/Category:Species?from=W");
-        speciesLinks.add("/wiki/Category:Species?from=X");
-        speciesLinks.add("/wiki/Category:Species?from=Y");
-        speciesLinks.add("/wiki/Category:Species?from=Z");
+        List<String> speciesLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Species?from="));
         speciesLinks.add("/wiki/Droid_Heroes");
         speciesLinks.add("/wiki/Droid_Chassis");
 
         List<JSONObject> entries = new ArrayList<>();
-        double size = speciesLinks.size();
-        AtomicInteger i = new AtomicInteger();
         for (String itemLink : speciesLinks) {
             entries.addAll(readItemMenuPage(itemLink, true));
-            drawProgressBar(i.getAndIncrement() * 100 / size);
+            drawProgressBar(entries.size() * 100.0 / 345.0);
         }
-        //System.out.println(allSpecies.stream().map(species -> "\""+species+"\"").collect(Collectors.toList()));
         System.out.println("processed "+ entries.size() + " of 345");
         System.out.println("species with auto languages " + languages);
-
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }

@@ -30,6 +30,11 @@ public class TraitExporter extends BaseExporter {
 
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\traits.json";
     public static final String UNARMED_DAMAGE_DIE = "unarmedDamageDie";
+    public static final String SHIP_SKILL_MODIFIER = "shipSkillModifier";
+    public static final String REFLEX_DEFENSE_BONUS = "reflexDefenseBonus";
+    public static final String SNEAK_MODIFIER = "sneakModifier";
+    public static final String DAMAGE_THRESHOLD_SIZE_MODIFIER = "damageThresholdSizeModifier";
+    public static final String GRAPPLE_SIZE_MODIFIER = "grappleSizeModifier";
 
     public static void main(String[] args) {
 
@@ -69,15 +74,12 @@ public class TraitExporter extends BaseExporter {
     }
 
     private static Collection<? extends JSONObject> getSizeTraits() {
-        List<String> sizes = Lists.newArrayList("Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal");
+        List<String> sizes = Lists.newArrayList("Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)");
         Set<JSONObject> response = new HashSet<>();
         for (String size : sizes) {
             response.add(Trait
                     .create(size)
-                    .withProvided(getSizeSneakModifier(size))
-                    .withProvided(getReflexDefenseModifier(size, null))
-                    .withProvided(getDamageThresholdSizeModifier(size))
-                    .withProvided(getUnarmedDieSize(size))
+                    .withProvided(getSizeModifiers(size))
                     .toJSON());
 
         }
@@ -309,7 +311,14 @@ public class TraitExporter extends BaseExporter {
                 "</p>").toJSON());
 
         response.add(Trait.create("Disable Attribute Modification").withDescription("<p>Some Species have set Attribute Arrays\n" +
-                "</p>").toJSON());
+                "</p>").withProvided(Attribute.create("disableAttributeModification", true))
+                .withProvided(Attribute.create("baseStrength", 10))
+                .withProvided(Attribute.create("baseDexterity", 10))
+                .withProvided(Attribute.create("baseConstitution", 10))
+                .withProvided(Attribute.create("baseIntelligence", 10))
+                .withProvided(Attribute.create("baseWisdom", 10))
+                .withProvided(Attribute.create("baseCharisma", 10))
+                .toJSON());
 
         response.add(Trait.create("Aquala").withDescription("<p>Aquala Aqualish have finned hands, making them the strongest swimmers of all Aqualish." +
                 "</p>").toJSON());
@@ -345,7 +354,7 @@ public class TraitExporter extends BaseExporter {
 
         response.add(Trait.create("Niman")
                 .withDescription("When wielding a Lightsaber, you gain a +1 bonus to your Reflex Defense and Will Defense.")
-                .withProvided(Attribute.create("reflexDefenseBonus", "1")).withProvided(Attribute.create("willDefenseBonus", "1")).toJSON());
+                .withProvided(Attribute.create(REFLEX_DEFENSE_BONUS, "1")).withProvided(Attribute.create("willDefenseBonus", "1")).toJSON());
         //response.add(Trait.create("Stormtrooper Perception Bonus").withProvided(Attribute.create("perceptionModifier", 2)).toJSON());
         //response.add(Trait.create("Low-Light Vision").withProvided(Attribute.create("lowLightVision", true)).toJSON());
         //response.add(Trait.create("4 Arm Option").toJSON());
@@ -454,11 +463,9 @@ public class TraitExporter extends BaseExporter {
                 .withProvided(getBonusFeat(itemName, content))
                 .withProvided(getClassSkill(itemName))
                 .withProvided(getNaturalArmorBonus(itemName))
-                .withProvided(getReflexDefenseModifier(itemName, content))
+                .withProvided(getReflexDefenseModifier(content))
                 .withProvided(getFortitudeDefenseModifier(itemName, content))
                 .withProvided(getWillDefenseModifier(itemName, content))
-                .withProvided(getSizeSneakModifier(itemName))
-                .withProvided(getDamageThresholdSizeModifier(itemName))
                 .withProvided(getDamageReduction(itemName))
                 .withProvided(getManualAttributes(itemName))
                 .withProvided(getItems(itemName)).toJSON());
@@ -473,7 +480,7 @@ public class TraitExporter extends BaseExporter {
             case "Superior Defenses":
                 attributes.add(Attribute.create("fortitudeDefenseBonus", "1"));
                 attributes.add(Attribute.create("willDefenseBonus", "1"));
-                attributes.add(Attribute.create("reflexDefenseBonus", "1"));
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, "1"));
                 break;
         }
 
@@ -571,118 +578,130 @@ public class TraitExporter extends BaseExporter {
         return null;
     }
 
-    private static List<Attribute> getReflexDefenseModifier(String itemName, Element content) {
+
+    private static List<Attribute> getReflexDefenseModifier(Element content) {
+
         List<Attribute> attributes = new ArrayList<>();
-        switch (itemName) {
-            case "Colossal":
-                attributes.add(Attribute.create("reflexDefenseBonus", -10));
-                break;
-            case "Gargantuan":
-                attributes.add(Attribute.create("reflexDefenseBonus", -5));
-                break;
-            case "Huge":
-                attributes.add(Attribute.create("reflexDefenseBonus", -2));
-                break;
-            case "Large":
-                attributes.add(Attribute.create("reflexDefenseBonus", -1));
-                break;
-            case "Medium":
-                attributes.add(Attribute.create("reflexDefenseBonus", +0));
-                break;
-            case "Small":
-                attributes.add(Attribute.create("reflexDefenseBonus", +1));
-                break;
-            case "Tiny":
-                attributes.add(Attribute.create("reflexDefenseBonus", +2));
-                break;
-            case "Diminutive":
-                attributes.add(Attribute.create("reflexDefenseBonus", +5));
-                break;
-            case "Fine":
-                attributes.add(Attribute.create("reflexDefenseBonus", +10));
-                break;
-            default:
-        }
-
-
         if (content != null && content.text().toLowerCase().contains("reflex")) {
             Optional<Matcher> m = Regex.find("Beings gain a ([+-]\\d*) Species bonus to their Reflex Defense\\.", content.text());
             if (m.isPresent()) {
                 Integer bonus = Integer.parseInt(m.get().group(1));
-                attributes.add(Attribute.create("reflexDefenseBonus", bonus));
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, bonus));
             }
         }
         return attributes;
     }
 
-    private static Attribute getUnarmedDieSize(String itemName) {
+    private static List<Attribute> getSizeModifiers(String itemName) {
+        List<Attribute> attributes = new ArrayList<>();
         switch (itemName) {
+            case "Colossal (Frigate)":
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, -10));
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, -10));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "2d8"));
+                attributes.add(Attribute.create("vehicleFightingSpace", "1 square"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, -20));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +100));
+                attributes.add(Attribute.create(GRAPPLE_SIZE_MODIFIER, +25));
+                break;
+            case "Colossal (Cruiser)":
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, -10));
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, -10));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "2d8"));
+                attributes.add(Attribute.create("vehicleFightingSpace", "4 squares"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, -20));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +200));
+                attributes.add(Attribute.create(GRAPPLE_SIZE_MODIFIER, +30));
+                break;
+            case "Colossal (Station)":
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, -10));
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, -10));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "2d8"));
+                attributes.add(Attribute.create("vehicleFightingSpace", "4 squares"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, -20));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +500));
+                attributes.add(Attribute.create(GRAPPLE_SIZE_MODIFIER, +35));
+                break;
             case "Colossal":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "2d8");
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, -10));
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, -10));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "2d8"));
+                attributes.add(Attribute.create("vehicleFightingSpace", "1 square"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, -20));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +50));
+                attributes.add(Attribute.create(GRAPPLE_SIZE_MODIFIER, +20));
+                break;
             case "Gargantuan":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "2d6");
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, -5));
+                attributes.add(Attribute.create("characterFightingSpace", "16 squares"));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, -5));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "2d6"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, -15));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +20));
+                attributes.add(Attribute.create(GRAPPLE_SIZE_MODIFIER, +15));
+                break;
             case "Huge":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "1d8");
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, -2));
+                attributes.add(Attribute.create("characterFightingSpace", "9 squares"));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, -2));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "1d8"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, -10));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +10));
+                attributes.add(Attribute.create(GRAPPLE_SIZE_MODIFIER, +10));
+                break;
             case "Large":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "1d6");
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, -1));
+                attributes.add(Attribute.create("characterFightingSpace", "4 squares"));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, -1));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "1d6"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, -5));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +5));
+                attributes.add(Attribute.create(GRAPPLE_SIZE_MODIFIER, +5));
+                break;
             case "Medium":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "1d4");
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, +0));
+                attributes.add(Attribute.create("characterFightingSpace", "1 square"));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, +0));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "1d4"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, +0));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
+                break;
             case "Small":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "1d3");
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, +1));
+                attributes.add(Attribute.create("characterFightingSpace", "1 square"));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, +1));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "1d3"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, +5));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
+                break;
             case "Tiny":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "1d2");
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, +2));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, +2));
+                attributes.add(Attribute.create("characterFightingSpace", "1 square"));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "1d2"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, +10));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
+                break;
             case "Diminutive":
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, +5));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, +5));
+                attributes.add(Attribute.create("characterFightingSpace", "1 square"));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "1"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, +15));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
+                break;
             case "Fine":
-                return Attribute.create(UNARMED_DAMAGE_DIE, "1");
-            default:
-                return null;
+                attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, +10));
+                attributes.add(Attribute.create(SHIP_SKILL_MODIFIER, +10));
+                attributes.add(Attribute.create("characterFightingSpace", "1 square"));
+                attributes.add(Attribute.create(UNARMED_DAMAGE_DIE, "1"));
+                attributes.add(Attribute.create(SNEAK_MODIFIER, +20));
+                attributes.add(Attribute.create(DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
+                break;
         }
-    }
 
-    private static Attribute getSizeSneakModifier(String itemName) {
-        switch (itemName) {
-            case "Colossal":
-                return Attribute.create("sneakModifier", -20);
-            case "Gargantuan":
-                return Attribute.create("sneakModifier", -15);
-            case "Huge":
-                return Attribute.create("sneakModifier", -10);
-            case "Large":
-                return Attribute.create("sneakModifier", -5);
-            case "Medium":
-                return Attribute.create("sneakModifier", +0);
-            case "Small":
-                return Attribute.create("sneakModifier", +5);
-            case "Tiny":
-                return Attribute.create("sneakModifier", +10);
-            case "Diminutive":
-                return Attribute.create("sneakModifier", +15);
-            case "Fine":
-                return Attribute.create("sneakModifier", +20);
-            default:
-                return null;
-        }
-    }
 
-    private static Attribute getDamageThresholdSizeModifier(String itemName) {
-        switch (itemName) {
-            case "Colossal":
-                return Attribute.create("damageThresholdSizeModifier", +50);
-            case "Gargantuan":
-                return Attribute.create("damageThresholdSizeModifier", +20);
-            case "Huge":
-                return Attribute.create("damageThresholdSizeModifier", +10);
-            case "Large":
-                return Attribute.create("damageThresholdSizeModifier", +5);
-            case "Medium":
-            case "Small":
-            case "Tiny":
-            case "Diminutive":
-            case "Fine":
-                return Attribute.create("damageThresholdSizeModifier", +0);
-            default:
-                return null;
-        }
+        return attributes;
     }
 
     private static Attribute getDamageReduction(String itemName) {
@@ -700,7 +719,7 @@ public class TraitExporter extends BaseExporter {
 
         List<Object> attributes = new ArrayList<>();
         if (itemName.equals("Natural Armor")) {
-            attributes.add(Attribute.create("reflexDefenseBonus", "#payload#"));
+            attributes.add(Attribute.create(REFLEX_DEFENSE_BONUS, "#payload#"));
         }
         return attributes;
     }

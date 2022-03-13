@@ -104,25 +104,26 @@ public class FeatExporter extends BaseExporter {
         Elements links = body.getElementsByClass("category-page__member-link");
 
         links.forEach(a -> hrefs.add(a.attr("href")));
-        {
-            Elements tables = body.getElementsByClass("wikitable");
 
-            tables.forEach(table ->
+
+        Elements tables = body.getElementsByClass("wikitable");
+
+        tables.forEach(table ->
+        {
+            Elements rows = table.getElementsByTag("tr");
+            rows.forEach(row ->
             {
-                Elements rows = table.getElementsByTag("tr");
-                rows.forEach(row ->
-                {
-                    Element first = row.getElementsByTag("td").first();
-                    if (first != null) {
-                        Element anchor = first.getElementsByTag("a").first();
-                        if (anchor != null) {
-                            String href = anchor.attr("href");
-                            hrefs.add(href);
-                        }
+                Element first = row.getElementsByTag("td").first();
+                if (first != null) {
+                    Element anchor = first.getElementsByTag("a").first();
+                    if (anchor != null) {
+                        String href = anchor.attr("href");
+                        hrefs.add(href);
                     }
-                });
+                }
             });
-        }
+        });
+
 
         return hrefs.stream().flatMap((Function<String, Stream<JSONObject>>) itemLink -> parseItem(itemLink).stream())
                 .collect(Collectors.toList());
@@ -168,7 +169,7 @@ public class FeatExporter extends BaseExporter {
                 .withPrerequisite(prerequisite)
                 .withCategories(categories)
                 .withProvided(getGeneratedAttributes(content))
-                .withProvided(getAttributes(itemName)).toJSON());
+                .withProvided(getManualAttributes(itemName)).toJSON());
 
         return feats;
     }
@@ -214,13 +215,16 @@ public class FeatExporter extends BaseExporter {
         return Prerequisite.merge(prerequisite, added);
     }
 
-    private static List<Attribute> getAttributes(String itemName) {
+    private static List<Attribute> getManualAttributes(String itemName) {
         List<Attribute> attributes = new ArrayList<>();
         if (itemName == null) {
             return attributes;
         }
 
         switch (itemName) {
+            case "Improved Damage Threshold":
+                attributes.add(Attribute.create("damageThresholdBonus", 5));
+                break;
             case "Toughness":
                 attributes.add(Attribute.create("hitPointEq", "@charLevel"));
                 break;

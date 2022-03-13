@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 public class Attribute implements JSONy, Copyable<Attribute> {
     private final String key;
-    private final Object value;
+    private Object value;
     private String modifier;
 
     public static  Attribute create(String key, Object value) {
@@ -62,5 +62,10 @@ public class Attribute implements JSONy, Copyable<Attribute> {
     @Override
     public Attribute copy() {
         return new Attribute(key, value).withModifier(modifier);
+    }
+
+    public Attribute withValue(Object value) {
+        this.value = value;
+        return this;
     }
 }

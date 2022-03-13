@@ -7,9 +7,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -175,4 +178,106 @@ public class BaseExporter
         return content.toString().trim();
     }
 
+    protected static Object getProvidedItemOrChoiceOfProvidedItemsInList(String value, String listDelimiter, String description) {
+        Object provided;
+        if (value.contains(listDelimiter)) {
+            String[] toks = value.split(listDelimiter);
+            Choice choice = new Choice(description);
+            for (String tok : toks) {
+                String val = tok.trim();
+                choice.withOption(val, new Option().withProvidedItem(ProvidedItem.create(val, ItemType.TRAIT)));
+            }
+            provided = choice;
+        } else {
+            provided = ProvidedItem.create(value, ItemType.TRAIT);
+        }
+        return provided;
+    }
+
+    protected static ArrayList<String> getHeaders(Element table) {
+        ArrayList<String> headers = new ArrayList<>();
+
+        Elements rows = table.select("tr:has(th)");
+
+        final ListIterator<Element> rowsIterator = rows.listIterator();
+        Elements first = rowsIterator.next().select("th");
+        ListIterator<Element> next = null;
+        if (rowsIterator.hasNext()) {
+            next = rowsIterator.next().select("th").listIterator();
+        }
+
+        for (Element primary : first) {
+            if(!primary.attr("rowspan").equals("") && Integer.parseInt(primary.attr("rowspan")) > 2){
+                continue;
+            }
+            if (primary.attr("rowspan").equals("2") || next == null) {
+                headers.add(primary.text().trim());
+            } else if(next != null){
+                final String colspan = primary.attr("colspan");
+                int num = 1;
+                if (colspan != null && !"".equals(colspan)) {
+                    num = Integer.parseInt(colspan);
+                }
+                for (int i = 0; i < num; i++) {
+try {
+    String e = primary.text().trim();
+    if(next.hasNext()){
+        e+= " " + next.next().text().trim();
+    }
+    headers.add(e);
+}catch(NoSuchElementException d){
+    System.out.println();
+}
+                }
+            }
+        }
+
+        return headers;
+    }
+
+    protected static List<String> getAlphaLinks(String alphaCategory) {
+        List<String> expandedLinks = new LinkedList<>();
+        for(char alpha = 'A'; alpha <= 'Z'; alpha++){
+
+            expandedLinks.add(alphaCategory + alpha);
+        }
+        return expandedLinks;
+    }
+
+    public static String toString(double numeric) {
+        String s = Double.toString(numeric);
+        if(s.contains("E")){
+            String[] toks = s.split("E");
+            int exp = Integer.parseInt(toks[1]);
+
+            if(exp > 0) {
+                String[] nums = toks[0].split("\\.");
+                StringBuilder response = new StringBuilder(nums[0]);
+
+                for (int i = 0; i < exp; i++) {
+                    final String num = nums[1];
+                    if (num.length() > i) {
+                        response.append(num.charAt(i));
+                    } else {
+                        response.append(0);
+                    }
+                }
+                s = response.toString();
+            }
+
+        }
+        return s;
+    }
+
+    public static double getKilograms(String value, String unit) {
+        if(value.equalsIgnoreCase("None")){
+            return 0.0d;
+        }
+        double numeric = Double.parseDouble(value.replace(",", ""));
+
+        if (!unit.startsWith("Ton")){
+            numeric /= 1000;
+        }
+        return numeric;
+    }
 }

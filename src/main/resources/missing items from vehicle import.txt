@@ -1,0 +1,62 @@
+Suppression Cannon
+Antivehicle Cannon
+Interceptor Missile
+Proton Torpedo Salvo
+Ion Bomb
+Drill
+Claws
+MG1-A Heavy Proton Torpedoes
+Volcano Cannon
+Medium Laser Turret
+Plasma Beam Cutter
+Laser Cannon with Burst Fire
+Light Concussion Missile Launchers
+Anti-Infantry Cannon
+Boarding Drill
+Superlaser
+Bomb Chute
+Concussion Missile Launchers
+Advanced Heavy Laser Cannon
+Heavy Concussion Mortar Cannon
+Heavy Laser Turret
+Disruptor Torpedo
+Hailfire Missile Launchers
+Missile Launchers
+Twin Blaster Cannon
+Super-Heavy Concussion Missile
+Marker Missile
+Stun-Prod
+Mass Driver Cannon
+Proton Bombs
+Thermal Detonators
+Rocket Launcher
+Proton Beam Cannon
+Laser Borer
+Sonic Cannon
+Heavy Assault Laser Cannon
+Torpedo Launchers
+Mini-Missiles
+Light Repeating Blaster
+s Fire Cannon
+Heavy Concussion Missiles or Hex Missiles
+Turbolaser Turret
+Laser Turret
+Energy Bomblet
+Seismic Driver
+Light Concussion Missile
+Concussion Mines
+Tracking Proton Torpedoes
+Heavy Repeating Blaster Cannon
+Projectile Launcher
+Pseudograv Projector
+Micro Tractor Beam
+Microtractor-Pressors
+Concussion Grenade Launcher
+Bomblet Generator
+Surface-to-Orbit Ion Cannon
+Concussion Projectiles
+Dual Missile Launcher
+Debris Clearing Cannon
+processed 647 of 647
+
+Process finished with exit code 0
