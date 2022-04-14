@@ -1,7 +1,7 @@
 package swse.common;
 
 public enum ItemType {
-    TRAIT,SPECIES,CLASS, ITEM, LEVEL, FEAT, TALENT, VEHICLE_SYSTEM("vehicleSystem"), VEHICLE_TEMPLATE("vehicleTemplate"), TEMPLATE;
+    TRAIT,SPECIES,CLASS, ITEM, LEVEL, FEAT, TALENT, VEHICLE_SYSTEM("vehicleSystem"), VEHICLE_BASE_TYPE("vehicleBaseType"), TEMPLATE;
 
 
     String toStringOverride = null;

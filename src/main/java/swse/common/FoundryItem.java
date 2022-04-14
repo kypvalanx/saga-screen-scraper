@@ -22,6 +22,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     protected final List<Choice> choices;
     protected String source;
     protected String availability;
+    protected String subtype;
 
     public FoundryItem(String name) {
         this.name = name;
@@ -77,6 +78,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         data.put("description", description);
         data.put("choices", JSONy.toArray(choices));
         data.put("source", source);
+        data.put("subtype", subtype);
         if (prerequisite != null) {
             data.put("prerequisite", JSONy.toJSON(prerequisite));
         }
@@ -160,6 +162,11 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         return (T) this;
     }
 
+
+    public T withSubtype(String subtype) {
+        this.subtype = subtype;
+        return (T) this;
+    }
 
     public T withProvided(Object object) {
         return withProvided(object, false);

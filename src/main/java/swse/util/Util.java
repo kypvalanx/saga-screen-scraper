@@ -127,4 +127,48 @@ public class Util
         }
         return newList;
 }
+
+    public static String toCamelCase(String text) {
+        String[] words = text.split("[\\W_]+");
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (i == 0) {
+                word = word.isEmpty() ? word : word.toLowerCase();
+            } else {
+                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase();
+            }
+            builder.append(word);
+        }
+        return builder.toString();
+    }
+
+    public static String toEnumCase(String text) {
+        List<String> words = Arrays.asList(text.toUpperCase().split("[\\W_]+"));
+
+        return String.join("_", words);
+    }
+
+    public static String toTitleCase(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        StringBuilder converted = new StringBuilder();
+
+        boolean convertNext = true;
+        for (char ch : text.toCharArray()) {
+            if (Character.isSpaceChar(ch) || ch == '-' || ch == '\'') {
+                convertNext = true;
+            } else if (convertNext) {
+                ch = Character.toTitleCase(ch);
+                convertNext = false;
+            } else {
+                ch = Character.toLowerCase(ch);
+            }
+            converted.append(ch);
+        }
+
+        return converted.toString();
+    }
 }

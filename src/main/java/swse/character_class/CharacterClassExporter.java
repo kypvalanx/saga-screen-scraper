@@ -5,17 +5,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Choice;
 import swse.common.ItemType;
+import swse.common.JSONy;
 import swse.common.Option;
 import swse.common.ProvidedItem;
 import swse.prerequisite.Prerequisite;
 import swse.util.Context;
+import swse.util.Timer;
 
 public class CharacterClassExporter extends BaseExporter {
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\classes.json";
@@ -23,6 +27,8 @@ public class CharacterClassExporter extends BaseExporter {
 
 
     public static void main(String[] args) {
+        Timer timer = new Timer();
+        System.out.println("Start Class Export:");
         List<String> classLinkList = new ArrayList<String>();
         classLinkList.add("/wiki/Jedi");
         classLinkList.add("/wiki/Noble");
@@ -68,17 +74,21 @@ public class CharacterClassExporter extends BaseExporter {
         classLinkList.add("/wiki/Martial_Arts_Master");
 
         List<JSONObject> entries = new ArrayList<>();
+        final CharacterClassExporter characterClassExporter = new CharacterClassExporter();
         for (String speciesLink : classLinkList) {
-            entries.addAll(parseItem(speciesLink, false));
+            entries.addAll(characterClassExporter.parseItem(speciesLink, false).stream().map(item -> item.toJSON()).collect(Collectors.toList()));
         }
 
         //System.out.println(allClasses.stream().map(feat -> "\""+feat+"\"").collect(Collectors.toList()));
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
         //writeToCSV(new File(OUTPUT_FILE), entries);
+        final long end = timer.end();
+        long average = end / entries.size();
+        System.out.println("End Class Export: TOTAL TIME: "+ end +"ms, AVERAGE TIME: "+ average);
     }
 
 
-    private static Collection<? extends JSONObject> parseItem(String itemLink, boolean overwrite) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -105,7 +115,7 @@ public class CharacterClassExporter extends BaseExporter {
         content.select("table:not([class])").remove();
 
         Context.setValue("name", itemName);
-        JSONObject characterClass = CharacterClass.create(itemName)
+        JSONy characterClass = CharacterClass.create(itemName)
                 .withLeveledStats(Levels.getLeveledStats(content.select("table"), itemName))
                 .withProvided(ClassSkill.getClassSkills(content.select("p,ul,h4")))
                 .withProvided(HitPoints.getHitPoints(content.select("p,h4"), itemName))
@@ -116,7 +126,7 @@ public class CharacterClassExporter extends BaseExporter {
                 .withProvided(getClassChoice(itemName))
                 .withProvided(getClassType(itemName))
                 .withProvided(getProvidedItems(itemName))
-                .withDescription(getDescription(content)).toJSON();
+                .withDescription(getDescription(content));
 
         return Lists.newArrayList(characterClass);
     }
@@ -125,7 +135,7 @@ public class CharacterClassExporter extends BaseExporter {
         Collection<Object> items = new ArrayList<>();
 
         if ("Beast".equals(itemName)) {
-            items.add(Attribute.create("intelligenceMax", 2));
+            items.add(Attribute.create(AttributeKey.INTELLIGENCE_MAX, 2));
         }
 
         return items;
@@ -133,8 +143,8 @@ public class CharacterClassExporter extends BaseExporter {
 
     private static Collection<?> getClassType(String itemName) {
         List<Object> classTypes = new ArrayList<>();
-        classTypes.add(Attribute.create("isHeroic", !List.of("Beast", "Nonheroic").contains(itemName)));
-        classTypes.add(Attribute.create("isPrestige", !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
+        classTypes.add(Attribute.create(AttributeKey.IS_HEROIC, !List.of("Beast", "Nonheroic").contains(itemName)));
+        classTypes.add(Attribute.create(AttributeKey.IS_PRESTIGE, !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
         return classTypes;
     }
 

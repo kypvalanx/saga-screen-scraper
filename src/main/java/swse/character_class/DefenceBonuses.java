@@ -8,6 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 
 public class DefenceBonuses
 {
@@ -33,19 +34,19 @@ public class DefenceBonuses
                     Matcher fortMatcher = FORTITUDE_PATTERN.matcher(input);
                     if (fortMatcher.find())
                     {
-                        attributes.add(Attribute.create("classFortitudeDefenseBonus", Integer.parseInt(fortMatcher.group(1))));
+                        attributes.add(Attribute.create(AttributeKey.FORTITUDE_DEFENSE_BONUS_CLASS, Integer.parseInt(fortMatcher.group(1))));
                     }
 
                     Matcher reflexMatcher = REFLEX_PATTERN.matcher(input);
                     if (reflexMatcher.find())
                     {
-                        attributes.add(Attribute.create("classReflexDefenseBonus", Integer.parseInt(reflexMatcher.group(1))));
+                        attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS_CLASS, Integer.parseInt(reflexMatcher.group(1))));
                     }
 
                     Matcher willMatcher = WILL_PATTERN.matcher(input);
                     if (willMatcher.find())
                     {
-                        attributes.add(Attribute.create("classWillDefenseBonus", Integer.parseInt(willMatcher.group(1))));
+                        attributes.add(Attribute.create(AttributeKey.CLASS_WILL_DEFENSE_BONUS, Integer.parseInt(willMatcher.group(1))));
                     }
                 }
             } else if ((entry.tag().equals(Tag.valueOf("h4")) || entry.tag().equals(Tag.valueOf("p"))) && input.contains("defense bonuses"))

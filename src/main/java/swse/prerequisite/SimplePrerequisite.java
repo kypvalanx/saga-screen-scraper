@@ -8,6 +8,10 @@ public class SimplePrerequisite extends Prerequisite
 {
     private final String requirement;
 
+    public static Prerequisite simple(String plainText, String type, String requirement){
+        return new SimplePrerequisite(plainText, type, requirement);
+    }
+
     public SimplePrerequisite(String plainText, String type, String requirement)
     {
         super(plainText, type);

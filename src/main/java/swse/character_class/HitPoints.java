@@ -10,6 +10,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 
 class HitPoints
 {
@@ -41,7 +42,7 @@ class HitPoints
 
                     if (m.find())
                     {
-                        attributes.add(Attribute.create("firstLevelHitPoints",Integer.parseInt(m.group(1))));
+                        attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL,Integer.parseInt(m.group(1))));
                     }
 
                     Pattern levelUpHitPointsPattern = Pattern.compile("(?:gain|hit points equal to) (\\d*d\\d*) (hit point|\\+ their)(s)?");
@@ -50,7 +51,7 @@ class HitPoints
 
                     if (m2.find())
                     {
-                        attributes.add(Attribute.create("levelUpHitPoints", m2.group(1)));
+                        attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, m2.group(1)));
                     }
 
                 }
@@ -61,13 +62,13 @@ class HitPoints
         }
 
         if("Beast".equals(itemName)){
-            attributes.add(Attribute.create("firstLevelHitPoints", "1d8"));
-            attributes.add(Attribute.create("levelUpHitPoints", "1d8"));
+            attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d8"));
+            attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d8"));
         }
 
         if("Nonheroic".equals(itemName)){
-            attributes.add(Attribute.create("firstLevelHitPoints", "1d4"));
-            attributes.add(Attribute.create("levelUpHitPoints", "1d4"));
+            attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d4"));
+            attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d4"));
         }
         return attributes;
     }

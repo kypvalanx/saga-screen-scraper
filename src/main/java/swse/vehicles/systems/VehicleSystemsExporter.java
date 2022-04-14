@@ -17,9 +17,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 import swse.common.BaseExporter;
+import swse.common.JSONy;
 import swse.prerequisite.Prerequisite;
 import swse.prerequisite.SimplePrerequisite;
+import swse.util.Context;
+import static swse.util.Util.toEnumCase;
 
 public class VehicleSystemsExporter extends BaseExporter {
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\Vehicle Systems.json";
@@ -40,10 +44,11 @@ public class VehicleSystemsExporter extends BaseExporter {
         //vehicleSystemLinks.addAll(getAlphaLinks("/wiki/Category:Starship_Accessories?from="));
         List<JSONObject> entries = new LinkedList<>();
         List<String> names = new LinkedList<>();
+        VehicleSystemsExporter vehicleSystemsExporter = new VehicleSystemsExporter();
         boolean overwrite = false;
         for (String vehicleSystemLink :
                 vehicleSystemLinks) {
-            final List<JSONObject> newEntities = readItemMenuPage(vehicleSystemLink, overwrite);
+            final List<JSONObject> newEntities = vehicleSystemsExporter.readItemMenuPage(vehicleSystemLink, overwrite);
             for (JSONObject newEntity : newEntities) {
                 if (names.contains(newEntity.get("name"))) {
                     //System.out.println("Duplicate: " + newEntity.get("name") + " from: " + vehicleSystemLink);
@@ -55,29 +60,29 @@ public class VehicleSystemsExporter extends BaseExporter {
             drawProgressBar(entries.size() * 100.0 / 323.0);
         }
         List<JSONObject> newEntities = new ArrayList<>();
-        newEntities.addAll(parseItem("/wiki/Droid_Socket", overwrite));
-        newEntities.addAll(parseItem("/wiki/Grenade_Launcher", overwrite));
-        newEntities.addAll(parseItem("/wiki/Missile_Launcher", overwrite));
-        newEntities.addAll(parseItem("/wiki/Frag_Grenade", overwrite));
-        newEntities.addAll(parseItem("/wiki/Heavy_Repeating_Blaster", overwrite));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Fire"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Repeating"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Battery"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Heavy Yaret-kor"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Medium Yaret-kor"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Light Yaret-kor"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Magma Missile"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Heavy Plasma Projector"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Medium Plasma Projector"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Light Plasma Projector"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Dovin Basal"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Stun Cannon"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Suppression Cannon"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Bomblet Generator"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Antivehicle Cannon"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Interceptor Missile"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Superlaser"));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Volcano Cannon"));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Droid_Socket", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Grenade_Launcher", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Missile_Launcher", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Frag_Grenade", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Heavy_Repeating_Blaster", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Fire").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Repeating").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Battery").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Heavy Yaret-kor").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Medium Yaret-kor").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Light Yaret-kor").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Magma Missile").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Heavy Plasma Projector").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Medium Plasma Projector").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Light Plasma Projector").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Dovin Basal").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Stun Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Suppression Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Bomblet Generator").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Antivehicle Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Interceptor Missile").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Superlaser").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(assembleFromNameAndChildren(null, "Volcano Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
 
 
 
@@ -100,7 +105,7 @@ public class VehicleSystemsExporter extends BaseExporter {
     }
 
 
-    private static List<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite) {
+    private List<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite) {
         if (null == itemPageLink) {
             return new ArrayList<>();
         }
@@ -118,11 +123,12 @@ public class VehicleSystemsExporter extends BaseExporter {
         links.forEach(a -> hrefs.add(a.attr("href")));
 
 
-        return hrefs.stream().flatMap((Function<String, Stream<JSONObject>>) itemLink -> parseItem(itemLink, overwrite).stream())
+        return hrefs.stream().flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite).stream())
+                .map(item -> item.toJSON())
                 .collect(Collectors.toList());
     }
 
-    private static List<JSONObject> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -146,7 +152,8 @@ public class VehicleSystemsExporter extends BaseExporter {
         return assembleFromNameAndChildren(children, itemName);
     }
 
-    private static List<JSONObject> assembleFromNameAndChildren(Elements children, String itemName) {
+    private static List<JSONy> assembleFromNameAndChildren(Elements children, String itemName) {
+        Context.setValue("name", itemName);
         List<VehicleSystem> items = new LinkedList<>();
         VehicleSystem current = VehicleSystem.create(itemName);
 
@@ -183,7 +190,7 @@ public class VehicleSystemsExporter extends BaseExporter {
                             //System.out.println(variantName);
 
                             if ("Added Power Couplings".equalsIgnoreCase(itemName)) {
-                                currentVariant.withProvided(Attribute.create("emplacementPointsBonus", nameModifier));
+                                currentVariant.withProvided(Attribute.create(AttributeKey.EMPLACEMENT_POINTS_BONUS, nameModifier));
                             }
 
                             for (int i = 1; i < headers.size(); i++) {
@@ -196,7 +203,8 @@ public class VehicleSystemsExporter extends BaseExporter {
                                         break;
                                     case "EMPLACEMENT POINTS":
                                     case "DAMAGE":
-                                        currentVariant.withProvided(Attribute.create(key.toLowerCase(), value));
+                                            currentVariant.withProvided(Attribute.create(AttributeKey
+                                                    .valueOf(toEnumCase(key.toLowerCase())), value));
                                         break;
                                     case "COST":
                                         currentVariant.withCost(value);
@@ -205,7 +213,7 @@ public class VehicleSystemsExporter extends BaseExporter {
                                         currentVariant.withProvided(Prerequisite.create(value));
                                         break;
                                     default:
-                                        System.out.println("- " + key + " : " + value);
+                                        //System.out.println("- " + key + " : " + value);
                                 }
                                 //System.out.println("- "+key + " : " + value);
                             }
@@ -273,10 +281,10 @@ public class VehicleSystemsExporter extends BaseExporter {
                 if (m.find()) {
                     found = true;
                     if(isVariant){
-                        current.withProvided(Attribute.create("emplacementPoints", m.group(1)));
+                        current.withProvided(Attribute.create(AttributeKey.EMPLACEMENT_POINTS, m.group(1)));
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            variant.withProvided(Attribute.create("emplacementPoints", m.group(1)));
+                            variant.withProvided(Attribute.create(AttributeKey.EMPLACEMENT_POINTS, m.group(1)));
                         }
                     }
                 }
@@ -313,14 +321,14 @@ public class VehicleSystemsExporter extends BaseExporter {
                     found = true;
                     if(isVariant){
 
-                        final Attribute damage = Attribute.create("damage", m.group(1).trim());
+                        final Attribute damage = Attribute.create(AttributeKey.DAMAGE, m.group(1).trim());
                         if (m.group(2) != null) {
                             damage.withModifier(m.group(2).trim());
                         }
                         current.withProvided(damage);
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            final Attribute damage = Attribute.create("damage", m.group(1).trim());
+                            final Attribute damage = Attribute.create(AttributeKey.DAMAGE, m.group(1).trim());
                             if (m.group(2) != null) {
                                 damage.withModifier(m.group(2).trim());
                             }
@@ -338,10 +346,10 @@ public class VehicleSystemsExporter extends BaseExporter {
                     found = true;
                     if(isVariant){
 
-                        current.withProvided(Attribute.create("seeAlso", m.group(1)));
+                        current.withProvided(Attribute.create(AttributeKey.SEE_ALSO, m.group(1)));
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            variant.withProvided(Attribute.create("seeAlso", m.group(1)));
+                            variant.withProvided(Attribute.create(AttributeKey.SEE_ALSO, m.group(1)));
                         }
 
                     }
@@ -407,11 +415,6 @@ public class VehicleSystemsExporter extends BaseExporter {
                 items.addAll(entry.getValue().values());
             }
         }
-//
-//        if(variantData.isEmpty()){
-//            items.add(current);
-//        }
-//        items.addAll(variantData.values().stream().flatMap(m-> m.values().stream()).collect(Collectors.toList()));
 
         List<VehicleSystem> manualItems = new LinkedList<>();
         for (VehicleSystem system : items) {
@@ -419,7 +422,7 @@ public class VehicleSystemsExporter extends BaseExporter {
         }
         items.addAll(manualItems);
 
-        return items.stream().map(VehicleSystem::toJSON).collect(Collectors.toList());
+        return new ArrayList<>(items);
     }
 
     private static Collection<? extends VehicleSystem> manualItems(VehicleSystem system) {
@@ -427,16 +430,16 @@ public class VehicleSystemsExporter extends BaseExporter {
 
         switch (system.getName()) {
             case "Droid Socket":
-                system.withProvided(Attribute.create("providesSlot", ASTROMECH_DROID));
+                system.withProvided(Attribute.create(AttributeKey.PROVIDES_SLOT, ASTROMECH_DROID));
                 system.withSubtype("Droid Accessories (Droid Stations)");
                 break;
             case "Double Cannon":
                 system.withName("Double")
                         .withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Attribute.create("itemMod", "true"));
-                system.withProvided(Attribute.create("bonusDamage", "1d10"));
-                system.withProvided(Attribute.create("cost", "*3"));
-                system.withProvided(Attribute.create("autofireAttackBonus", "0"));
+                        .withProvided(Attribute.create(AttributeKey.ITEM_MOD, "true"));
+                system.withProvided(Attribute.create(AttributeKey.BONUS_DAMAGE, "1d10"));
+                system.withProvided(Attribute.create(AttributeKey.COST, "*3"));
+                system.withProvided(Attribute.create(AttributeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 systems.add(system.copy().withName("Dual"));
                 systems.add(system.copy().withName("Twin"));
                 systems.add(system.copy().withName("Triple"));
@@ -444,121 +447,121 @@ public class VehicleSystemsExporter extends BaseExporter {
                 break;
             case "Rapid-Fire":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Attribute.create("itemMod", "true"));
-                system.withProvided(Attribute.create("autofireAttackBonus", "+3"));
+                        .withProvided(Attribute.create(AttributeKey.ITEM_MOD, "true"));
+                system.withProvided(Attribute.create(AttributeKey.AUTOFIRE_ATTACK_BONUS, "+3"));
                 break;
             case "Rapid-Repeating":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Attribute.create("itemMod", "true"));
-                system.withProvided(Attribute.create("autofireAttackBonus", "0"));
+                        .withProvided(Attribute.create(AttributeKey.ITEM_MOD, "true"));
+                system.withProvided(Attribute.create(AttributeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "Quad Cannon":
                 system.withName("Quad");
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Attribute.create("itemMod", "true"));
-                system.withProvided(Attribute.create("modifies", "TYPE:Weapon Systems"));
-                system.withProvided(Attribute.create("bonusDamage", "2d10"));
-                system.withProvided(Attribute.create("cost", "*5"));
-                system.withProvided(Attribute.create("autofireAttackBonus", "0"));
+                        .withProvided(Attribute.create(AttributeKey.ITEM_MOD, "true"));
+                system.withProvided(Attribute.create(AttributeKey.MODIFIES, "TYPE:Weapon Systems"));
+                system.withProvided(Attribute.create(AttributeKey.BONUS_DAMAGE, "2d10"));
+                system.withProvided(Attribute.create(AttributeKey.COST, "*5"));
+                system.withProvided(Attribute.create(AttributeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "2 Fire-Linked Weapon":
             case "4 Fire-Linked Weapon":
             case "Standard Cannon Enhancements":
             case "Advanced Cannon Enhancements":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Attribute.create("itemMod", "true"));
-                system.withProvided(Attribute.create("modifies", "TYPE:Weapon Systems"));
-                system.withProvided(Attribute.create("bonusDamage", "2d10"));
-                system.withProvided(Attribute.create("cost", "*5"));
-                system.withProvided(Attribute.create("autofireAttackBonus", "0"));
+                        .withProvided(Attribute.create(AttributeKey.ITEM_MOD, "true"));
+                system.withProvided(Attribute.create(AttributeKey.MODIFIES, "TYPE:Weapon Systems"));
+                system.withProvided(Attribute.create(AttributeKey.BONUS_DAMAGE, "2d10"));
+                system.withProvided(Attribute.create(AttributeKey.COST, "*5"));
+                system.withProvided(Attribute.create(AttributeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "Proton Torpedo Launcher":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Attribute.create("itemMod", "true"));
+                        .withProvided(Attribute.create(AttributeKey.ITEM_MOD, "true"));
                 //systems.add(system.copy().withName("Light Proton Torpedoes")).replaceAttribute(Attribute.create("damage", ));
                 systems.add(system.copy().withName("Medium Proton Torpedoes"));
-                systems.add(system.copy().withName("Heavy Proton Torpedoes").replaceAttribute(Attribute.create("damage", "9d10x5")));
+                systems.add(system.copy().withName("Heavy Proton Torpedoes").replaceAttribute(Attribute.create(AttributeKey.DAMAGE, "9d10x5")));
                 break;
             case "Battery":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Attribute.create("itemMod", "true"));
-                system.withProvided(Attribute.create("aidAnotherBonus", "2"));
+                        .withProvided(Attribute.create(AttributeKey.ITEM_MOD, "true"));
+                system.withProvided(Attribute.create(AttributeKey.AID_ANOTHER_BONUS, "2"));
                 //TODO battery should let you chose how many battery slots to add system.withProvided(Choice.create());
                 break;
             case "Heavy Yaret-kor":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "10d10x5"));
-                system.withProvided(Attribute.create("targetSizeModifier", "<Colossal:-20"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "10d10x5"));
+                system.withProvided(Attribute.create(AttributeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Medium Yaret-kor":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "8d10x5"));
-                system.withProvided(Attribute.create("targetSizeModifier", "<Colossal:-20"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "8d10x5"));
+                system.withProvided(Attribute.create(AttributeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Light Yaret-kor":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "6d10x5"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "6d10x5"));
                 break;
             case "Magma Missile":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "8d10x5"));
-                system.withProvided(Attribute.create("splash", "4 square"));
-                system.withProvided(Attribute.create("targetSizeModifier", "<Colossal:-20"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "8d10x5"));
+                system.withProvided(Attribute.create(AttributeKey.SPLASH, "4 square"));
+                system.withProvided(Attribute.create(AttributeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Heavy Plasma Projector":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "10d10x5"));
-                system.withProvided(Attribute.create("targetSizeModifier", "<Colossal:-20"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "10d10x5"));
+                system.withProvided(Attribute.create(AttributeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Medium Plasma Projector":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "8d10x5"));
-                system.withProvided(Attribute.create("targetSizeModifier", "<Colossal:-20"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "8d10x5"));
+                system.withProvided(Attribute.create(AttributeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Light Plasma Projector":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "6d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "6d10x2"));
                 break;
             case "Dovin Basal":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "7d10x2"));
-                system.withProvided(Attribute.create("targetSizeModifier", "<Colossal:-20"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "7d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Stun Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("stunDamage", "7d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.STUN_DAMAGE, "7d10x2"));
                 break;
             case "Suppression Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("stunDamage", "4d10x2"));
-                system.withProvided(Attribute.create("autofireAttackBonus", "0"));
+                system.withProvided(Attribute.create(AttributeKey.STUN_DAMAGE, "4d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "Antivehicle Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("stunDamage", "5d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.STUN_DAMAGE, "5d10x2"));
                 break;
             case "Interceptor Missile":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "4d10x2"));
-                system.withProvided(Attribute.create("splash", "4 square"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "4d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.SPLASH, "4 square"));
                 break;
             case "Bomblet Generator":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "4d6"));
-                system.withProvided(Attribute.create("damageType", "Ion"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "4d6"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE_TYPE, "Ion"));
                 break;
             case "Superlaser":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "8d10x40"));
-                system.withProvided(Attribute.create("targetSizeModifier", "<Colossal:-20"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "8d10x40"));
+                system.withProvided(Attribute.create(AttributeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Volcano Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create("damage", "6d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "6d10x2"));
                 break;
             case "Heavy Concussion Missile Launcher":
                 final VehicleSystem superHeavy = system.copy().withName("Super-Heavy Concussion Missile ");
-                superHeavy.withProvided(Attribute.create("damage", "11d10x5"));
+                superHeavy.withProvided(Attribute.create(AttributeKey.DAMAGE, "11d10x5"));
                 systems.add(superHeavy);
                 break;
         }
@@ -568,33 +571,33 @@ public class VehicleSystemsExporter extends BaseExporter {
         if (hyperdriveMatcher.find()) {
             if(system.getName().equals("Class 3 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 2.5 Hyperdrive").withProvided(Attribute.create("hyperdrive", "2.5")));
+                systems.add(system.copy().withName("Class 2.5 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "2.5")));
             }
             if(system.getName().equals("Class 8 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 7 Hyperdrive").withProvided(Attribute.create("hyperdrive", "7")));
-                systems.add(system.copy().withName("Class 9 Hyperdrive").withProvided(Attribute.create("hyperdrive", "9")));
+                systems.add(system.copy().withName("Class 7 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "7")));
+                systems.add(system.copy().withName("Class 9 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "9")));
             }
             if(system.getName().equals("Class 15 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 12 Hyperdrive").withProvided(Attribute.create("hyperdrive", "12")));
-                systems.add(system.copy().withName("Class 14 Hyperdrive").withProvided(Attribute.create("hyperdrive", "14")));
-                systems.add(system.copy().withName("Class 16 Hyperdrive").withProvided(Attribute.create("hyperdrive", "16")));
-                systems.add(system.copy().withName("Class 18 Hyperdrive").withProvided(Attribute.create("hyperdrive", "18")));
-                systems.add(system.copy().withName("Class 20 Hyperdrive").withProvided(Attribute.create("hyperdrive", "20")));
-                systems.add(system.copy().withName("Class 24 Hyperdrive").withProvided(Attribute.create("hyperdrive", "24")));
-                systems.add(system.copy().withName("Class 25 Hyperdrive").withProvided(Attribute.create("hyperdrive", "25")));
-                systems.add(system.copy().withName("Class 30 Hyperdrive").withProvided(Attribute.create("hyperdrive", "25")));
+                systems.add(system.copy().withName("Class 12 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "12")));
+                systems.add(system.copy().withName("Class 14 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "14")));
+                systems.add(system.copy().withName("Class 16 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "16")));
+                systems.add(system.copy().withName("Class 18 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "18")));
+                systems.add(system.copy().withName("Class 20 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "20")));
+                systems.add(system.copy().withName("Class 24 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "24")));
+                systems.add(system.copy().withName("Class 25 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "25")));
+                systems.add(system.copy().withName("Class 30 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "25")));
             }
             if(system.getName().equals("Class 0.75 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 0.9 Hyperdrive").withProvided(Attribute.create("hyperdrive", "0.9")));
+                systems.add(system.copy().withName("Class 0.9 Hyperdrive").withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "0.9")));
                 systems.add(system.copy().withName("Class 0.5 Hyperdrive")
-                        .withProvided(Attribute.create("hyperdrive", "0.5")).withAvailability("Illegal")
+                        .withProvided(Attribute.create(AttributeKey.HYPERDRIVE, "0.5")).withAvailability("Illegal")
                         .withPrerequisite(new SimplePrerequisite("The only way to achieve a Hyperdrive of this type is to modify a Class .75 Hyperdrive using the Starship Designer Feat.", "FEAT", "Starship Designer")));
             }
 
-            system.withProvided(Attribute.create("hyperdrive", hyperdriveMatcher.group(1)));
+            system.withProvided(Attribute.create(AttributeKey.HYPERDRIVE, hyperdriveMatcher.group(1)));
 
 
         }
@@ -641,7 +644,7 @@ public class VehicleSystemsExporter extends BaseExporter {
         List<Object> attributes = new LinkedList<>();
 
         if (name.endsWith("Added Power Couplings")) {
-            attributes.add(Attribute.create("emplacementPointBonus", name.split(" ")[0]));
+            attributes.add(Attribute.create(AttributeKey.EMPLACEMENT_POINTS_BONUS, name.split(" ")[0]));
         } else {
             //System.out.println(name);
         }

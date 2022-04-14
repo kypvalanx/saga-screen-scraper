@@ -13,6 +13,15 @@ public class Choice implements JSONy, Copyable<Choice>
     private String noAvailableOptionsDescription;
     private final Map<String, Option> options = new HashMap();
     private String oneOption;
+    private String rollOption;
+
+    public static Choice create(String description){
+        return new Choice(description);
+    }
+    public static Choice create(String description, String noAvailableOptionsDescription){
+        return new Choice(description, noAvailableOptionsDescription);
+    }
+
 
     public Choice(String description)
     {
@@ -38,6 +47,7 @@ public class Choice implements JSONy, Copyable<Choice>
         json.put("noOptions", noAvailableOptionsDescription);
         json.put("isFirstLevel", isFirstLevel);
         json.put("oneOption", oneOption);
+        json.put("rollOption", rollOption);
 
         for (Map.Entry<String, Option> entry :
                 options.entrySet())
@@ -89,5 +99,10 @@ public class Choice implements JSONy, Copyable<Choice>
             copy.withOption(entity.getKey(),entity.getValue().copy());
         }
         return copy;
+    }
+
+    public Choice withRollOption(String rollOption) {
+        this.rollOption = rollOption;
+        return this;
     }
 }

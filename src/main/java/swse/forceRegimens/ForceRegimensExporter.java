@@ -2,19 +2,14 @@ package swse.forceRegimens;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import swse.common.BaseExporter;
 import swse.common.Category;
+import swse.common.JSONy;
 
 public class ForceRegimensExporter extends BaseExporter
 {
@@ -24,55 +19,14 @@ public class ForceRegimensExporter extends BaseExporter
     public static void main(String[] args)
     {
         List<String> talentLinks = new ArrayList<String>();
-        talentLinks.add("/wiki/Force_Regimens");
+        talentLinks.add("/wiki/Category:Force_Regimens");
 
-        List<JSONObject> entries = new ArrayList<>();
-        for(String speciesLink : talentLinks){
-            entries.addAll(readItemMenuPage(speciesLink, false));
-        }
+        List<JSONObject> entries = new ForceRegimensExporter().getEntriesFromCategoryPage(talentLinks);
 
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
     }
 
-
-    private static List<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite)
-    {
-        Document doc = getDoc(itemPageLink, overwrite);
-        if (doc == null)
-        {
-            return new ArrayList<>();
-        }
-        Element body = doc.body();
-
-        Element div = body.select("div.mw-parser-output").first();
-        Elements lis = div.select("li");
-        Set<String> hrefs = new HashSet<>();
-        lis.forEach(li -> hrefs.add(li.select("a[href]").first().attr("href")));
-
-//        Elements tables = body.getElementsByClass("wikitable");
-//
-//        tables.forEach(table ->
-//        {
-//            Elements rows = table.getElementsByTag("tr");
-//            rows.forEach(row ->
-//            {
-//                Element first = row.getElementsByTag("td").first();
-//                if (first != null)
-//                {
-//                    Element anchor = first.select("a[href]").first();
-//                    if (anchor != null)
-//                    {
-//                        hrefs.add(anchor.attr("href"));
-//                    }
-//                }
-//            });
-//        });
-
-        return hrefs.stream().flatMap((Function<String, Stream<ForceRegimen>>) itemLink -> parseItem(itemLink, overwrite).stream())
-                .map(ForceRegimen::toJSON).collect(Collectors.toList());
-    }
-
-    private static List<ForceRegimen> parseItem(String itemLink, boolean overwrite)
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite)
     {
         if (null == itemLink)
         {
@@ -88,7 +42,7 @@ public class ForceRegimensExporter extends BaseExporter
         String itemName = getItemName(doc);
 
 
-        if ("home".equals(itemName.toLowerCase()))
+        if ("home".equalsIgnoreCase(itemName))
         {
             return new ArrayList<>();
         }
@@ -97,7 +51,7 @@ public class ForceRegimensExporter extends BaseExporter
 
         Set<Category> categories = Category.getCategories(doc);
 //
-        List<ForceRegimen> traditions = new ArrayList<>();
+        List<JSONy> traditions = new ArrayList<>();
         traditions.add(ForceRegimen.create(itemName).withDescription(getDescription(content)).withCategories(categories));
 
         return traditions;

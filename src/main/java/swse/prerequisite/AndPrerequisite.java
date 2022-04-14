@@ -1,6 +1,8 @@
 package swse.prerequisite;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
@@ -11,6 +13,19 @@ import static swse.util.Util.cloneList;
 public class AndPrerequisite extends Prerequisite
 {
     private final List<Prerequisite> children;
+
+    public static Prerequisite and(String plainText,
+                                   Prerequisite... children){
+        return new AndPrerequisite(plainText, Arrays.asList(children));
+    }
+    public static Prerequisite and(String plainText,
+                                   List<Prerequisite> children){
+        return new AndPrerequisite(plainText, children);
+    }
+
+    public static Prerequisite and(List<Prerequisite> children){
+        return new AndPrerequisite(children);
+    }
 
     public AndPrerequisite(String plainText,
                            List<Prerequisite> children)
@@ -29,7 +44,7 @@ public class AndPrerequisite extends Prerequisite
     @Override
     public JSONObject toJSON()
     {
-        return new JSONObject().put("text", plainText).put("type", type).put("children", children.stream().map(Prerequisite::toJSON).collect(Collectors.toList()));
+        return new JSONObject().put("text", plainText).put("type", type).put("children", children.stream().filter(Objects::nonNull).map(Prerequisite::toJSON).collect(Collectors.toList()));
     }
 
     @Override

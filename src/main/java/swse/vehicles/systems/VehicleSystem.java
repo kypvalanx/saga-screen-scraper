@@ -8,7 +8,6 @@ import static swse.util.Util.cloneList;
 
 public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyable<VehicleSystem> {
     private String cost;
-    private String subtype;
     private boolean asterisk = false;
 
     public VehicleSystem(String name) {
@@ -46,8 +45,6 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
         json.put("type", "vehicleSystem");
 
         data.put("cost", cost);
-        data.put("subtype", subtype);
-        data.put("subType", subtype);
 
         return json;
     }

@@ -5,22 +5,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Category;
 import swse.common.Choice;
+import swse.common.JSONy;
 import swse.common.Option;
 import swse.prerequisite.Prerequisite;
 import swse.util.Context;
@@ -37,99 +33,18 @@ public class FeatExporter extends BaseExporter {
     private static Set<String> allFeats = new HashSet<>();
 
     public static void main(String[] args) {
-        List<String> featLinks = new ArrayList<>();
-        featLinks.add("/wiki/Category:Feats?from=A");
-        featLinks.add("/wiki/Category:Feats?from=B");
-        featLinks.add("/wiki/Category:Feats?from=C");
-        featLinks.add("/wiki/Category:Feats?from=D");
-        featLinks.add("/wiki/Category:Feats?from=E");
-        featLinks.add("/wiki/Category:Feats?from=F");
-        featLinks.add("/wiki/Category:Feats?from=G");
-        featLinks.add("/wiki/Category:Feats?from=H");
-        featLinks.add("/wiki/Category:Feats?from=I");
-        featLinks.add("/wiki/Category:Feats?from=J");
-        featLinks.add("/wiki/Category:Feats?from=K");
-        featLinks.add("/wiki/Category:Feats?from=L");
-        featLinks.add("/wiki/Category:Feats?from=M");
-        featLinks.add("/wiki/Category:Feats?from=N");
-        featLinks.add("/wiki/Category:Feats?from=O");
-        featLinks.add("/wiki/Category:Feats?from=P");
-        featLinks.add("/wiki/Category:Feats?from=Q");
-        featLinks.add("/wiki/Category:Feats?from=R");
-        featLinks.add("/wiki/Category:Feats?from=S");
-        featLinks.add("/wiki/Category:Feats?from=T");
-        featLinks.add("/wiki/Category:Feats?from=U");
-        featLinks.add("/wiki/Category:Feats?from=V");
-        featLinks.add("/wiki/Category:Feats?from=W");
-        featLinks.add("/wiki/Category:Feats?from=X");
-        featLinks.add("/wiki/Category:Feats?from=Y");
-        featLinks.add("/wiki/Category:Feats?from=Z");
-        //featLinks.add("/wiki/Feats");
 
-        List<JSONObject> entries = new ArrayList<>();
-        double size = featLinks.size();
-        AtomicInteger i = new AtomicInteger();
-        for (String itemLink : featLinks) {
-            entries.addAll(readItemMenuPage(itemLink, true));
-            drawProgressBar(i.getAndIncrement() * 100 / size);
-        }
-        System.out.println("processed "+ entries.size() + " of 555");
+        List<String> featLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Feats?from="));
 
-        //List<JSONObject> entries = readItemMenuPage("/wiki/Feats");
 
-//        JSONArray prereqs = new JSONArray(allPrerequisites);
-//        System.out.println(prereqs);
-
-        //System.out.println(allFeats.stream().map(feat -> "\""+feat+"\"").collect(Collectors.toList()));
+        List<JSONObject> entries = new FeatExporter().getEntriesFromCategoryPage(featLinks);
 
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }
 
 
-    private static List<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite) {
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(ROOT + itemPageLink).get();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (doc == null) {
-            return new ArrayList<>();
-        }
-        Element body = doc.body();
-
-        List<String> hrefs = new LinkedList<>();
-
-        Elements links = body.getElementsByClass("category-page__member-link");
-
-        links.forEach(a -> hrefs.add(a.attr("href")));
-
-
-        Elements tables = body.getElementsByClass("wikitable");
-
-        tables.forEach(table ->
-        {
-            Elements rows = table.getElementsByTag("tr");
-            rows.forEach(row ->
-            {
-                Element first = row.getElementsByTag("td").first();
-                if (first != null) {
-                    Element anchor = first.getElementsByTag("a").first();
-                    if (anchor != null) {
-                        String href = anchor.attr("href");
-                        hrefs.add(href);
-                    }
-                }
-            });
-        });
-
-
-        return hrefs.stream().flatMap((Function<String, Stream<JSONObject>>) itemLink -> parseItem(itemLink).stream())
-                .collect(Collectors.toList());
-    }
-
-    private static List<JSONObject> parseItem(String itemLink) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -161,7 +76,7 @@ public class FeatExporter extends BaseExporter {
 
         Set<Category> categories = Category.getCategories(doc);
 
-        List<JSONObject> feats = new ArrayList<>();
+        List<JSONy> feats = new ArrayList<>();
 
         feats.add(Feat.create(itemName)
                 .withDescription(getDescription(content))
@@ -169,7 +84,7 @@ public class FeatExporter extends BaseExporter {
                 .withPrerequisite(prerequisite)
                 .withCategories(categories)
                 .withProvided(getGeneratedAttributes(content))
-                .withProvided(getManualAttributes(itemName)).toJSON());
+                .withProvided(getManualAttributes(itemName)));
 
         return feats;
     }
@@ -193,7 +108,7 @@ public class FeatExporter extends BaseExporter {
                                     payload.startsWith("You can take this Feat multiple times") ||
                                     payload.startsWith("You may take this Feat more than once") ||
                                     payload.startsWith("This Feat may be selected multiple times")) {
-                                provided.add(Attribute.create("takeMultipleTimes", "true"));
+                                provided.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, "true"));
                             }
                         default:
                     }
@@ -223,95 +138,95 @@ public class FeatExporter extends BaseExporter {
 
         switch (itemName) {
             case "Improved Damage Threshold":
-                attributes.add(Attribute.create("damageThresholdBonus", 5));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, 5));
                 break;
             case "Toughness":
-                attributes.add(Attribute.create("hitPointEq", "@charLevel"));
+                attributes.add(Attribute.create(AttributeKey.HIT_POINT_EQ, "@charLevel"));
                 break;
             case "Weapon Proficiency":
             case "Exotic Weapon Proficiency":
-                attributes.add(Attribute.create("weaponProficiency", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.WEAPON_PROFICIENCY, "#payload#"));
                 break;
             case "Armor Proficiency":
-                attributes.add(Attribute.create("armorProficiency", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.ARMOR_PROFICIENCY, "#payload#"));
                 break;
             case "Weapon Focus":
-                attributes.add(Attribute.create("weaponFocus", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.WEAPON_FOCUS, "#payload#"));
                 break;
             case "Skill Focus":
-                attributes.add(Attribute.create("skillFocus", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.SKILL_FOCUS, "#payload#"));
                 break;
             case "Skill Mastery":
-                attributes.add(Attribute.create("skillMastery", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.SKILL_MASTERY, "#payload#"));
                 break;
             case "Double Attack":
-                attributes.add(Attribute.create("doubleAttack", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.DOUBLE_ATTACK, "#payload#"));
                 break;
             case "Triple Attack":
-                attributes.add(Attribute.create("tripleAttack", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.TRIPLE_ATTACK, "#payload#"));
                 break;
             case "Savage Attack":
-                attributes.add(Attribute.create("savageAttack", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.SAVAGE_ATTACK, "#payload#"));
             case "Relentless Attack":
-                attributes.add(Attribute.create("relentlessAttack", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.RELENTLESS_ATTACK, "#payload#"));
                 break;
             case "Autofire Sweep":
-                attributes.add(Attribute.create("autofireSweep", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.AUTOFIRE_SWEEP, "#payload#"));
                 break;
             case "Autofire Assault":
-                attributes.add(Attribute.create("autofireAssault", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.AUTOFIRE_ASSAULT, "#payload#"));
                 break;
             case "Halt":
-                attributes.add(Attribute.create("halt", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.HALT, "#payload#"));
                 break;
             case "Return Fire":
-                attributes.add(Attribute.create("returnFire", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.RETURN_FIRE, "#payload#"));
                 break;
             case "Critical Strike":
-                attributes.add(Attribute.create("criticalStrike", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.CRITICAL_STRIKE, "#payload#"));
                 break;
             case "Force Sensitivity":
-                attributes.add(Attribute.create("forceSensitivity", "true"));
-                attributes.add(Attribute.create("bonusTalentTree", "Force Talent Tree"));
+                attributes.add(Attribute.create(AttributeKey.FORCE_SENSITIVITY, "true"));
+                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "Force Talent Tree"));
                 break;
             case "Weapon Finesse":
-                attributes.add(Attribute.create("finesseStat", "DEX"));
+                attributes.add(Attribute.create(AttributeKey.FINESSE_STAT, "DEX"));
                 break;
             case "Force Training":
-                attributes.add(Attribute.create("forceTraining", "true"));
-                attributes.add(Attribute.create("provides", "Force Powers:MAX(1 + @WISMOD,1)"));
+                attributes.add(Attribute.create(AttributeKey.FORCE_TRAINING, "true"));
+                attributes.add(Attribute.create(AttributeKey.PROVIDES, "Force Powers:MAX(1 + @WISMOD,1)"));
                 break;
             case "Dual Weapon Mastery I":
-                attributes.add(Attribute.create("dualWeaponModifier", "-5"));
+                attributes.add(Attribute.create(AttributeKey.DUAL_WEAPON_MODIFIER, "-5"));
                 break;
             case "Dual Weapon Mastery II":
-                attributes.add(Attribute.create("dualWeaponModifier", "-2"));
+                attributes.add(Attribute.create(AttributeKey.DUAL_WEAPON_MODIFIER, "-2"));
                 break;
             case "Dual Weapon Mastery III":
-                attributes.add(Attribute.create("dualWeaponModifier", "0"));
+                attributes.add(Attribute.create(AttributeKey.DUAL_WEAPON_MODIFIER, "0"));
                 break;
             case "Skill Training":
-                attributes.add(Attribute.create("trainedSkills", "1"));
+                attributes.add(Attribute.create(AttributeKey.TRAINED_SKILLS, "1"));
                 break;
             case "Improved Defenses":
-                attributes.add(Attribute.create("fortitudeDefenseBonus", "1"));
-                attributes.add(Attribute.create("willDefenseBonus", "1"));
-                attributes.add(Attribute.create("reflexDefenseBonus", "1"));
+                attributes.add(Attribute.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, "1"));
+                attributes.add(Attribute.create(AttributeKey.WILL_DEFENSE_BONUS, "1"));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, "1"));
                 break;
             case "Armor Proficiency (Light)":
-                attributes.add(Attribute.create("armorProficiency", "light"));
+                attributes.add(Attribute.create(AttributeKey.ARMOR_PROFICIENCY, "light"));
                 break;
             case "Armor Proficiency (Medium)":
-                attributes.add(Attribute.create("armorProficiency", "medium"));
+                attributes.add(Attribute.create(AttributeKey.ARMOR_PROFICIENCY, "medium"));
                 break;
             case "Armor Proficiency (Heavy)":
-                attributes.add(Attribute.create("armorProficiency", "heavy"));
+                attributes.add(Attribute.create(AttributeKey.ARMOR_PROFICIENCY, "heavy"));
                 break;
             default:
         }
         if (itemName.startsWith("Martial Arts ")) {
-            attributes.add(Attribute.create("bonusUnarmedDamageDieSize", "1"));
-            attributes.add(Attribute.create("bonusDodgeReflexDefense", "1"));
+            attributes.add(Attribute.create(AttributeKey.BONUS_UNARMED_DAMAGE_DIE_SIZE, "1"));
+            attributes.add(Attribute.create(AttributeKey.BONUS_DODGE_REFLEX_DEFENSE, "1"));
         }
         return attributes;
     }

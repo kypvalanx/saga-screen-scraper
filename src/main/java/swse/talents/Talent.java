@@ -12,7 +12,7 @@ import swse.prerequisite.Prerequisite;
 
 class Talent extends FoundryItem<Talent> implements Copyable<Talent>
 {
-    public static final String FORCE_TALENT = "Force Talent Tree";
+    public static final String FORCE_TALENT = "Force Talent Trees";
     private final List<String> talentProviders;
     private String talentTree;
     private String bonusTalentTree;

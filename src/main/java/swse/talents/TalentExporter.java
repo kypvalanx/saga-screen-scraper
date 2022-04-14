@@ -6,22 +6,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Buff;
 import swse.common.Category;
 import swse.common.Choice;
 import swse.common.ItemType;
+import swse.common.JSONy;
 import swse.common.Option;
 import swse.common.ProvidedItem;
 import swse.prerequisite.AndPrerequisite;
@@ -75,37 +75,16 @@ public class TalentExporter extends BaseExporter
         //talentLinks.add("/wiki/Droid_Talents");
         talentLinks.add("/wiki/Category:Talent_Trees");
 
-        List<JSONObject> entries = new ArrayList<>();
-        for(String speciesLink : talentLinks){
-            entries.addAll(readItemMenuPage(speciesLink, false));
-        }
 
-        //System.out.println(allTalents.stream().map(feat -> "\""+feat+"\"").collect(Collectors.toList()));
+        List<JSONObject> entries = new TalentExporter().getEntriesFromCategoryPage(talentLinks);
 
         System.out.println("Generated " + entries.size() + " of 1381");
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
     }
 
 
-    private static List<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite)
-    {
-        Document doc = getDoc(itemPageLink, overwrite);
-        if (doc == null)
-        {
-            return new ArrayList<>();
-        }
-        Element body = doc.body();
 
-        Elements as = body.select("a.category-page__member-link");
-
-        Set<String> hrefs = new HashSet<>();
-        as.forEach(a -> hrefs.add(a.attr("href")));
-
-        return hrefs.stream().flatMap((Function<String, Stream<JSONObject>>) itemLink -> parseItem(itemLink, overwrite).stream())
-                .collect(Collectors.toList());
-    }
-
-    private static List<JSONObject> parseItem(String itemLink, boolean overwrite)
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite)
     {
         if (null == itemLink)
         {
@@ -134,7 +113,7 @@ public class TalentExporter extends BaseExporter
 
         String tradition = getTradition(itemName, content);
 
-        List<JSONObject> talents = new ArrayList<>();
+        List<JSONy> talents = new ArrayList<>();
         String talentName = null;
         String talentDescription = null;
         Prerequisite prerequisite = null;
@@ -154,8 +133,7 @@ public class TalentExporter extends BaseExporter
                             .withPossibleProviders(possibleProviders)
                             .withForceTradition(tradition)
                             .withProvided(getAttributes(talentName))
-                            .withProvided(getChoices(talentName))
-                            .toJSON());
+                            .withProvided(getChoices(talentName)));
                 }
 
                 talentName = element.getElementsByClass("mw-headline").first().text();
@@ -166,16 +144,19 @@ public class TalentExporter extends BaseExporter
                 talentDescription = null;
                 prerequisite = null;
             } else if(element.tag().equals(Tag.valueOf("p"))){
-                if(element.text().toLowerCase().startsWith("prerequisite")){
+                String text = element.text();
+                if(text.toLowerCase().startsWith("prerequisite")){
                     //printUnique("---"+itemName);
                     Context.setValue("name", itemName);
-                    prerequisite = Prerequisite.getPrerequisite(element, itemName);
+
+
+                    prerequisite = Prerequisite.getPrerequisite(itemName, text);
                     //allPrerequisites.addAll(prerequisite.getAll());
                 } else{
                     if(talentDescription == null){
-                        talentDescription = element.text();
+                        talentDescription = text;
                     }else {
-                        talentDescription = talentDescription.concat("<br><br>").concat(element.text());
+                        talentDescription = talentDescription.concat("<br><br>").concat(text);
                     }
                 }
             }
@@ -192,8 +173,7 @@ public class TalentExporter extends BaseExporter
                     .withPossibleProviders(possibleProviders)
                     .withForceTradition(tradition)
                     .withProvided(getAttributes(talentName))
-                    .withProvided(getChoices(talentName))
-                    .toJSON());
+                    .withProvided(getChoices(talentName)));
         }
 
         return talents;
@@ -226,28 +206,28 @@ public class TalentExporter extends BaseExporter
 
         switch (itemName) {
             case "Noble Fencing Style":
-                attributes.add(Attribute.create("finesseStat", "CHA"));
+                attributes.add(Attribute.create(AttributeKey.FINESSE_STAT, "CHA"));
                 break;
             case "Weapon Specialization":
-                attributes.add(Attribute.create("takeMultipleTimes", true));
-                attributes.add(Attribute.create("weaponSpecialization", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.WEAPON_SPECIALIZATION, "#payload#"));
                 break;
             case "Greater Weapon Specialization":
-                attributes.add(Attribute.create("takeMultipleTimes", true));
-                attributes.add(Attribute.create("greaterWeaponSpecialization", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.GREATER_WEAPON_SPECIALIZATION, "#payload#"));
                 break;
             case "Greater Weapon Focus":
-                attributes.add(Attribute.create("takeMultipleTimes", true));
-                attributes.add(Attribute.create("greaterWeaponFocus", "#payload#"));
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.GREATER_WEAPON_FOCUS, "#payload#"));
                 break;
             case "Weapon Specialization (Discblade)":
-                attributes.add(Attribute.create("weaponSpecialization", "Discblade"));
+                attributes.add(Attribute.create(AttributeKey.WEAPON_SPECIALIZATION, "Discblade"));
                 break;
             case "Weapon Specialization (Lightsabers)":
-                attributes.add(Attribute.create("weaponSpecialization", "Lightsabers"));
+                attributes.add(Attribute.create(AttributeKey.WEAPON_SPECIALIZATION, "Lightsabers"));
                 break;
             case "Stolen Form":
-                attributes.add(Attribute.create("takeMultipleTimes", true));
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
                 attributes.add(ProvidedItem.create("#payload#", ItemType.TALENT));
                 attributes.add(new Choice("Choose one Talent from the Lightsaber Forms Talent Tree:")
                         .withNoOptionsDescription("There are no available Talents remaining in the Lightsaber Forms Talent Tree")
@@ -255,21 +235,21 @@ public class TalentExporter extends BaseExporter
                 break;
             case "Lightsaber Defense":
                 //when getinheritableby id sees a $ it should lookup the following inheritable value
-                attributes.add(Buff.create("Lightsaber Defense").withProvided(Attribute.create("deflectionBonus", "$lightsaberDefense")));
-                attributes.add(Attribute.create("lightsaberDefense", 1));
-                attributes.add(Attribute.create("takeMultipleTimes", 3));
+                attributes.add(Buff.create("Lightsaber Defense").withProvided(Attribute.create(AttributeKey.DEFLECTION_BONUS, "$lightsaberDefense")));
+                attributes.add(Attribute.create(AttributeKey.LIGHTSABER_DEFENSE, 1));
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, 3));
             case "Ataru":
                 //damageStat will replace STR to damage, than any specific(group or item name) damage type.  we'll take the highest one.  this will be doubled for 2 handers
-                attributes.add(Attribute.create("lightsabersDamageStat", "DEX"));
+                attributes.add(Attribute.create(AttributeKey.LIGHTSABERS_DAMAGE_STAT, "DEX"));
                 break;
             case "Djem So":
-                attributes.add(Attribute.create("action", "Once per round when an opponent hits you with a melee attack, you may spend a Force Point as a Reaction to make an immediate attack against that opponent."));
+                attributes.add(Attribute.create(AttributeKey.ACTION, "Once per round when an opponent hits you with a melee attack, you may spend a Force Point as a Reaction to make an immediate attack against that opponent."));
                 break;
             case "Jar'Kai":
                 attributes.add(ProvidedItem.create("Jar'Kai",ItemType.TRAIT, new OrPrerequisite(List.of(new SimplePrerequisite("Two Lightsabers", "EQUIPPED", "Lightsabers:>1"), new SimplePrerequisite("Double-Bladed Lightsaber", "EQUIPPED", "Double-Bladed Lightsaber")))));
                 break;
             case "Juyo":
-                attributes.add(Attribute.create("action", "Once per encounter, you may spend a Force Point as a Swift Action to designate a single opponent in your line of sight. For the remainder of the encounter, you may reroll your first attack roll each round against that opponent, keeping the better of the two results."));
+                attributes.add(Attribute.create(AttributeKey.ACTION, "Once per encounter, you may spend a Force Point as a Swift Action to designate a single opponent in your line of sight. For the remainder of the encounter, you may reroll your first attack roll each round against that opponent, keeping the better of the two results."));
                 break;
             case "Makashi":
                 attributes.add(ProvidedItem.create("Makashi",ItemType.TRAIT, new AndPrerequisite(List.of(new SimplePrerequisite("One Lightsaber", "EQUIPPED", "Lightsabers:<2"), new NotPrerequisite(new SimplePrerequisite("Two-Handed", "EQUIPPED", "2 Hand"))))));
@@ -278,23 +258,23 @@ public class TalentExporter extends BaseExporter
                 attributes.add(ProvidedItem.create("Niman",ItemType.TRAIT, new SimplePrerequisite("A Lightsaber", "EQUIPPED", "Lightsabers")));
                 break;
             case "Shien":
-                attributes.add(Attribute.create("redirectedShotBonus", 5));
+                attributes.add(Attribute.create(AttributeKey.REDIRECTED_SHOT_BONUS, 5));
                 break;
             case "Shii-cho":
-                attributes.add(Attribute.create("blockBonus", 3));
-                attributes.add(Attribute.create("deflectBonus", 3));
+                attributes.add(Attribute.create(AttributeKey.BLOCK_BONUS, 3));
+                attributes.add(Attribute.create(AttributeKey.DEFLECTION_BONUS, 3));
                 break;
             case "Sokan":
-                attributes.add(Attribute.create("note", "You may Take 10 on Acrobatics checks to Tumble, even when distracted or threatened. Additionally, each threatened or occupied square that you Tumble through only counts as 1 square of movement."));
+                attributes.add(Attribute.create(AttributeKey.NOTE, "You may Take 10 on Acrobatics checks to Tumble, even when distracted or threatened. Additionally, each threatened or occupied square that you Tumble through only counts as 1 square of movement."));
                 break;
             case "Soresu":
-                attributes.add(Attribute.create("note", "You may reroll a failed Use the Force check when using the Block or Deflect Talents."));
+                attributes.add(Attribute.create(AttributeKey.NOTE, "You may reroll a failed Use the Force check when using the Block or Deflect Talents."));
                 break;
             case "Trakata":
-                attributes.add(Attribute.create("note", "By harnessing the unique characteristics of a Lightsaber, you can catch your opponent off guard by quickly shutting off and reigniting the blade. When wielding a Lightsaber, you may spend two Swift Actions to make a Deception check to Feint in combat."));
+                attributes.add(Attribute.create(AttributeKey.NOTE, "By harnessing the unique characteristics of a Lightsaber, you can catch your opponent off guard by quickly shutting off and reigniting the blade. When wielding a Lightsaber, you may spend two Swift Actions to make a Deception check to Feint in combat."));
                 break;
             case "Vaapad":
-                attributes.add(Attribute.create("note", "When attacking with a Lightsaber, you score a critical hit on a natural roll of 19 or 20. However, a natural 19 is not considered an automatic hit; if you roll a natural 19 and still miss the target, you do not score a critical hit."));
+                attributes.add(Attribute.create(AttributeKey.NOTE, "When attacking with a Lightsaber, you score a critical hit on a natural roll of 19 or 20. However, a natural 19 is not considered an automatic hit; if you roll a natural 19 and still miss the target, you do not score a critical hit."));
                 break;
 
         }

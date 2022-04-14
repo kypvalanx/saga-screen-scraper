@@ -3,8 +3,10 @@ package swse.character_class;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
-import swse.common.JSONy;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
+import swse.common.JSONy;
+import swse.util.Util;
 
 public class Feature implements JSONy
 {
@@ -167,13 +169,18 @@ public class Feature implements JSONy
     {
         switch (key){
             case "PROVIDES":
-                return Attribute.create("provides", payload);
+                return Attribute.create(AttributeKey.PROVIDES, payload);
 
             case "TRAIT":
-                return Attribute.create("providedTrait", payload);
+                return Attribute.create(AttributeKey.PROVIDED_TRAIT, payload);
 
             case "BONUS":
-                return Attribute.create(toCamelCase(payload), amount);
+//                try {
+                    return Attribute.create(AttributeKey.valueOf(Util.toEnumCase(payload)), amount);
+//                } catch (IllegalArgumentException e){
+//                    printUnique(toEnumCase(payload) + "(\""+ toCamelCase(payload)+"\"),");
+//                    return Attribute.create(AttributeKey.PROVIDED_TRAIT, payload);
+//                }
         }
         throw new IllegalArgumentException("keys have to be PROVIDES, TRAIT, or BONUS.  it's currently:"+key);
     }
@@ -182,21 +189,6 @@ public class Feature implements JSONy
     {
 
         return create(key, payload, 1);
-    }
-
-    private static String toCamelCase(String text) {
-        String[] words = text.split("[\\W_]+");
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i];
-            if (i == 0) {
-                word = word.isEmpty() ? word : word.toLowerCase();
-            } else {
-                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase();
-            }
-            builder.append(word);
-        }
-        return builder.toString();
     }
 
     @Nonnull

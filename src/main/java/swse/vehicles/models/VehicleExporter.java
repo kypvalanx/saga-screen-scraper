@@ -7,18 +7,17 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.ItemType;
+import swse.common.JSONy;
 import swse.common.Modification;
 import swse.common.NamedCrew;
 import swse.common.ProvidedItem;
@@ -52,51 +51,18 @@ public class VehicleExporter extends BaseExporter {
 
         List<String> vehicleSystemLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Vehicles?from="));
         //vehicleSystemLinks.addAll(getAlphaLinks("/wiki/Category:Starship_Accessories?from="));
-        List<JSONObject> entries = new LinkedList<>();
-        List<String> names = new LinkedList<>();
-        boolean overwrite = false;
-        for (String vehicleSystemLink :
-                vehicleSystemLinks) {
-            final List<JSONObject> newEntities = readItemMenuPage(vehicleSystemLink, overwrite);
-            for (JSONObject newEntity : newEntities) {
-                if (names.contains(newEntity.get("name"))) {
-                    System.out.println("Duplicate: " + newEntity.get("name") + " from: " + vehicleSystemLink);
-                } else {
-                    names.add((String) newEntity.get("name"));
-                    entries.add(newEntity);
-                }
-            }
-            drawProgressBar(entries.size() * 100.0 / 647.0);
-        }
+
+
+        List<JSONObject> entries = new VehicleExporter().getEntriesFromCategoryPage(vehicleSystemLinks);
+
+
         System.out.println("processed " + entries.size() + " of 647");
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }
 
 
-    private static List<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite) {
-        if (null == itemPageLink) {
-            return new ArrayList<>();
-        }
-
-        Document doc = getDoc(itemPageLink, overwrite);
-
-        if (doc == null) {
-            return new ArrayList<>();
-        }
-
-
-        List<String> hrefs = new LinkedList<>();
-
-        Elements links = doc.select("a.category-page__member-link");
-        links.forEach(a -> hrefs.add(a.attr("href")));
-
-
-        return hrefs.stream().flatMap((Function<String, Stream<JSONObject>>) itemLink -> parseItem(itemLink, overwrite).stream())
-                .collect(Collectors.toList());
-    }
-
-    private static List<JSONObject> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -133,7 +99,7 @@ public class VehicleExporter extends BaseExporter {
 
         String itemName = title.text().trim();
         Vehicle current = Vehicle.create(itemName);
-        final ProvidedItem customTemplate = ProvidedItem.create("Custom", ItemType.VEHICLE_TEMPLATE);
+        final ProvidedItem customTemplate = ProvidedItem.create("Custom", ItemType.VEHICLE_BASE_TYPE);
         current.withProvided(customTemplate);
         items.add(current);
 
@@ -146,22 +112,22 @@ public class VehicleExporter extends BaseExporter {
             final String text = cursor.text();
             Matcher matcher = STRENGTH_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("baseStrength", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.BASE_STRENGTH, matcher.group(1)));
                 found = true;
             }
             matcher = DEXTERITY_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("baseDexterity", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.BASE_DEXTERITY, matcher.group(1)));
                 found = true;
             }
             matcher = INTELLIGENCE_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("baseIntelligence", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.BASE_INTELLIGENCE, matcher.group(1)));
                 found = true;
             }
             matcher = SIZE_AND_SUBTYPE.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("vehicleSubType", matcher.group(2)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.VEHICLE_SUB_TYPE, matcher.group(2)));
                 customTemplate.withProvided(ProvidedItem.create(matcher.group(1), ItemType.TRAIT));
                 if(matcher.group(3)!=null) {
                     customTemplate.withProvided(ProvidedItem.create(matcher.group(3), ItemType.TEMPLATE));
@@ -170,30 +136,30 @@ public class VehicleExporter extends BaseExporter {
             }
             matcher = DAMAGE_REDUCTION.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("damageReduction", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.DAMAGE_REDUCTION, matcher.group(1)));
                 found = true;
             }
             matcher = CHARACTER_SCALE_SPEED.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("speedCharacterScale", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.SPEED_CHARACTER_SCALE, matcher.group(1)));
                 found = true;
             }
             matcher = SHIP_SCALE_SPEED.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("speedStarshipScale", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.SPEED_STARSHIP_SCALE, matcher.group(1)));
                 found = true;
             }
             matcher = MAXIMUM_VELOCITY.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("maximumVelocity", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.MAXIMUM_VELOCITY, matcher.group(1)));
                 found = true;
             }
             matcher = CREW_PASSENGERS.matcher(text);
             if(text.contains("Crew:")) {
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create("crew", matcher.group(1)));
-                    customTemplate.withProvided(Attribute.create("crewQuality", matcher.group(3)));
-                    customTemplate.withProvided(Attribute.create("passengers", matcher.group(4)));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.CREW, matcher.group(1)));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.CREW_QUALITY, matcher.group(3)));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.PASSENGERS, matcher.group(4)));
                     if (" plus Astromech Droid".equals(matcher.group(2))) {
                         customTemplate.withProvided(ProvidedItem.create("Droid Socket", ItemType.VEHICLE_SYSTEM).withEquip("installed"));
                     }
@@ -206,9 +172,9 @@ public class VehicleExporter extends BaseExporter {
                         Matcher m2 = NAMED_CREW_QUALITY_PATTERN.matcher(text);
                         if(m2.find()){
 
-                            customTemplate.withProvided(Attribute.create("crewQuality", m2.group(1)));
+                            customTemplate.withProvided(Attribute.create(AttributeKey.CREW_QUALITY, m2.group(1)));
                         }
-                        customTemplate.withProvided(Attribute.create("crew", matcher.group(1)));
+                        customTemplate.withProvided(Attribute.create(AttributeKey.CREW, matcher.group(1)));
                         //printUnique(itemName, matcher.group(2));
 
                         for (NamedCrew namedCrew: resolveNamedCrew(matcher.group(2))){
@@ -223,9 +189,9 @@ public class VehicleExporter extends BaseExporter {
             matcher = COVER_PATTERN.matcher(text);
             while (matcher.find()) {
                 if (matcher.group(2) != null) {
-                    customTemplate.withProvided(Attribute.create("cover", matcher.group(1) + ":" + matcher.group(2)));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.COVER, matcher.group(1) + ":" + matcher.group(2)));
                 } else {
-                    customTemplate.withProvided(Attribute.create("cover", matcher.group(1)));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.COVER, matcher.group(1)));
                 }
                 found = true;
             }
@@ -234,7 +200,7 @@ public class VehicleExporter extends BaseExporter {
                 final String value = matcher.group(1);
                 final String unit = matcher.group(2);
 
-                customTemplate.withProvided(Attribute.create("cargoCapacity", toString(getKilograms(value, unit))));
+                customTemplate.withProvided(Attribute.create(AttributeKey.CARGO_CAPACITY, toString(getKilograms(value, unit))));
                 found = true;
             }
 
@@ -256,29 +222,29 @@ public class VehicleExporter extends BaseExporter {
 
             matcher = CONSUMABLE_PATTERN.matcher(text);
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create("consumables", matcher.group(1)));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.CONSUMABLES, matcher.group(1)));
                     found = true;
                 }
             matcher = HIT_POINT_PATTERN.matcher(text);
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create("hitPointEq", matcher.group(1).replace(",", "")));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.HIT_POINT_EQ, matcher.group(1).replace(",", "")));
                     found = true;
                 }
             matcher = SHIELD_RATING_PATTERN.matcher(text);
                     if (matcher.find()) {
-                        customTemplate.withProvided(Attribute.create("shieldRating", matcher.group(1).replace(",", "")));
+                        customTemplate.withProvided(Attribute.create(AttributeKey.SHIELD_RATING, matcher.group(1).replace(",", "")));
                         found = true;
                     }
 
             matcher = ARMOR_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create("armorReflexDefenseBonus", matcher.group(1)));
+                customTemplate.withProvided(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, matcher.group(1)));
                 found = true;
             }
 
             matcher = PAYLOAD_PATTERN.matcher(text);
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create("payload", matcher.group(1)));
+                    customTemplate.withProvided(Attribute.create(AttributeKey.PAYLOAD, matcher.group(1)));
                     found = true;
                 }
 
@@ -336,7 +302,7 @@ public class VehicleExporter extends BaseExporter {
         }
 
 
-        return items.stream().map(Vehicle::toJSON).collect(Collectors.toList());
+        return new ArrayList<>(items);
     }
 
     private static List<NamedCrew> resolveNamedCrew(String group) {
@@ -412,7 +378,7 @@ public class VehicleExporter extends BaseExporter {
 
         if(damage.contains("Damage:")){
             if(m.find()){
-                vehicleWeapon.overwriteProvided(Attribute.create("damage", m.group(1)));
+                vehicleWeapon.overwriteProvided(Attribute.create(AttributeKey.DAMAGE, m.group(1)));
             } else {
                 //printUnique(damage); TODO weapons that are harder to aim at small targets
             }
@@ -420,7 +386,7 @@ public class VehicleExporter extends BaseExporter {
 
         //TODO make these into mods
         for (String modifier : modifiers) {
-            vehicleWeapon.withProvided(Attribute.create("suffix", ", "+modifier));
+            vehicleWeapon.withProvided(Attribute.create(AttributeKey.SUFFIX, ", "+modifier));
             vehicleWeapon.withProvided(Modification.create(ProvidedItem.create(modifier, ItemType.VEHICLE_SYSTEM)));
             switch (modifier) {
                 case "Rapid-Fire":
@@ -444,7 +410,7 @@ public class VehicleExporter extends BaseExporter {
                     break;
                 case "Battery":
                     for(int i = 1; i < positions; i++) {
-                        vehicleWeapon.withProvided(Attribute.create("providesSlot", crewPosition));
+                        vehicleWeapon.withProvided(Attribute.create(AttributeKey.PROVIDES_SLOT, crewPosition));
                     }
 
 

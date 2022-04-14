@@ -1,22 +1,21 @@
 package swse;
 
+import swse.affiliation.AffiliationExporter;
 import swse.character_class.CharacterClassExporter;
 import swse.feat.FeatExporter;
 import swse.forcePowers.ForcePowersExporter;
 import swse.forceRegimens.ForceRegimensExporter;
 import swse.forceSecrets.ForceSecretsExporter;
 import swse.forceTechniques.TechniquesExporter;
-import swse.affiliation.AffiliationExporter;
 import swse.item.ItemExporter;
 import swse.species.SpeciesExporter;
-import swse.traits.TraitExporter;
 import swse.talents.TalentExporter;
 import swse.templates.TemplateExporter;
-import swse.vehicles.models.VehicleExporter;
-import swse.vehicles.stock.templates.VehicleStockTemplateExporter;
+import swse.traits.TraitExporter;
+import swse.vehicles.stock.baseType.VehicleBaseTypeExporter;
 import swse.vehicles.systems.VehicleSystemsExporter;
 
-public class RefreshCompendiums
+public class RefreshItemCompendiums
 {
     public static void main(String[] args)
     {
@@ -32,9 +31,8 @@ public class RefreshCompendiums
         TalentExporter.main(args);
         TemplateExporter.main(args);
         TraitExporter.main(args);
-        VehicleStockTemplateExporter.main(args);
+        VehicleBaseTypeExporter.main(args);
         VehicleSystemsExporter.main(args);
-        VehicleExporter.main(args);
 
     }
 }

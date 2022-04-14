@@ -1,7 +1,8 @@
-package swse.vehicles.stock.templates;
+package swse.vehicles.stock.baseType;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +12,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 import swse.common.BaseExporter;
+import swse.common.JSONy;
 
-public class VehicleStockTemplateExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\Vehicle Stock Templates.json";
+public class VehicleBaseTypeExporter extends BaseExporter {
+    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\Vehicle Base Types.json";
 
     public static void main(String[] args) {
 
@@ -26,9 +29,10 @@ public class VehicleStockTemplateExporter extends BaseExporter {
         List<JSONObject> entries = new ArrayList<>();
 
         boolean overwrite = false;
+        final VehicleBaseTypeExporter vehicleBaseTypeExporter = new VehicleBaseTypeExporter();
         for (String stockTemplateLink :
                 stockTemplateLinks) {
-            entries.addAll(parseItem(stockTemplateLink, overwrite));
+            entries.addAll(vehicleBaseTypeExporter.parseItem(stockTemplateLink, overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
         }
         entries.add(createCustom());
 
@@ -36,10 +40,10 @@ public class VehicleStockTemplateExporter extends BaseExporter {
     }
 
     private static JSONObject createCustom() {
-        return VehicleStockTemplate.create("Custom").toJSON();
+        return VehicleBaseType.create("Custom").toJSON();
     }
 
-    private static List<JSONObject> parseItem(String itemLink, boolean overwrite) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -52,7 +56,7 @@ public class VehicleStockTemplateExporter extends BaseExporter {
 
         Elements tables = doc.select("table.wikitable:has(caption)");
 
-        Map<String, VehicleStockTemplate> templates = new HashMap<>();
+        Map<String, JSONy> templates = new HashMap<>();
         for (Element table : tables) {
             List<String> headers = getHeaders(table);
 
@@ -66,7 +70,7 @@ public class VehicleStockTemplateExporter extends BaseExporter {
                 }
                 List<String> rowValues = row.select("td").stream().map(element -> element.text().trim()).collect(Collectors.toList());
                 String templateName = rowValues.get(templateNameIndex);
-                VehicleStockTemplate template = templates.computeIfAbsent(templateName, tn -> VehicleStockTemplate.create(tn).withProvided(Attribute.create("vehicleSubType", mapSubtype(tn))));
+                VehicleBaseType template = (VehicleBaseType) templates.computeIfAbsent(templateName, tn -> VehicleBaseType.create(tn).withProvided(Attribute.create(AttributeKey.VEHICLE_SUB_TYPE, mapSubtype(tn))));
 
                 for (int i = 0; i < headers.size(); i++) {
                     if (i == templateNameIndex) {
@@ -80,37 +84,37 @@ public class VehicleStockTemplateExporter extends BaseExporter {
                             template.withProvided(getProvidedItemOrChoiceOfProvidedItemsInList(value, "/", "Select an available size"));
                             break;
                         case "STRENGTH":
-                            template.withProvided(Attribute.create("baseStrength", value));
+                            template.withProvided(Attribute.create(AttributeKey.BASE_STRENGTH, value));
                             break;
                         case "DEXTERITY":
-                            template.withProvided(Attribute.create("baseDexterity", value));
+                            template.withProvided(Attribute.create(AttributeKey.BASE_DEXTERITY, value));
                             break;
                         case "INTELLIGENCE":
-                            template.withProvided(Attribute.create("baseIntelligence", value));
+                            template.withProvided(Attribute.create(AttributeKey.BASE_INTELLIGENCE, value));
                             break;
                         case "SPEED CHARACTER SCALE":
-                            template.withProvided(Attribute.create("speedCharacterScale", value));
+                            template.withProvided(Attribute.create(AttributeKey.SPEED_CHARACTER_SCALE, value));
                             break;
                         case "SPEED STARSHIP SCALE":
-                            template.withProvided(Attribute.create("speedStarshipScale", value));
+                            template.withProvided(Attribute.create(AttributeKey.SPEED_STARSHIP_SCALE, value));
                             break;
                         case "HIT POINTS":
-                            template.withProvided(Attribute.create("hitPointEq", value));
+                            template.withProvided(Attribute.create(AttributeKey.HIT_POINT_EQ, value));
                             break;
                         case "DR":
-                            template.withProvided(Attribute.create("damageThresholdBonus", value));
+                            template.withProvided(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, value));
                             break;
                         case "ARMOR":
-                            template.withProvided(Attribute.create("armorReflexDefenseBonus", value));
+                            template.withProvided(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, value));
                             break;
                         case "COST":
                             template.withCost(value);
                             break;
                         case "CREW":
-                            template.withProvided(Attribute.create("crew", value));
+                            template.withProvided(Attribute.create(AttributeKey.CREW, value));
                             break;
                         case "PASSENGERS":
-                            template.withProvided(Attribute.create("passengers", value));
+                            template.withProvided(Attribute.create(AttributeKey.PASSENGERS, value));
                             break;
                         case "CARGO CAPACITY":
                             String[] toks = value.split(" ");
@@ -119,14 +123,14 @@ public class VehicleStockTemplateExporter extends BaseExporter {
                             if(toks.length > 1) {
                                 unit = toks[1];
                             }
-                            template.withProvided(Attribute.create("cargoCapacity", toString(getKilograms(toks[0], unit))));
+                            template.withProvided(Attribute.create(AttributeKey.CARGO_CAPACITY, toString(getKilograms(toks[0], unit))));
                             break;
                         case "CONSUMABLES":
-                            template.withProvided(Attribute.create("consumables", value));
+                            template.withProvided(Attribute.create(AttributeKey.CONSUMABLES, value));
                             break;
                         case "EMPLACEMENT POINTS":
                         case "UNUSED EMPLACEMENT POINTS":
-                            template.withProvided(Attribute.create("emplacementPoints", value));
+                            template.withProvided(Attribute.create(AttributeKey.EMPLACEMENT_POINTS, value));
                             break;
                     }
                 }
@@ -135,7 +139,7 @@ public class VehicleStockTemplateExporter extends BaseExporter {
         }
 
 
-        return templates.values().stream().map(VehicleStockTemplate::toJSON).collect(Collectors.toList());
+        return templates.values();
     }
 
     private static String mapSubtype(String tn) {

@@ -6,8 +6,12 @@ import org.json.JSONObject;
 
 class RangePrerequisite extends Prerequisite
 {
-    private String low;
-    private String high;
+    private final String low;
+    private final String high;
+
+    public static Prerequisite range(String text, String type, String low, String high){
+        return new RangePrerequisite(text, type, low, high);
+    }
 
     public RangePrerequisite(String text, String type, String low, String high)
     {

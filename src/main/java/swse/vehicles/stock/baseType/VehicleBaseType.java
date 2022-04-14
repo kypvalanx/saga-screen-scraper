@@ -1,23 +1,23 @@
-package swse.vehicles.stock.templates;
+package swse.vehicles.stock.baseType;
 
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-public class VehicleStockTemplate  extends FoundryItem<VehicleStockTemplate> implements Copyable<VehicleStockTemplate> {
+public class VehicleBaseType extends FoundryItem<VehicleBaseType> implements Copyable<VehicleBaseType> {
     private String cost;
 
-    public VehicleStockTemplate(String name) {
+    public VehicleBaseType(String name) {
         super(name);
     }
 
-    public static VehicleStockTemplate create(String name) {
-        return new VehicleStockTemplate(name);
+    public static VehicleBaseType create(String name) {
+        return new VehicleBaseType(name);
     }
 
     @Override
-    public VehicleStockTemplate copy() {
+    public VehicleBaseType copy() {
         return null;
     }
 
@@ -26,14 +26,14 @@ public class VehicleStockTemplate  extends FoundryItem<VehicleStockTemplate> imp
     public JSONObject toJSON(){
         JSONObject json = super.toJSON();
         JSONObject data = json.getJSONObject("data");
-        json.put("type", "vehicleTemplate");
+        json.put("type", "vehicleBaseType");
 
         data.put("cost", cost);
 
         return json;
     }
 
-    public VehicleStockTemplate withCost(String cost) {
+    public VehicleBaseType withCost(String cost) {
         this.cost = cost;
         return this;
     }

@@ -25,10 +25,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.character_class.StartingFeats;
 import swse.common.Attribute;
+import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Category;
 import swse.common.Choice;
 import swse.common.ItemType;
+import swse.common.JSONy;
 import swse.common.Option;
 import swse.common.ProvidedItem;
 import static swse.util.Util.printUnique;
@@ -38,10 +40,6 @@ public class SpeciesExporter extends BaseExporter {
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\species.json";
     public static final String ROOT = "G:/FoundryVTT/Data";
     public static final List<String> DUMMY_CATEGORYS = List.of("Damage Reduction", "Conditional Bonus Feat", "Natural Armor", "Bonus Class Skill", "Species");
-
-    public static Set<String> allCategories = new HashSet();
-    public static Set<String> keys = new HashSet();
-    private static final List<String> allSpecies = new ArrayList<>();
     public static final Pattern BONUS_FEAT_PATTERN = Pattern.compile("gain one bonus Feat at 1st level");
     public static final Pattern DAMAGE_REDUCTION = Pattern.compile("Damage Reduction (\\d*)");
     private static List<Object> defaultDroidUnarmedDamage;
@@ -55,11 +53,18 @@ public class SpeciesExporter extends BaseExporter {
 
         List<JSONObject> entries = new ArrayList<>();
         for (String itemLink : speciesLinks) {
-            entries.addAll(readItemMenuPage(itemLink, true));
+            entries.addAll(readItemMenuPage(itemLink, false));
             drawProgressBar(entries.size() * 100.0 / 345.0);
         }
         System.out.println("processed "+ entries.size() + " of 345");
         System.out.println("species with auto languages " + languages);
+
+        List<String> names = new LinkedList<>();
+        for(JSONObject entry : entries){
+            names.add((String) entry.get("name"));
+        }
+
+        System.out.println("List.of(\"" + String.join("\", \"", names) + "\")");
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }
@@ -93,10 +98,13 @@ public class SpeciesExporter extends BaseExporter {
             });
         });
 
-        return hrefs.stream().flatMap((Function<String, Stream<JSONObject>>) itemLink -> parseItem(itemLink, overwrite).stream()).collect(Collectors.toList());
+        final SpeciesExporter speciesExporter = new SpeciesExporter();
+
+        return hrefs.stream().flatMap((Function<String, Stream<JSONy>>) itemLink -> speciesExporter
+                .parseItem(itemLink, overwrite).stream()).map(item ->item.toJSON()).collect(Collectors.toList());
     }
 
-    private static List<JSONObject> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -112,6 +120,10 @@ public class SpeciesExporter extends BaseExporter {
 
         String speciesName = headingElements.first().text();
 
+        if(speciesName.equals("t'landa Til")){
+            speciesName = "T'landa Til";
+        }
+
         if ("home".equals(speciesName)) {
             return new ArrayList<>();
         }
@@ -119,8 +131,6 @@ public class SpeciesExporter extends BaseExporter {
         if (speciesName.contains("Droid Models")) {
             speciesName = speciesName.replace("Droid Models", "Droid Model");
         }
-
-        allSpecies.add(speciesName);
 
         Element content = doc.getElementsByClass("mw-parser-output").first();
 
@@ -155,7 +165,7 @@ public class SpeciesExporter extends BaseExporter {
                 .withProvided(getManualBonusItems(speciesName))
                 .withProvided(getBonusItems(content));
 
-        return Lists.newArrayList(species.toJSON());
+        return Lists.newArrayList(species);
     }
 
     private static Collection<Object> getDroidUnarmedDamage(String speciesName) {
@@ -168,46 +178,46 @@ public class SpeciesExporter extends BaseExporter {
         }
         defaultDroidUnarmedDamage = new ArrayList<>();
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Diminutive"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Tiny"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Tiny"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Medium"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Diminutive"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Tiny"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Tiny"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Small"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Medium"));
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d2", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Tiny"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d2", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d2", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d2", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d2", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Large"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Tiny"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Small"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Small"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Medium"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Large"));
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d3", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d3", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d3", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d3", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d3", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Huge"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Small"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Medium"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Medium"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Large"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Huge"));
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d4", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d4", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d4", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d4", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d4", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Gargantuan"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Medium"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Large"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Large"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Huge"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Gargantuan"));
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d6", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d6", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d6", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d6", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d6", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Colossal"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Large"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Huge"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Huge"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Gargantuan"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Colossal"));
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d8", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d8", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d8", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 1d8", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Colossal"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Huge"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Gargantuan"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Gargantuan"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Colossal"));
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 2d6", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 2d6", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Colossal"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 2d6", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Colossal"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d6)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Gargantuan"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d6)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Colossal"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d6)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Colossal"));
 
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage 2d8", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Colossal"));
+        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d8)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Colossal"));
 
         return defaultDroidUnarmedDamage;
     }
@@ -283,9 +293,9 @@ public class SpeciesExporter extends BaseExporter {
                         provided.add(new Choice("After the fall of the Empire, Dressellese are also fluent in Bothese.")
                                 .withOption("Before the fall of the Empire", new Option())
                                 .withOption("After the fall of the Empire", new Option()
-                                        .withAttribute(Attribute.create("speaks", "Bothese"))
-                                        .withAttribute(Attribute.create("reads", "Bothese"))
-                                        .withAttribute(Attribute.create("writes", "Bothese")))
+                                        .withAttribute(Attribute.create(AttributeKey.SPEAKS, "Bothese"))
+                                        .withAttribute(Attribute.create(AttributeKey.READS, "Bothese"))
+                                        .withAttribute(Attribute.create(AttributeKey.WRITES, "Bothese")))
                         );
                     }
 
@@ -294,40 +304,40 @@ public class SpeciesExporter extends BaseExporter {
                     Set<String> langs = Arrays.stream(m.group(1).split(" and ")).filter(lang -> null != lang && !lang.isBlank()).map(String::trim).collect(Collectors.toSet());
                     for(String s : langs){
                         if("Basic, Chev,".equals(s)){
-                            provided.add(Attribute.create("speaks", "Basic"));
-                            provided.add(Attribute.create("reads", "Basic"));
-                            provided.add(Attribute.create("writes", "Basic"));
+                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Basic"));
+                            provided.add(Attribute.create(AttributeKey.READS, "Basic"));
+                            provided.add(Attribute.create(AttributeKey.WRITES, "Basic"));
 
-                            provided.add(Attribute.create("speaks", "Chev"));
-                            provided.add(Attribute.create("reads", "Chev"));
-                            provided.add(Attribute.create("writes", "Chev"));
+                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Chev"));
+                            provided.add(Attribute.create(AttributeKey.READS, "Chev"));
+                            provided.add(Attribute.create(AttributeKey.WRITES, "Chev"));
                         } else if("Basic, Huttese,".equals(s)){
-                            provided.add(Attribute.create("speaks", "Basic"));
-                            provided.add(Attribute.create("reads", "Basic"));
-                            provided.add(Attribute.create("writes", "Basic"));
+                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Basic"));
+                            provided.add(Attribute.create(AttributeKey.READS, "Basic"));
+                            provided.add(Attribute.create(AttributeKey.WRITES, "Basic"));
 
-                            provided.add(Attribute.create("speaks", "Huttese"));
-                            provided.add(Attribute.create("reads", "Huttese"));
-                            provided.add(Attribute.create("writes", "Huttese"));
+                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Huttese"));
+                            provided.add(Attribute.create(AttributeKey.READS, "Huttese"));
+                            provided.add(Attribute.create(AttributeKey.WRITES, "Huttese"));
                         } else if("Nikto, as well as either Basic or Huttese".equals(s)){
-                            provided.add(Attribute.create("speaks", "Nikto"));
-                            provided.add(Attribute.create("reads", "Nikto"));
-                            provided.add(Attribute.create("writes", "Nikto"));
+                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Nikto"));
+                            provided.add(Attribute.create(AttributeKey.READS, "Nikto"));
+                            provided.add(Attribute.create(AttributeKey.WRITES, "Nikto"));
 
                             provided.add(new Choice("Select an available language")
                                     .withOption("Basic", new Option()
-                                            .withAttribute(Attribute.create("speaks", "Basic"))
-                                            .withAttribute(Attribute.create("reads", "Basic"))
-                                            .withAttribute(Attribute.create("writes", "Basic")))
+                                            .withAttribute(Attribute.create(AttributeKey.SPEAKS, "Basic"))
+                                            .withAttribute(Attribute.create(AttributeKey.READS, "Basic"))
+                                            .withAttribute(Attribute.create(AttributeKey.WRITES, "Basic")))
                                     .withOption("Huttese", new Option()
-                                            .withAttribute(Attribute.create("speaks", "Huttese"))
-                                            .withAttribute(Attribute.create("reads", "Huttese"))
-                                            .withAttribute(Attribute.create("writes", "Huttese")))
+                                            .withAttribute(Attribute.create(AttributeKey.SPEAKS, "Huttese"))
+                                            .withAttribute(Attribute.create(AttributeKey.READS, "Huttese"))
+                                            .withAttribute(Attribute.create(AttributeKey.WRITES, "Huttese")))
                             );
                         } else {
-                            provided.add(Attribute.create("speaks", s));
-                            provided.add(Attribute.create("reads", s));
-                            provided.add(Attribute.create("writes", s));
+                            provided.add(Attribute.create(AttributeKey.SPEAKS, s));
+                            provided.add(Attribute.create(AttributeKey.READS, s));
+                            provided.add(Attribute.create(AttributeKey.WRITES, s));
                         }
                         //printUnique(s);
                         //do i want 3 systems?
@@ -371,32 +381,32 @@ public class SpeciesExporter extends BaseExporter {
         switch (speciesName) {
             case "Medical Droid":
             case "1st-Degree Droid Model":
-                attributes.add(Attribute.create("bonusTalentTree", "1st-Degree Droid Talent Tree"));
+                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "1st-Degree Droid Talent Tree"));
                 break;
             case "Astromech Droid":
             case "Mechanic Droid":
             case "2nd-Degree Droid Model":
-                attributes.add(Attribute.create("bonusTalentTree", "2nd-Degree Droid Talent Tree"));
+                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "2nd-Degree Droid Talent Tree"));
                 break;
             case "Protocol Droid":
             case "Service Droid":
             case "3rd-Degree Droid Model":
-                attributes.add(Attribute.create("bonusTalentTree", "3rd-Degree Droid Talent Tree"));
+                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "3rd-Degree Droid Talent Tree"));
                 break;
             case "Battle Droid":
             case "Probe Droid":
             case "4th-Degree Droid Model":
-                attributes.add(Attribute.create("bonusTalentTree", "4th-Degree Droid Talent Tree"));
+                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "4th-Degree Droid Talent Tree"));
                 break;
             case "Labor Droid":
             case "5th-Degree Droid Model":
-                attributes.add(Attribute.create("bonusTalentTree", "5th-Degree Droid Talent Tree"));
+                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "5th-Degree Droid Talent Tree"));
                 break;
 
         }
 
         if (speciesName.contains(" Droid")) {
-            attributes.add(Attribute.create("isDroid", "true"));
+            attributes.add(Attribute.create(AttributeKey.IS_DROID, "true"));
             attributes.add(ProvidedItem.create("Droid Default Appendage Offset", ItemType.TRAIT));
         }
 
@@ -454,23 +464,23 @@ public class SpeciesExporter extends BaseExporter {
         } else if ("Aqualish".equals(speciesName)) {
             Choice choice = new Choice("Select a Subspecies:");
             choice.withOption("None", new Option());
-            choice.withOption("Aquala", new Option().withProvidedItem(ProvidedItem.create("Aquala", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Swim Speed 2", ItemType.TRAIT)));
+            choice.withOption("Aquala", new Option().withProvidedItem(ProvidedItem.create("Aquala", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Swim Speed (2)", ItemType.TRAIT)));
             choice.withOption("Kyuzo", new Option().withProvidedItem(ProvidedItem.create("Kyuzo", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Heightened Agility", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Bonus Trained Skill (Acrobatics)", ItemType.TRAIT)));
             choice.withOption("Quara", new Option().withProvidedItem(ProvidedItem.create("Quara", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Intimidating", ItemType.TRAIT)));
             choice.withOption("Ualaq", new Option().withProvidedItem(ProvidedItem.create("Ualaq", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Darkvision", ItemType.TRAIT)));
             choices.add(choice);
         } else if ("Killik".equals(speciesName)) {
             Choice choice = new Choice("Select a Size:");
-            choice.withOption("Tiny", new Option().withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 6", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+4 Dexterity", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("-4 Strength", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d3)", ItemType.ITEM)));
-            choice.withOption("Small", new Option().withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 6", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+2 Dexterity", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("-2 Strength", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d4)", ItemType.ITEM)));
-            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 6", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
-            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 6", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
-            choice.withOption("Large", new Option().withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 6", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+8 Strength", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+8 Constitution", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("-2 Dexterity", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d8)", ItemType.ITEM)));
-            choice.withOption("Huge", new Option().withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 4", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+16 Strength", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+16 Constitution", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("-4 Dexterity", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (2d6)", ItemType.ITEM)));
-            choice.withOption("Gargantuan", new Option().withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 4", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+24 Strength", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+24 Constitution", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("-4 Dexterity", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (3d6)", ItemType.ITEM)));
-            Option option = new Option().withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed 4", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("+32 Strength", ItemType.TRAIT));
-            option.withProvidedItem(ProvidedItem.create("+32 Constitution", ItemType.TRAIT));
-            choice.withOption("Colossal", option.withProvidedItem(ProvidedItem.create("-4 Dexterity", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (4d6)", ItemType.ITEM)));
+            choice.withOption("Tiny", new Option().withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d3)", ItemType.ITEM)));
+            choice.withOption("Small", new Option().withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d4)", ItemType.ITEM)));
+            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
+            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
+            choice.withOption("Large", new Option().withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+8)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+8)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d8)", ItemType.ITEM)));
+            choice.withOption("Huge", new Option().withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+16)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+16)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (2d6)", ItemType.ITEM)));
+            choice.withOption("Gargantuan", new Option().withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+24)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+24)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (3d6)", ItemType.ITEM)));
+            Option option = new Option().withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+32)", ItemType.TRAIT));
+            option.withProvidedItem(ProvidedItem.create("Constitution (+32)", ItemType.TRAIT));
+            choice.withOption("Colossal", option.withProvidedItem(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (4d6)", ItemType.ITEM)));
             choices.add(choice);
         }
 
@@ -498,7 +508,7 @@ public class SpeciesExporter extends BaseExporter {
     private static List<Object> getManualBonusItems(String speciesName) {
         List<Object> attributes = new ArrayList<>();
         for (String item : getBonusItemList(speciesName)) {
-            attributes.add(ProvidedItem.create(item, ItemType.ITEM));
+            attributes.add(ProvidedItem.create(item, ItemType.ITEM).withEquip("equipped"));
         }
         return attributes;
     }
@@ -560,6 +570,4 @@ public class SpeciesExporter extends BaseExporter {
 
         return filename;
     }
-
-
 }
