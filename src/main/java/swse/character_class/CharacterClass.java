@@ -11,7 +11,7 @@ class CharacterClass extends FoundryItem<CharacterClass> implements Copyable<Cha
 
     private CharacterClass(String name)
     {
-        super(name);
+        super(name, "class");
     }
 
     public static CharacterClass create(String name){

@@ -13,7 +13,7 @@ public class Level extends FoundryItem<Level>  implements Copyable<Level> {
     private Level previousLevel;
 
     public Level(int level) {
-        super("");
+        super(level+"", "level");
         this.level = level;
     }
 

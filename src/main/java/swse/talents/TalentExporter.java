@@ -154,9 +154,9 @@ public class TalentExporter extends BaseExporter
                     //allPrerequisites.addAll(prerequisite.getAll());
                 } else{
                     if(talentDescription == null){
-                        talentDescription = text;
+                        talentDescription = getDescription(element);
                     }else {
-                        talentDescription = talentDescription.concat("<br><br>").concat(text);
+                        talentDescription = talentDescription.concat("<br><br>").concat( getDescription(element));
                     }
                 }
             }

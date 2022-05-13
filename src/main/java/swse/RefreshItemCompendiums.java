@@ -1,13 +1,16 @@
 package swse;
 
 import swse.affiliation.AffiliationExporter;
+import swse.background.BackgroundExporter;
 import swse.character_class.CharacterClassExporter;
+import swse.destiny.DestinyExporter;
 import swse.feat.FeatExporter;
 import swse.forcePowers.ForcePowersExporter;
 import swse.forceRegimens.ForceRegimensExporter;
 import swse.forceSecrets.ForceSecretsExporter;
 import swse.forceTechniques.TechniquesExporter;
 import swse.item.ItemExporter;
+import swse.language.LanguageExporter;
 import swse.species.SpeciesExporter;
 import swse.talents.TalentExporter;
 import swse.templates.TemplateExporter;
@@ -33,6 +36,9 @@ public class RefreshItemCompendiums
         TraitExporter.main(args);
         VehicleBaseTypeExporter.main(args);
         VehicleSystemsExporter.main(args);
+        LanguageExporter.main(args);
+        BackgroundExporter.main(args);
+        DestinyExporter.main(args);
 
     }
 }

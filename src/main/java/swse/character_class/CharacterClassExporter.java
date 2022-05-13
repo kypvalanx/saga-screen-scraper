@@ -126,7 +126,7 @@ public class CharacterClassExporter extends BaseExporter {
                 .withProvided(getClassChoice(itemName))
                 .withProvided(getClassType(itemName))
                 .withProvided(getProvidedItems(itemName))
-                .withDescription(getDescription(content));
+                .withDescription(content);
 
         return Lists.newArrayList(characterClass);
     }

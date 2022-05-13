@@ -24,6 +24,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 
 public abstract class BaseExporter {
@@ -149,8 +150,16 @@ public abstract class BaseExporter {
 
         content = content.clone();
         content.select("span.mw-editsection").remove();
-        content.select("div.toc").remove();
-        content.select("img,figure").remove();
+        final Elements toc = content.select("div.toc");
+        try {
+            toc.remove();
+        }catch(Exception e){
+            //Ignore
+        }
+        final Elements figure = content.select("img,figure");
+        if(figure.size() > 0) {
+            figure.remove();
+        }
 
         Elements anchors = content.select("a");
         for (Element anchor : anchors) {
@@ -272,6 +281,26 @@ public abstract class BaseExporter {
             numeric /= 1000;
         }
         return numeric;
+    }
+
+    protected static List<Element> getParagraphs(Element content) {
+        List<Element> response = new LinkedList<>();
+        for (Element element : content.children()) {
+            if (element.tag().equals(Tag.valueOf("p"))) {
+                response.add(element);
+            }
+        }
+
+        return response;
+    }
+
+    public static String getAttribute(Element content, String attributeName) {
+        for (Element child : content.children()) {
+            if (child.text().toLowerCase().startsWith(attributeName.toLowerCase())) {
+                return child.text().substring(attributeName.length());
+            }
+        }
+        return null;
     }
 
 

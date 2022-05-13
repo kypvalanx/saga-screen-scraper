@@ -9,7 +9,7 @@ import swse.common.FoundryItem;
 
 class ForceSecret extends FoundryItem<ForceSecret>  implements Copyable<ForceSecret> {
     public ForceSecret(String name) {
-        super(name);
+        super(name, "forceSecret");
     }
 
     public static ForceSecret create(String name) {

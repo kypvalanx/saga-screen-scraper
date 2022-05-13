@@ -7,11 +7,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
+import org.jsoup.nodes.Element;
+import static swse.common.BaseExporter.getDescription;
 import swse.item.Mode;
 import swse.prerequisite.Prerequisite;
-import static swse.util.Util.cloneList;
 
 public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
+    protected final String type;
     protected String name;
     protected String description = "";
     protected Prerequisite prerequisite;
@@ -24,24 +26,25 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     protected String availability;
     protected String subtype;
 
-    public FoundryItem(String name) {
+    public FoundryItem(String name, String type) {
         this.name = name;
         this.choices = new ArrayList<>();
         this.categories = new ArrayList<>();
         this.attributes =  new ArrayList<>();
         this.providedItems =  new ArrayList<>();
+        this.type = type;
     }
 
-    public FoundryItem(FoundryItem<?> foundryItem) {
-        this.name = foundryItem.name;
-        this.description = foundryItem.description;
-        this.prerequisite = foundryItem.prerequisite.copy();
-        this.image = foundryItem.image;
-        this.choices = cloneList(foundryItem.choices);
-        this.categories = cloneList(foundryItem.categories);
-        this.attributes = cloneList(foundryItem.attributes);
-        this.providedItems = cloneList(foundryItem.providedItems);
-    }
+//    public FoundryItem(FoundryItem<?> foundryItem) {
+//        this.name = foundryItem.name;
+//        this.description = foundryItem.description;
+//        this.prerequisite = foundryItem.prerequisite.copy();
+//        this.image = foundryItem.image;
+//        this.choices = cloneList(foundryItem.choices);
+//        this.categories = cloneList(foundryItem.categories);
+//        this.attributes = cloneList(foundryItem.attributes);
+//        this.providedItems = cloneList(foundryItem.providedItems);
+//    }
 
     public static JSONObject constructModes(List<Mode> modes) {
         final JSONObject modeObjects = new JSONObject();
@@ -70,9 +73,11 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     @Nonnull
     @Override
     public JSONObject toJSON(){
+        preJSON();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         jsonObject.put("img", image);
+        jsonObject.put("type", type);
 
         JSONObject data = new JSONObject();
         data.put("description", description);
@@ -90,6 +95,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
 
         data.put("attributes", createAttributes(attributes.stream().filter(Objects::nonNull).map(Attribute::toJSON).collect(Collectors.toList())));
 
+        //printUnique("------ "+type + " - " + subtype);
         jsonObject.put("data", data);
         return jsonObject;
     }
@@ -168,6 +174,10 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         return (T) this;
     }
 
+    protected void preJSON() {
+        //if(modes.stream().filter((mode) -> {})){}
+    }
+
     public T withProvided(Object object) {
         return withProvided(object, false);
     }
@@ -203,6 +213,12 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     public T withDescription(String description)
     {
         this.description += description;
+        return (T) this;
+    }
+
+    public T withDescription(Element content)
+    {
+        this.description += getDescription(content);
         return (T) this;
     }
 

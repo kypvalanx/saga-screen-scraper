@@ -33,7 +33,6 @@ import swse.common.ItemType;
 import swse.common.JSONy;
 import swse.common.Option;
 import swse.common.ProvidedItem;
-import static swse.util.Util.printUnique;
 
 public class SpeciesExporter extends BaseExporter {
     public static final String IMAGE_FOLDER = "systems/swse/icon/species";
@@ -147,7 +146,7 @@ public class SpeciesExporter extends BaseExporter {
 
 
         Species species = Species.create(speciesName)
-                .withDescription(getDescription(content))
+                .withDescription(content)
                 .withImage(imageFile)
                 .withProvided(categories)
                 .withProvided(addTraitsFromCategories(categories, speciesName))
@@ -299,7 +298,7 @@ public class SpeciesExporter extends BaseExporter {
                         );
                     }
 
-                    printUnique(complex); //child.text());
+                    //printUnique(complex); //child.text());
                 }
                     Set<String> langs = Arrays.stream(m.group(1).split(" and ")).filter(lang -> null != lang && !lang.isBlank()).map(String::trim).collect(Collectors.toSet());
                     for(String s : langs){
@@ -544,8 +543,15 @@ public class SpeciesExporter extends BaseExporter {
 
         Choice droidChoice = new Choice("Select the size of your droid's chassis:");
 
-        droidChoice.withOption("Small", new Option().withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)));
-        droidChoice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Fine (GM Only)").withProvidedItem(ProvidedItem.create("Fine", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Diminutive (GM Only)").withProvidedItem(ProvidedItem.create("Diminutive", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Tiny (GM Only)").withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Small").withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Medium").withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Large (GM Only)").withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Huge (GM Only)").withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Gargantuan (GM Only)").withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Colossal (GM Only)").withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT)));
         choices.add(droidChoice);
         return choices;
     }

@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import swse.prerequisite.AndPrerequisite;
 import swse.prerequisite.Prerequisite;
-import static swse.util.Util.printUnique;
 
 //identifies a trait that should be added as opposed to a complete trait
 public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
@@ -30,7 +29,7 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
 //        if(m.find() && !name.contains("(")){
 //            System.out.println(name + " " + type);
 //        }
-        printUnique("ProvidedItem " + name);
+        //printUnique("ProvidedItem " + name);
         this.name = name;
         this.type = type;
         this.prerequisite = prerequisite;

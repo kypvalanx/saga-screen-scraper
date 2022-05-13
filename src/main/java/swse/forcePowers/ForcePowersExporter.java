@@ -57,7 +57,7 @@ public class ForcePowersExporter extends BaseExporter
 //
         List<JSONy> traditions = new ArrayList<>();
 
-        traditions.add(ForcePower.create(itemName).withDescription(getDescription(content)).withCategories(categories).
+        traditions.add(ForcePower.create(itemName).withDescription(content).withCategories(categories).
                 withProvided(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, "true")));
 
         return traditions;

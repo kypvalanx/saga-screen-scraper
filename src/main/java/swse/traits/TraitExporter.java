@@ -19,8 +19,10 @@ import swse.common.Attribute;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.BonusFeat;
+import swse.common.Choice;
 import swse.common.ItemType;
 import swse.common.JSONy;
+import swse.common.Option;
 import swse.common.ProvidedItem;
 import swse.common.Regex;
 import swse.util.Timer;
@@ -131,6 +133,11 @@ public class TraitExporter extends BaseExporter {
 
     private static Set<JSONObject> getManualAbilities() {
         Set<JSONObject> response = new HashSet<>();
+
+        response.add(Trait.create("GM Bonus").withDescription("Grants a bonus outside the usual character building mechanics")
+                .withProvided(Choice.create("Select a bonus")
+                        .withOption("AVAILABLE_GM_BONUSES", new Option().withPayload("AVAILABLE_GM_BONUSES")))
+                .withProvided(Choice.create("Bonus Size:").withType(Choice.Type.INTEGER).withPayload("#integer#")).toJSON());
 
         response.add(Trait.create("Starship Armor").withDescription("").withProvided(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, "#payload#")).toJSON());
 
@@ -404,7 +411,7 @@ public class TraitExporter extends BaseExporter {
         List<JSONy> trait = new ArrayList<>();
 
         trait.add(Trait.create(itemName)
-                .withDescription(getDescription(content))
+                .withDescription(content)
                 .withProvided(categories)
                 .withProvided(getBonusFeat(itemName, content))
                 .withProvided(getClassSkill(itemName))

@@ -23,7 +23,7 @@ public class NotPrerequisite extends Prerequisite {
     }
 
     public NotPrerequisite(Prerequisite child) {
-        super("Not" + child.getPlainText(), "NOT");
+        super("Not " + child.getPlainText(), "NOT");
         this.child = child;
     }
 

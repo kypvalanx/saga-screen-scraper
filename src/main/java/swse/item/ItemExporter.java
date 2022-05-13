@@ -534,9 +534,8 @@ public class ItemExporter extends BaseExporter {
             return jsonObjects;
         }
 
-        Item item = Item.create(itemName)
-                .withDescription(content.html())
-                .withType(itemType)
+        Item item = Item.create(itemName, itemType)
+                .withDescription(content)
                 .withSubtype(itemSubType)
                 .withProvided(attributes)
                 .withDamageDie(damageDie)
@@ -776,10 +775,12 @@ public class ItemExporter extends BaseExporter {
         if ("DC-17m IWS".equals(itemName)) {
             attributes.add(Mode.create("Blaster Rifle", "POWER", List.of(
                     Attribute.create(AttributeKey.DAMAGE, "3d8"),
-                    Attribute.create(AttributeKey.STUN_DAMAGE, "3d8"),
+                    Attribute.create(AttributeKey.DAMAGE_TYPE, "Energy"),
                     Attribute.create(AttributeKey.AMMO, "Power Pack:60"),
                     Attribute.create(AttributeKey.AMMO, "Gas Canister:300")
-            ), List.of(MODE_SINGLE_SHOT, MODE_AUTOFIRE)));
+            ), List.of(MODE_SINGLE_SHOT, MODE_AUTOFIRE, Mode.create("Stun", List.of(
+                    Attribute.create(AttributeKey.DAMAGE, "3d8").isOverride(),
+                    Attribute.create(AttributeKey.DAMAGE_TYPE, "Stun").isOverride())))));
             attributes.add(Mode.create("Sniper Rifle", "POWER", List.of(
                     Attribute.create(AttributeKey.DAMAGE, "3d8"),
                     Attribute.create(AttributeKey.AMMO, "Sniper Power Pack:5:100:0.5")
@@ -790,9 +791,15 @@ public class ItemExporter extends BaseExporter {
 
             ), List.of(MODE_SINGLE_SHOT)));
             attributes.add(Mode.create("PEP Laser", "POWER", List.of(
-                    Attribute.create(AttributeKey.STUN_DAMAGE, "3d6"),
+                    Attribute.create(AttributeKey.DAMAGE, "3d6"),
+                    Attribute.create(AttributeKey.DAMAGE_TYPE, "Stun"),
                     Attribute.create(AttributeKey.AMMO, "PEP Cartridge:15:100:0.5")
             ), List.of(MODE_SINGLE_SHOT)));
+        }
+        if("Credit Chip".equals(itemName)){
+            attributes.add(Attribute.create(AttributeKey.CREDIT, 0));
+            attributes.add(Attribute.create(AttributeKey.CREDIT_TYPE, "CREDIT"));
+            attributes.add(Attribute.create(AttributeKey.CREDIT_ENTITY_TYPE, "CONTAINER"));
         }
 
         return attributes;
@@ -895,21 +902,21 @@ public class ItemExporter extends BaseExporter {
         //printUnique(subType);
         if (List.of("advanced melee weapons", "exotic melee weapons", "simple melee weapons", "simple ranged weapons",
                 "exotic ranged weapons", "pistols", "rifles", "lightsabers", "heavy weapons", "grenades", "mines", "explosives").contains(subType.toLowerCase())) {
-            return "Weapon";
+            return "weapon";
         } else if (List.of("light armor", "medium armor", "heavy armor", "droid accessories (droid armor)").contains(subType.toLowerCase())) {
-            return "Armor";
+            return "armor";
         } else if (List.of("weapons upgrade", "armor upgrade").contains(subType.toLowerCase())) {
-            return "Upgrade";
+            return "upgrade";
         }
 
-        return "Equipment";
+        return "equipment";
     }
 
 
     private static String standardizeTypes(String trim) {
         if (trim == null) {
             // printUnique(Context.getValue("name"));
-            return "Equipment";
+            return "equipment";
         }
         trim = trim.trim();
         if ("implant".equalsIgnoreCase(trim)) {
@@ -977,24 +984,22 @@ public class ItemExporter extends BaseExporter {
         List<JSONObject> items = new ArrayList<>();
 
         String sheildGeneratorDescription = "";
-        items.add(Item.create("Shield Generator (SR 5)")
+        items.add(Item.create("Shield Generator (SR 5)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 5))
                 .withCost("2500 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
                 .toJSON());
 
         final String SR10Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
-        items.add(Item.create("Shield Generator (SR 10)")
+        items.add(Item.create("Shield Generator (SR 10)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 10))
                 .withCost("5000 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
                 .withPrerequisite(new OrPrerequisite(SR10Prerequisite,
                         List.of(
@@ -1008,13 +1013,12 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         final String SR15Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
-        items.add(Item.create("Shield Generator (SR 15)")
+        items.add(Item.create("Shield Generator (SR 15)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 15))
                 .withCost("7500 x Cost Factor")
                 .withWeight("(30 x Cost Factor) kg")
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
                 .withPrerequisite(new OrPrerequisite(SR15Prerequisite,
                         List.of(
@@ -1027,13 +1031,12 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         final String SR20Prerequisite = "Only Droids of Large or bigger size can be equipped with a SR 20 generator.";
-        items.add(Item.create("Shield Generator (SR 20)")
+        items.add(Item.create("Shield Generator (SR 20)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 20))
                 .withCost("10000 x Cost Factor")
                 .withWeight("(40 x Cost Factor) kg")
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
                 .withPrerequisite(new OrPrerequisite(SR20Prerequisite,
                         List.of(
@@ -1044,33 +1047,29 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Translator Unit (DC 20)")
+        items.add(Item.create("Translator Unit (DC 20)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("200")
                 .withWeight("1 kg")
                 .withProvided(Attribute.create(AttributeKey.TRANSLATE_DC, 20)).toJSON());
 
-        items.add(Item.create("Translator Unit (DC 15)")
+        items.add(Item.create("Translator Unit (DC 15)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("500")
                 .withWeight("2 kg")
                 .withProvided(Attribute.create(AttributeKey.TRANSLATE_DC, 15)).toJSON());
 
-        items.add(Item.create("Translator Unit (DC 10)")
+        items.add(Item.create("Translator Unit (DC 10)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("1000")
                 .withWeight("4 kg")
                 .withProvided(Attribute.create(AttributeKey.TRANSLATE_DC, 10)).toJSON());
 
-        items.add(Item.create("Translator Unit (DC 5)")
+        items.add(Item.create("Translator Unit (DC 5)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("2000")
                 .withWeight("8 kg")
@@ -1078,9 +1077,8 @@ public class ItemExporter extends BaseExporter {
 
 
         final String hardenedSystem = "Droids of Large or greater size can be designed to have internal armor and redundant systems that enable it to continue functioning despite heavy damage";
-        items.add(Item.create("Hardened Systems x2")
+        items.add(Item.create("Hardened Systems x2", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("1000 x Cost Factor")
                 .withWeight("(100 x Cost Factor) kg")
@@ -1096,9 +1094,8 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Hardened Systems x3")
+        items.add(Item.create("Hardened Systems x3", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("2500 x Cost Factor")
                 .withWeight("(250 x Cost Factor) kg")
@@ -1114,9 +1111,8 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Hardened Systems x4")
+        items.add(Item.create("Hardened Systems x4", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("4000 x Cost Factor")
                 .withWeight("(400 x Cost Factor) kg")
@@ -1132,9 +1128,8 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Hardened Systems x5")
+        items.add(Item.create("Hardened Systems x5", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Equipment")
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("6250 x Cost Factor")
                 .withWeight("(650 x Cost Factor) kg")
@@ -1150,9 +1145,8 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Plasteel Shell")
+        items.add(Item.create("Plasteel Shell", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("400 x Cost Factor")
@@ -1162,9 +1156,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "5"))
                 .toJSON());
 
-        items.add(Item.create("Quadanium Shell")
+        items.add(Item.create("Quadanium Shell", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("900 x Cost Factor")
@@ -1174,9 +1167,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
                 .toJSON());
 
-        items.add(Item.create("Durasteel Shell")
+        items.add(Item.create("Durasteel Shell", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("1600 x Cost Factor")
@@ -1186,9 +1178,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
                 .toJSON());
 
-        items.add(Item.create("Quadanium Plating")
+        items.add(Item.create("Quadanium Plating", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("2500 x Cost Factor")
@@ -1198,9 +1189,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
-        items.add(Item.create("Durasteel Plating")
+        items.add(Item.create("Durasteel Plating", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("3600 x Cost Factor")
@@ -1210,9 +1200,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
-        items.add(Item.create("Quadanium Battle Armor")
+        items.add(Item.create("Quadanium Battle Armor", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("4900 x Cost Factor")
@@ -1222,9 +1211,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
-        items.add(Item.create("Duranium Plating")
+        items.add(Item.create("Duranium Plating", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("6400 x Cost Factor")
@@ -1234,9 +1222,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
                 .toJSON());
 
-        items.add(Item.create("Durasteel Battle Armor")
+        items.add(Item.create("Durasteel Battle Armor", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("9600 x Cost Factor")
@@ -1246,9 +1233,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
-        items.add(Item.create("Mandalorian Steel Shell")
+        items.add(Item.create("Mandalorian Steel Shell", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("8100 x Cost Factor")
@@ -1258,9 +1244,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
-        items.add(Item.create("Duranium Battle Armor")
+        items.add(Item.create("Duranium Battle Armor", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("10000 x Cost Factor")
@@ -1270,9 +1255,8 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
                 .toJSON());
 
-        items.add(Item.create("Neutronium Plating")
+        items.add(Item.create("Neutronium Plating", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
-                .withType("Armor")
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("12100 x Cost Factor")

@@ -387,11 +387,11 @@ public class VehicleSystemsExporter extends BaseExporter {
                 if (!cursor.text().contains(":") && !cursor.text().contains("*")  && cursor.text().length() > 100) {
                     found = true;
                     if(isVariant){
-                        current.withDescription(cursor.text());
+                        current.withDescription(cursor);
 
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            variant.withDescription(cursor.text());
+                            variant.withDescription(cursor);
                         }
 
                     }
@@ -529,16 +529,19 @@ public class VehicleSystemsExporter extends BaseExporter {
                 break;
             case "Stun Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create(AttributeKey.STUN_DAMAGE, "7d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "7d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE_TYPE, "Stun"));
                 break;
             case "Suppression Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create(AttributeKey.STUN_DAMAGE, "4d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "4d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE_TYPE, "Stun"));
                 system.withProvided(Attribute.create(AttributeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "Antivehicle Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Attribute.create(AttributeKey.STUN_DAMAGE, "5d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE, "5d10x2"));
+                system.withProvided(Attribute.create(AttributeKey.DAMAGE_TYPE, "Stun"));
                 break;
             case "Interceptor Missile":
                 system.withSubtype("Weapon Systems");

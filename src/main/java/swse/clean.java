@@ -2,7 +2,6 @@ package swse;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static swse.util.Util.printUnique;
 
 public class clean
 {
@@ -590,7 +589,7 @@ public class clean
         Matcher m = p.matcher(s);
 
         while(m.find()){
-            printUnique(m.group(1));
+            //printUnique(m.group(1));
     }
 
     }

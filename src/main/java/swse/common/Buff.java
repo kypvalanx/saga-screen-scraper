@@ -6,7 +6,7 @@ import org.json.JSONObject;
 public class Buff extends FoundryItem<Buff> implements JSONy, Copyable<Buff>{
 
     public Buff(String name) {
-        super(name);
+        super(name, "buff");
     }
 
     public static Buff create(String name) {

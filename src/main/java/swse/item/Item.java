@@ -11,25 +11,23 @@ import swse.common.FoundryItem;
 import static swse.util.Util.cloneList;
 
 class Item extends FoundryItem<Item> implements Copyable<Item> {
-    private String type;
     private String size;
     private String cost;
     private String weight;
     private List<Mode> modes = new LinkedList<>();
 
-    public static Item create(String itemName) {
-        return new Item(itemName);
+    public static Item create(String itemName, String type) {
+        return new Item(itemName, type);
     }
 
-    public Item(String name) {
-        super(name);
+    public Item(String name, String type) {
+        super(name, type);
     }
 
     @Nonnull
     public JSONObject toJSON() {
         JSONObject json = super.toJSON();
         JSONObject data = json.getJSONObject("data");
-        json.put("type", type.toLowerCase());
 
         data
                 .put("size", size)
@@ -40,11 +38,6 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
         return json;
     }
 
-
-    public Item withType(String type) {
-        this.type = type;
-        return this;
-    }
 
     public Item withCost(String cost) {
         this.cost = cost;
@@ -63,13 +56,11 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
 
 
     public Item withSplash(String splash) {
-        this.withProvided(Attribute.create(AttributeKey.SPLASH, splash));
-        return this;
+        return this.withProvided(Attribute.create(AttributeKey.SPLASH, splash));
     }
 
     public Item withHeirloomBonus(String heirloomBonus) {
-        this.withProvided(Attribute.create(AttributeKey.HEIRLOOM_BONUS, heirloomBonus));
-        return this;
+        return this.withProvided(Attribute.create(AttributeKey.HEIRLOOM_BONUS, heirloomBonus));
     }
 
     public Item withSeeAlso(String seeAlso) {
@@ -166,7 +157,7 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
 
     public Item withStunDamageDie(String stunDamageDie) {
         if(stunDamageDie != null) {
-            modes.add(Mode.create("Stun", List.of(Attribute.create(AttributeKey.STUN_DAMAGE, stunDamageDie))));
+            modes.add(Mode.create("Stun", List.of(Attribute.create(AttributeKey.DAMAGE, stunDamageDie).isOverride(), Attribute.create(AttributeKey.DAMAGE_TYPE, "Stun").isOverride())));
         }
         return this;
     }
@@ -212,13 +203,12 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
 //    protected final List<Choice> choices;
     @Override
     public Item copy() {
-        final Item item = new Item(name)
+        final Item item = new Item(name, type)
                 .withDescription(description);
         if (prerequisite != null) {
             item.withPrerequisite(prerequisite.copy());
         }
         item.withImage(image)
-                .withType(type)
                 .withSubtype(subtype)
                 .withSize(size)
                 .withCost(cost)

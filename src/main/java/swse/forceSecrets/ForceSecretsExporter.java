@@ -53,7 +53,7 @@ public class ForceSecretsExporter extends BaseExporter
         Set<Category> categories = Category.getCategories(doc);
 
         List<JSONy> traditions = new ArrayList<>();
-        traditions.add(ForceSecret.create(itemName).withDescription(getDescription(content)).withCategories(categories));
+        traditions.add(ForceSecret.create(itemName).withDescription(content).withCategories(categories));
 
         return traditions;
     }

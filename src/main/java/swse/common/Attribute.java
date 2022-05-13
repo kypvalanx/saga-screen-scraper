@@ -3,7 +3,6 @@ package swse.common;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.prerequisite.Prerequisite;
-import static swse.util.Util.printUnique;
 
 public class Attribute implements JSONy, Copyable<Attribute> {
     private final String key;
@@ -11,6 +10,7 @@ public class Attribute implements JSONy, Copyable<Attribute> {
     private String modifier;
     private Prerequisite prerequisite;
     private Prerequisite parentPrerequisite;
+    private boolean isOverride = false;
 
     public static  Attribute create(AttributeKey key, Object value) {
         if(value == null){
@@ -27,8 +27,8 @@ public class Attribute implements JSONy, Copyable<Attribute> {
 
 
     public Attribute(String key, Object value) {
-
-        printUnique("Attribute " + key);
+//
+//        printUnique("Attribute " + key);
 //        if("damage".equals(key)) {
 //            value = ((String)value).replace("x", "*");
 //        }
@@ -57,6 +57,14 @@ public class Attribute implements JSONy, Copyable<Attribute> {
         this.modifier = modifier;
         return this;
     }
+    public Attribute isOverride(boolean isOverride) {
+        this.isOverride = isOverride;
+        return this;
+    }
+    public Attribute isOverride() {
+        this.isOverride = true;
+        return this;
+    }
 
     public String getModifier() {
         return modifier;
@@ -69,6 +77,7 @@ public class Attribute implements JSONy, Copyable<Attribute> {
         jsonObject.put("key", key);
                 jsonObject.put("value", value);
         jsonObject.put("modifier", modifier);
+        jsonObject.put("override", isOverride);
 
 
         if (prerequisite != null) {

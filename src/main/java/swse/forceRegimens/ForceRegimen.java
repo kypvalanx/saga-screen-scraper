@@ -10,7 +10,7 @@ import swse.common.FoundryItem;
 class ForceRegimen extends FoundryItem<ForceRegimen> implements Copyable<ForceRegimen> {
 
     public ForceRegimen(String name) {
-        super(name);
+        super(name, "forceRegimen");
     }
 
     public static ForceRegimen create(String name) {

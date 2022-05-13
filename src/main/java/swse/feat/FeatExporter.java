@@ -79,7 +79,7 @@ public class FeatExporter extends BaseExporter {
         List<JSONy> feats = new ArrayList<>();
 
         feats.add(Feat.create(itemName)
-                .withDescription(getDescription(content))
+                .withDescription(content)
                 .withProvided(getPayloadChoice(itemName))
                 .withPrerequisite(prerequisite)
                 .withCategories(categories)
@@ -187,7 +187,7 @@ public class FeatExporter extends BaseExporter {
                 break;
             case "Force Sensitivity":
                 attributes.add(Attribute.create(AttributeKey.FORCE_SENSITIVITY, "true"));
-                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "Force Talent Tree"));
+                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "Force Talent Trees"));
                 break;
             case "Weapon Finesse":
                 attributes.add(Attribute.create(AttributeKey.FINESSE_STAT, "DEX"));

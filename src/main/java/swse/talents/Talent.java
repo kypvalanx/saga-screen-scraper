@@ -9,6 +9,7 @@ import swse.common.Category;
 import swse.common.Copyable;
 import swse.common.FoundryItem;
 import swse.prerequisite.Prerequisite;
+import static swse.util.Util.printUnique;
 
 class Talent extends FoundryItem<Talent> implements Copyable<Talent>
 {
@@ -20,7 +21,7 @@ class Talent extends FoundryItem<Talent> implements Copyable<Talent>
 
     public Talent(String name)
     {
-        super(name);
+        super(name, "talent");
         this.talentProviders = new ArrayList<>();
     }
 
@@ -93,6 +94,7 @@ class Talent extends FoundryItem<Talent> implements Copyable<Talent>
         }
 
     public Talent withPossibleProviders(List<String> talentProviders) {
+        printUnique(talentProviders);
         this.talentProviders.addAll(talentProviders);
         return this;
     }

@@ -106,6 +106,7 @@ public enum AttributeKey {
     NOTE("note"),
     PASSENGERS("passengers"),
     PAYLOAD("payload"),
+    IS_PAYLOAD("#payload#"),
     PENETRATION("penetration"),
     PERCEPTION_MODIFIER("perceptionModifier"),
     PREFIX("prefix"),
@@ -207,13 +208,23 @@ public enum AttributeKey {
     INITIATIVE_BONUS("initiativeBonus"),
     CARRIED_CRAFT("carriedCraft"),
     WEAPON_SYSTEMS("weaponSystems"),
-    UNARMED_BONUS_DAMAGE("unarmedBonusDamage");
+    UNARMED_BONUS_DAMAGE("unarmedBonusDamage"),
+    CREDIT("credit"),
+    CREDIT_TYPE("creditType"),
+    CREDIT_ENTITY_TYPE("creditEntityType"),
+    GRAPPLE_BONUS("grappleBonus"),
+    UNTRAINED_SKILL_BONUS("untrainedSkillBonus"),
+    DESTINY_BONUS("destinyBonus"),
+    DESTINY_PENALTY("destinyPenalty"),
+    DESTINY_FULFILLED("destinyFulfilled");
 
     private final String value;
 
     AttributeKey(String string) {
         this.value = string;
     }
+
+
 
     public String value() {
         return value;

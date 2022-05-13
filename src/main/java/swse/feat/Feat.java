@@ -22,7 +22,7 @@ class Feat extends FoundryItem<Feat> implements Copyable<Feat>
 
     public Feat(String name)
     {
-        super(name);
+        super(name, "feat");
     }
 
     @Nonnull

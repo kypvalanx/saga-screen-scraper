@@ -55,7 +55,7 @@ public class TechniquesExporter extends BaseExporter
         Set<Category> categories = Category.getCategories(doc);
 //
         List<JSONy> traditions = new ArrayList<>();
-        traditions.add(ForceTechnique.create(itemName).withDescription(getDescription(content)).withCategories(categories));
+        traditions.add(ForceTechnique.create(itemName).withDescription(content).withCategories(categories));
 
         return traditions;
     }

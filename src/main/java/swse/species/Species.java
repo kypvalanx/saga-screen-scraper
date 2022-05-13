@@ -9,7 +9,7 @@ public class Species extends FoundryItem<Species> implements Copyable<Species>
 {
     public Species(String name)
     {
-        super(name);
+        super(name, "species");
     }
 
     public static Species create(String itemName)

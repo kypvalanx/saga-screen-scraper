@@ -10,7 +10,7 @@ public class Trait extends FoundryItem<Trait> implements Copyable<Trait>
 
     public Trait(String name)
     {
-        super(name);
+        super(name, "trait");
     }
 
     public static Trait create(String name)

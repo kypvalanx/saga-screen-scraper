@@ -9,7 +9,7 @@ public class VehicleBaseType extends FoundryItem<VehicleBaseType> implements Cop
     private String cost;
 
     public VehicleBaseType(String name) {
-        super(name);
+        super(name, "vehicleBaseType");
     }
 
     public static VehicleBaseType create(String name) {

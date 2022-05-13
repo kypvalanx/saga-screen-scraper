@@ -9,7 +9,7 @@ import swse.common.FoundryItem;
 
 class ForceTechnique extends FoundryItem<ForceTechnique> implements Copyable<ForceTechnique> {
     public ForceTechnique(String name) {
-        super(name);
+        super(name, "forceTechnique");
     }
 
     public static ForceTechnique create(String name) {

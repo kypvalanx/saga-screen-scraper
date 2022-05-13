@@ -182,8 +182,29 @@ class StatBonuses
             return bonuses;
         }
 
+        bonuses.add(ProvidedItem.create("Dexterity (+8)", ItemType.TRAIT,"TRAIT:Fine"));
+        bonuses.add(ProvidedItem.create("Strength (-8)", ItemType.TRAIT, "TRAIT:Fine"));
+
+        bonuses.add(ProvidedItem.create("Dexterity (+6)", ItemType.TRAIT,"TRAIT:Diminutive"));
+        bonuses.add(ProvidedItem.create("Strength (-6)", ItemType.TRAIT, "TRAIT:Diminutive"));
+
+        bonuses.add(ProvidedItem.create("Dexterity (+4)", ItemType.TRAIT,"TRAIT:Tiny"));
+        bonuses.add(ProvidedItem.create("Strength (-4)", ItemType.TRAIT, "TRAIT:Tiny"));
+
         bonuses.add(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT,"TRAIT:Small"));
         bonuses.add(ProvidedItem.create("Strength (-2)", ItemType.TRAIT, "TRAIT:Small"));
+
+        bonuses.add(ProvidedItem.create("Dexterity (-2)", ItemType.TRAIT,"TRAIT:Large"));
+        bonuses.add(ProvidedItem.create("Strength (+8)", ItemType.TRAIT, "TRAIT:Large"));
+
+        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT,"TRAIT:Huge"));
+        bonuses.add(ProvidedItem.create("Strength (+16)", ItemType.TRAIT, "TRAIT:Huge"));
+
+        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT,"TRAIT:Gargantuan"));
+        bonuses.add(ProvidedItem.create("Strength (+24)", ItemType.TRAIT, "TRAIT:Gargantuan"));
+
+        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT,"TRAIT:Colossal"));
+        bonuses.add(ProvidedItem.create("Strength (+32)", ItemType.TRAIT, "TRAIT:Colossal"));
         return bonuses;
     }
 

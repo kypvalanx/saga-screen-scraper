@@ -2,7 +2,6 @@ package swse.templates;
 
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
-import org.jsoup.nodes.Element;
 import swse.common.Attribute;
 import swse.common.AttributeKey;
 import swse.common.Copyable;
@@ -14,7 +13,7 @@ public class Template extends FoundryItem<Template> implements Copyable<Template
 
     public Template(String name)
     {
-        super(name);
+        super(name, "template");
     }
 
     public static Template create(String itemName)
@@ -31,12 +30,6 @@ public class Template extends FoundryItem<Template> implements Copyable<Template
     public Template withApplication(String application)
     {
         this.attributes.add(Attribute.create(AttributeKey.APPLICATION, application));
-        return this;
-    }
-
-    public Template withDescription(Element content)
-    {
-        this.description = content.html();
         return this;
     }
 

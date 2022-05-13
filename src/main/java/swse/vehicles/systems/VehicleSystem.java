@@ -11,7 +11,7 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
     private boolean asterisk = false;
 
     public VehicleSystem(String name) {
-        super(name);
+        super(name, "vehicleSystem");
     }
 
     public static VehicleSystem create(String name) {
@@ -42,7 +42,6 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
     public JSONObject toJSON(){
         JSONObject json = super.toJSON();
         JSONObject data = json.getJSONObject("data");
-        json.put("type", "vehicleSystem");
 
         data.put("cost", cost);
 
@@ -51,10 +50,6 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
 
     public VehicleSystem withCost(String cost) {
         this.cost = cost;
-        return this;
-    }
-    public VehicleSystem withSubtype(String subtype) {
-        this.subtype = subtype;
         return this;
     }
 

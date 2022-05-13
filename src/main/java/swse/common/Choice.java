@@ -1,9 +1,9 @@
 package swse.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.LinkedList;
+import java.util.List;
 import javax.annotation.Nonnull;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Choice implements JSONy, Copyable<Choice>
@@ -11,9 +11,12 @@ public class Choice implements JSONy, Copyable<Choice>
     private boolean isFirstLevel = false;
     private final String description;
     private String noAvailableOptionsDescription;
-    private final Map<String, Option> options = new HashMap();
+    private final List<Option> options = new LinkedList<>();
     private String oneOption;
     private String rollOption;
+    private int availableSelections = 1;
+    private Type type = Type.SELECT;
+    private String payload;
 
     public static Choice create(String description){
         return new Choice(description);
@@ -41,30 +44,48 @@ public class Choice implements JSONy, Copyable<Choice>
     public JSONObject toJSON()
     {
         JSONObject json = new JSONObject();
-        JSONObject optionJSON = new JSONObject();
+        JSONArray optionJSON = new JSONArray();
         json.put("options", optionJSON);
         json.put("description", description);
         json.put("noOptions", noAvailableOptionsDescription);
         json.put("isFirstLevel", isFirstLevel);
         json.put("oneOption", oneOption);
         json.put("rollOption", rollOption);
+        json.put("availableSelections", availableSelections);
+        json.put("type", type);
+        if(payload != null){
+            json.put("payload", payload);
+        }
 
-        for (Map.Entry<String, Option> entry :
-                options.entrySet())
+        for ( Option entry :
+                options)
         {
-            optionJSON.put(entry.getKey(), entry.getValue().toJSON());
+            optionJSON.put(entry.toJSON());
         }
         return json;
     }
 
     public Choice withOption(String key, Option option){
-        options.put(key, option);
+        option.withName(key);
+        return this.withOption(option);
+    }
+
+    public Choice withOption(Option option){
+        options.add(option);
         return this;
     }
+
     public Choice withNoOptionsDescription(String noAvailableOptionsDescription){
         this.noAvailableOptionsDescription = noAvailableOptionsDescription;
         return this;
     }
+
+    public Choice withAvailableSelections(int availableSelections){
+        this.availableSelections = availableSelections;
+        return this;
+    }
+
+
     public Choice isFirstLevel(boolean isFirstLevel){
         this.isFirstLevel = isFirstLevel;
         return this;
@@ -95,8 +116,8 @@ public class Choice implements JSONy, Copyable<Choice>
     public Choice copy() {
         Choice copy = new Choice(description, noAvailableOptionsDescription)
                 .isFirstLevel(isFirstLevel).withOneOption(oneOption);
-        for(Map.Entry<String, Option> entity: options.entrySet()){
-            copy.withOption(entity.getKey(),entity.getValue().copy());
+        for( Option entity: options){
+            copy.withOption(entity.copy());
         }
         return copy;
     }
@@ -104,5 +125,27 @@ public class Choice implements JSONy, Copyable<Choice>
     public Choice withRollOption(String rollOption) {
         this.rollOption = rollOption;
         return this;
+    }
+
+    public Choice withType(Type type) {
+        this.type = type;
+        return this;
+    }
+
+    /**
+     * what payload to use for non-select choices.  select choices carry their payload name in their options
+     * @param payload
+     * @return
+     */
+    public Choice withPayload(String payload) {
+        payload = "#"+payload+"#";
+        payload = payload.replaceAll("##", "#");
+
+        this.payload = payload;
+        return this;
+    }
+
+    public enum Type {
+        INTEGER, SELECT
     }
 }

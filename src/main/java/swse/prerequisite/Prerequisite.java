@@ -21,9 +21,7 @@ import static swse.prerequisite.NotPrerequisite.not;
 import static swse.prerequisite.OrPrerequisite.or;
 import static swse.prerequisite.SimplePrerequisite.simple;
 import static swse.talents.TalentExporter.DUPLICATE_TALENT_NAMES;
-import swse.util.Context;
 import swse.util.Util;
-import static swse.util.Util.printUnique;
 //import static swse.util.Util.printUnique;
 
 public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
@@ -398,7 +396,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
         }
         if (Objects.equals("Any Armor, Any Melee Slashing or Piercing Weapon", text)) {
             return List.of(or(text,
-                    simple(text, "TYPE", "armor"),
+                    simple("Any Armor", "TYPE", "armor"),
                     and(text,simple(text, "WEAPON_GROUP", "Melee Weapons"),
                             or(simple(text, "DAMAGE_TYPE", "Slashing"),
                                     simple(text, "DAMAGE_TYPE", "Piercing")))));
@@ -408,7 +406,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(or(text,
                     simple(text, "TYPE", "armor"),
                     and(text,simple(text, "WEAPON_GROUP", "Melee Weapons"),
-                            not(simple(text, "DAMAGE_TYPE", "Energy"))),
+                            not(or(simple(text, "DAMAGE_TYPE", "Energy"), simple(text, "MODE", "Energy")))),
                     and(text,simple(text, "WEAPON_GROUP", "Ranged Weapons"),
                             simple(text, "MODE", "Stun"))
                     ));
@@ -431,7 +429,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
         if (Objects.equals("Any Ranged Weapon dealing Piercing damage", text)) {
             return List.of(and(text,
                     simple(text, "WEAPON_GROUP", "Ranged Weapons"),
-                    simple(text, "DAMAGE_TYPE", "Piercing")));
+                    or(simple(text, "DAMAGE_TYPE", "Piercing")), simple(text, "MODE", "Piercing")));
         }
         if (Objects.equals("Any Weapon with the Antiqued Weapon Template", text)) {
             return List.of(simple(text, "TEMPLATE", "Antiquated Weapon Template"));
@@ -457,13 +455,15 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
         if (Objects.equals("Any Armor, Any Slashing or Piercing Weapon (Excluding Lightsabers)", text)) {
 
             return List.of(or(List.of(
-                    simple(text,"TYPE", "armor"),
+                    simple("armor","TYPE", "armor"),
                     and(List.of(
+                            simple("weapon", "TYPE", "weapon"),
                             or(List.of(
-                                    simple(text, "TYPE", "weapon"),
-                                    simple(text,"DAMAGE_TYPE", "Slashing"),
-                                    simple(text, "DAMAGE_TYPE", "Piercing"))),
-                            not(simple(text, "SUBTYPE", "Lightsabers"))
+                                    simple("Slashing mode", "MODE", "Slashing"),
+                                    simple("Piercing mode", "MODE", "Piercing"),
+                                    simple("Slashing damage type","DAMAGE_TYPE", "Slashing"),
+                                    simple("Piercing damage type", "DAMAGE_TYPE", "Piercing"))),
+                            not(simple("Lightsaber", "SUBTYPE", "Lightsabers"))
                     )))));
         }
         if ("vehicle".equalsIgnoreCase(text)) {
@@ -806,7 +806,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(simple(toks[1], toks[0], toks[1]));
         }
 
-        printUnique(Context.getValue("name") + " --- " + text);
+        //printUnique(Context.getValue("name") + " --- " + text);
 
 
         return List.of();

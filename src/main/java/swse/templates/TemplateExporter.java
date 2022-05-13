@@ -38,7 +38,7 @@ public class TemplateExporter extends BaseExporter {
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\templates.json";
     private static int num = 0;
     private static Set<String> allPrerequisites = new HashSet<String>();
-    public static final Pattern TEMPLATE_PREFIX_PATTERN = Pattern.compile("([\\w\\s\\d]*) (?:Droid|General|Weapon|Armor) Template");
+    public static final Pattern TEMPLATE_PREFIX_PATTERN = Pattern.compile("([\\w\\s\\d-]*) (?:Droid|General|Weapon|Armor) Template");
 
     public static void main(String[] args) {
         Map<String, List<String>> templateLinks = new HashMap<>();
@@ -419,12 +419,12 @@ public class TemplateExporter extends BaseExporter {
                 break;
             case "Dashade Weapon Template":
                 response.add(Attribute.create(AttributeKey.SPECIAL, "A target moved down the Condition Track by an attack from a Dashade Manufacture Weapon can only spend 2 Swift Actions per turn to Recover. This effect lasts until the target return to its normal state (all conditions removed)."));
-                response.add(Attribute.create(AttributeKey.DAMAGE, "-2"));
+                response.add(Attribute.create(AttributeKey.BONUS_DAMAGE, "-2"));
                 break;
             case "Gand Weapon Template":
                 response.add(Attribute.create(AttributeKey.SPECIAL, "If a Gand Manufacture Weapon moves a target down the Condition Track with it's Stun damage, that target has it's speed halved until it returns to its normal state (all conditions removed); a target that is -4 steps down the Condition Track (at the -10 step) is Immobilized instead."));
-                response.add(Attribute.create(AttributeKey.DAMAGE, "-2"));
-                response.add(Attribute.create(AttributeKey.EXOTIC_WEAPON, "true"));
+                response.add(Attribute.create(AttributeKey.BONUS_DAMAGE, "-2"));
+                response.add(Attribute.create(AttributeKey.EXOTIC_WEAPON, "Gand"));
                 break;
             case "Quick Draw Weapon Template":
                 response.add(Attribute.create(AttributeKey.SPECIAL, "A Quick Draw Weapon wielder that possesses the Quick Draw feat can draw or holster the weapon once per round as a Free Action."));
@@ -432,7 +432,7 @@ public class TemplateExporter extends BaseExporter {
             case "Rakatan Weapon Template":
                 response.add(Attribute.create(AttributeKey.BONUS_DAMAGE_DIE_TYPE, "1"));
                 response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "1"));
-                response.add(Attribute.create(AttributeKey.EXOTIC_WEAPON, "true"));
+                response.add(Attribute.create(AttributeKey.EXOTIC_WEAPON, "Rakatan"));
                 break;
             case "Sith Alchemical Weapon Template":
                 response.add(Attribute.create(AttributeKey.BLOCKS_LIGHTSABER, "true"));
@@ -445,7 +445,7 @@ public class TemplateExporter extends BaseExporter {
                 response.add(Attribute.create(AttributeKey.SPECIAL, "Antiquated Energy Cells and Antiquated Power Packs for Antiquated Weapons cost 50% more than a standard Energy Cell or Power Pack. Unless otherwise specified, an Antiquated Weapon cannot use standard Energy Cells or Power Packs, only Antiquated Energy Cells or Antiquated Power Packs."));
                 response.add(Attribute.create(AttributeKey.SPECIAL, "Antiquated Weapons do not use modern technology and are likely to be unfamiliar to most weaponsmiths. An Antiquated Weapon increases the base DC of any Mechanics check made to build or repair the Weapon by +5."));
                 response.add(Attribute.create(AttributeKey.SPECIAL, "An Antiquated Weapon can be Refitted. Apply the Refitted Weapon Template to the base Weapon instead of the Antiquated Weapon Template."));
-                        response.add(Attribute.create(AttributeKey.AVAILABILITY, "Rare"));
+                        response.add(Attribute.create(AttributeKey.AVAILABILITY, "Rare").isOverride());
                 break;
             case "Refitted Weapon Template":
                 response.add(Attribute.create(AttributeKey.SPECIAL, "A Refitted Weapon can use standard Energy Cells and Power Packs. Additionally, weapons that use Power Packs to provide ammunition have their number of shots that can be fired before the Power Pack must be replaced increased by 10%."));
@@ -512,6 +512,7 @@ public class TemplateExporter extends BaseExporter {
                 response.add(Attribute.create(AttributeKey.DAMAGE_TYPE, "Fire"));
                 response.add(Attribute.create(AttributeKey.OVERHEAT_LIMIT, "1"));
                 response.add(Attribute.create(AttributeKey.COOLDOWN_TIME, "1"));
+                response.add(Attribute.create(AttributeKey.SPECIAL, "If this Weapon is used with an ability that consumes more than one shot in a round (such as Rapid Shot or Double Attack), the weapon overheats and cannot be fired for one round as it cools down."));
                 break;
             case "Arkanian General Template (armor)":
                 response.add(Attribute.create(AttributeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, "x2").withModifier("Extreme Cold"));
@@ -534,14 +535,15 @@ public class TemplateExporter extends BaseExporter {
             case "Echani General Template (weapon)": 
                 response.add(Attribute.create(AttributeKey.ACTION, "Once per encounter the wielder of an Echani Manufacture Weapon can declare that the critical range of their weapon is increased by one (thus scoring a Critical Hit on a Natural 19 or Natural 20 on most weapons). The use of this ability can be declared after the attack roll is made, but before the attack is resolved."));
                 response.add(Attribute.create(AttributeKey.HP_WEAPON, "*0.5"));
+                response.add(Mode.create("Extended Critical Range", List.of(Attribute.create(AttributeKey.EXTENDED_CRITICAL_HIT, 19))));
                 break;
             case "Echani General Template (armor)":
                 response.add(Attribute.create(AttributeKey.ACTION, "once per encounter the wearer can move at their normal speed (not the adjusted speed for wearing the Armor) for one round"));
                 response.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, -1));
                 break;
             case "GenoHaradan General Template (weapon)":
-                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, 2).withModifier("to the attack roll of a Contact Poison applied to the weapon"));
-                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, 1).withModifier("attack rolls with weapons set to Stun (for Ranged Weapons)"));
+                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, 2).withPrerequisite(simple("damage type: stun", "DAMAGE_TYPE", "Contact Poison")));
+                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, 1).withPrerequisite(simple("damage type: stun", "DAMAGE_TYPE", "Stun")));
                 response.add(Attribute.create(AttributeKey.FRAGILE, "true"));
                 break;
             case "GenoHaradan General Template (armor)":
@@ -559,6 +561,7 @@ public class TemplateExporter extends BaseExporter {
                 break;
             case "Krath General Template (weapon)": 
                 response.add(Attribute.create(AttributeKey.DARKSIDE_TAINT, 1));
+                //TODO figure out status system in foundry
                 response.add(Attribute.create(AttributeKey.SPECIAL, "If an attack roll with a Krath Manufacture Weapon equals or exceeds the target's Fortitude Defense as well as its Reflex Defense, the target takes 1d4 damage at the beginning of it's next turn."));
                 break;
             case "Krath General Template (armor)":
@@ -570,18 +573,18 @@ public class TemplateExporter extends BaseExporter {
                 response.add(Attribute.create(AttributeKey.SPECIAL, "If a Mandalorian Manufacture item is disabled, all of the Weapon and Armor Accessories to that item are destroyed (and must be purchased anew, not merely repaired)."));
                 break;
             case "Massassi General Template (weapon)":
-                response.add(Attribute.create(AttributeKey.CRITICAL_HIT_PREMULTIPLIER_BONUS, "@STR_MOD"));
+                response.add(Attribute.create(AttributeKey.CRITICAL_HIT_PREMULTIPLIER_BONUS, "@STRMOD * 2"));
                 //response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-2"));
-                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-2").withParentPrerequisite(not(Prerequisite.create("Strength 15"))).withPrerequisite(simple("Medium", "WEAPON_SIZE", "Medium")));
-                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-2").withParentPrerequisite(not(Prerequisite.create("Strength 17"))).withPrerequisite(simple("Large", "WEAPON_SIZE", "Large")));
-                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-2").withParentPrerequisite(not(Prerequisite.create("Strength 19"))).withPrerequisite(simple("Huge", "WEAPON_SIZE", "Huge")));
+                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-2").withModifier("Massassi General Template (weapon)").withParentPrerequisite(not(Prerequisite.create("Strength 15"))).withPrerequisite(simple("Medium", "WEAPON_SIZE", "Medium")));
+                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-2").withModifier("Massassi General Template (weapon)").withParentPrerequisite(not(Prerequisite.create("Strength 17"))).withPrerequisite(simple("Large", "WEAPON_SIZE", "Large")));
+                response.add(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-2").withModifier("Massassi General Template (weapon)").withParentPrerequisite(not(Prerequisite.create("Strength 19"))).withPrerequisite(simple("Huge", "WEAPON_SIZE", "Huge")));
                 break;
             case "Massassi General Template (armor)":
                 response.add(Attribute.create(AttributeKey.ACTION, "once per encounter the wearer can move at their normal speed (not the adjusted speed for wearing the Armor) for one round"));
 
-                response.add(Attribute.create(AttributeKey.ARMOR_CHECK_PENALTY_OVERRIDE, "true").withParentPrerequisite(not(Prerequisite.create("Strength 13"))).withPrerequisite(simple("Light Armor", "ARMOR_TYPE", "Light")));
-                response.add(Attribute.create(AttributeKey.ARMOR_CHECK_PENALTY_OVERRIDE, "true").withParentPrerequisite(not(Prerequisite.create("Strength 15"))).withPrerequisite(simple("Medium Armor", "ARMOR_TYPE", "Medium")));
-                response.add(Attribute.create(AttributeKey.ARMOR_CHECK_PENALTY_OVERRIDE, "true").withParentPrerequisite(not(Prerequisite.create("Strength 17"))).withPrerequisite(simple("Heavy Armor", "ARMOR_TYPE", "Heavy")));
+                response.add(Attribute.create(AttributeKey.ARMOR_CHECK_PENALTY_OVERRIDE, "true").withModifier("Massassi General Template (armor)").withParentPrerequisite(not(Prerequisite.create("Strength 13"))).withPrerequisite(simple("Light Armor", "ARMOR_TYPE", "Light")));
+                response.add(Attribute.create(AttributeKey.ARMOR_CHECK_PENALTY_OVERRIDE, "true").withModifier("Massassi General Template (armor)").withParentPrerequisite(not(Prerequisite.create("Strength 15"))).withPrerequisite(simple("Medium Armor", "ARMOR_TYPE", "Medium")));
+                response.add(Attribute.create(AttributeKey.ARMOR_CHECK_PENALTY_OVERRIDE, "true").withModifier("Massassi General Template (armor)").withParentPrerequisite(not(Prerequisite.create("Strength 17"))).withPrerequisite(simple("Heavy Armor", "ARMOR_TYPE", "Heavy")));
                 break;
             case "Prototype General Template (droid)":
                 response.add(Attribute.create(AttributeKey.BONUS_SPECIAL_TRAIT, 1));
@@ -623,8 +626,6 @@ public class TemplateExporter extends BaseExporter {
     private static Prerequisite getItemPrerequisite(Element content, String type) {
         List<Prerequisite> prerequisites = new LinkedList<>();
                 prerequisites.add( Prerequisite.create(type));
-
-
 
                 if("droid".equals(type)){
 
