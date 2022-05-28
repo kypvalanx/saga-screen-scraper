@@ -22,6 +22,7 @@ import static swse.prerequisite.OrPrerequisite.or;
 import static swse.prerequisite.SimplePrerequisite.simple;
 import static swse.talents.TalentExporter.DUPLICATE_TALENT_NAMES;
 import swse.util.Util;
+import static swse.util.Util.printUnique;
 //import static swse.util.Util.printUnique;
 
 public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
@@ -41,13 +42,14 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
     protected final String type;
 
     public Prerequisite(String plainText, String type) {
+        printUnique("---"+type);
         this.plainText = plainText;
         this.type = type;
         //Util.printUnique("TYPE: "+ type);
     }
 
 
-    public static Prerequisite getClassPrerequisite(Elements entries) {
+    public static Prerequisite getClassPrerequisite(Elements entries, String itemName) {
         boolean found = false;
         boolean allowUL = true;
         List<Prerequisite> prerequisites = new ArrayList<>();
@@ -60,7 +62,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
 
                     for (Element li :
                             entry.select("li")) {
-                        prerequisites.add(Prerequisite.create(li.text()));
+                        prerequisites.add(Prerequisite.create(li.text(), itemName));
                     }
 
                 }
@@ -490,20 +492,22 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(or(text, 2, List.of(simple(text, "TALENT", "Slicer Talent Tree"), simple(text, "TALENT", "Burst Transfer"))));
         }
 
-        Pattern twoTalents = Pattern.compile("(?:Any )?two Talents from (?:either )?the ([\\s\\w]*)");
+        Pattern twoTalents = Pattern.compile("(?:Any )?two Talents from (?:either )?the ([\\s\\w,]*)");
         Matcher twoTalentsMatcher = twoTalents.matcher(text);
         if (twoTalentsMatcher.find()) {
             String payload = twoTalentsMatcher.group(1);
+
+            String[] tokens = new String[1];
+            tokens[0] = payload;
             if (payload.contains(" or ") || text.contains(", ")) {
-                String[] tokens = payload.split(", or | or |, ");
-                return List.of(or(text, 2, Arrays.stream(tokens).map(Prerequisite::cleanItem).map(talentTree -> simple("Talent from the " + talentTree, "TALENT", talentTree)).collect(Collectors.toList())));
+                tokens = payload.split(", or | or |, ");
             }
-            return List.of(simple("Talent from the " + payload, "TALENT", payload));
+            return List.of(or(text, 2, Arrays.stream(tokens).map(Prerequisite::cleanItem).map(talentTree -> simple("Talent from the " + talentTree, "TALENT", talentTree)).collect(Collectors.toList())));
 
         }
 
         if ("At least three Force Talents".equals(text)) {
-            return List.of(or(text, 3, List.of(simple(text, "TALENT", "Force Talent"))));
+            return List.of(or(text, 3, List.of(simple(text, "TALENT", "Force Talent Trees"))));
         }
 
         Pattern featsPattern = Pattern.compile("Feats: ([\\w\\s,()-:']*)");
@@ -574,10 +578,10 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
         Matcher trainedSkillsMatcher = trainedSkills.matcher(text);
         if (trainedSkillsMatcher.find()) {
             String payload = trainedSkillsMatcher.group(1);
-            if (payload.contains(" and ")) {
+            if (payload.contains(" and ") || text.contains(", ")) {
                 String[] tokens = payload.split(" and |, ");
                 return List.of(and(text, Arrays.stream(tokens).map(skill -> simple("Trained in " + skill, "TRAINED SKILL", skill)).collect(Collectors.toList())));
-            } else if (payload.contains(" or ") || text.contains(", ")) {
+            } else if (payload.contains(" or ")) {
                 String[] tokens = payload.split(" or |, ");
                 return List.of(or(text, Arrays.stream(tokens).map(skill -> simple("Trained in " + skill, "TRAINED SKILL", skill)).collect(Collectors.toList())));
             }
@@ -616,7 +620,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(simple(text + " trait", "TRAIT", text));
         }
         if (ITEM_LIST.contains(text)) {
-            return List.of(simple(text, "ITEM", text));
+            return List.of(simple(text, "EQUIPPED", text));
         }
         if (SPECIAL_LIST.contains(text)) {
             return List.of(simple(text, "SPECIAL", text));

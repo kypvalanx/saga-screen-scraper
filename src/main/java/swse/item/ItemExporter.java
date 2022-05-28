@@ -37,7 +37,7 @@ import static swse.util.Util.getParensContent;
 
 public class ItemExporter extends BaseExporter {
     public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\items.json";
-    public static final Mode MODE_AUTOFIRE = Mode.create("Autofire", "ROF", List.of(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-5")));
+    public static final Mode MODE_AUTOFIRE = Mode.create("Autofire", "ROF", List.of(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-5"), Attribute.create(AttributeKey.SKIP_CRITICAL_MULTIPLY, "true")));
     public static final Mode MODE_SINGLE_SHOT = Mode.create("Single-Shot", "ROF", List.of());
     public static final Mode MODE_BARRAGE = Mode.create("Barrage", "ROF", List.of());
     public static final String IMAGE_FOLDER = "systems/swse/icon/item";
@@ -98,6 +98,7 @@ public class ItemExporter extends BaseExporter {
         itemLinks.add("/wiki/Heirloom_Items");
         itemLinks.add("/wiki/Holocrons");
         itemLinks.add("/wiki/Implants");
+        itemLinks.add("/wiki/Bio-Implants");
         itemLinks.add("/wiki/Sith_Artifacts");
         itemLinks.add("/wiki/Yuuzhan_Vong_Biotech");
 //        //droid stuff
@@ -137,15 +138,16 @@ public class ItemExporter extends BaseExporter {
             Elements rows = table.getElementsByTag("tr");
             rows.forEach(row ->
             {
-                Element first = row.getElementsByTag("td").first();
-                if (first != null) {
-                    Element anchor = first.getElementsByTag("a").first();
-                    if (anchor != null) {
-                        String href = anchor.attr("href");
-                        hrefs.add(href);
-                        //items.addAll(parseItem(href));
+                row.getElementsByTag("td").forEach(element -> {
+                    if (element != null) {
+                        Element anchor = element.getElementsByTag("a").first();
+                        if (anchor != null) {
+                            String href = anchor.attr("href");
+                            hrefs.add(href);
+                            //items.addAll(parseItem(href));
+                        }
                     }
-                }
+                });
             });
         });
 
@@ -801,6 +803,9 @@ public class ItemExporter extends BaseExporter {
             attributes.add(Attribute.create(AttributeKey.CREDIT_TYPE, "CREDIT"));
             attributes.add(Attribute.create(AttributeKey.CREDIT_ENTITY_TYPE, "CONTAINER"));
         }
+        if("Heuristic Processor".equals(itemName)){
+            attributes.add(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Basic Processor"));
+        }
 
         return attributes;
     }
@@ -983,9 +988,75 @@ public class ItemExporter extends BaseExporter {
     private static Collection<JSONObject> getManualItems() {
         List<JSONObject> items = new ArrayList<>();
 
-        String sheildGeneratorDescription = "";
+        String energyShieldDescription = "Energy Shields give a character a Shield Rating, which functions exactly as normal shielding. An energy-shield generator is typically worn on the forearm or upper arm and must be activated as a Swift Action. Energy Shields typically have 5 charges, and energy shields can only be activated once per encounter (the stress on the shield generator causes the device to overload otherwise, so the manufacturers build in failsafes to prevent such an occurrence).\n" +
+                "\n" +
+                "Each activation consumes one charge and lasts through the end of the encounter. An Energy Shield only protects against weapons that deal Energy damage; a weapon that deals any other type of damage bypasses the shield's SR entirely.\n" +
+                "\n" +
+                "The Shield Rating provided by the Energy Shield determines the Energy Shield's price, as well as the type of Armor Proficiency feat required to operate the Energy Shield without penalty (Armor Proficiency (Light), Armor Proficiency (Medium), or Armor Proficiency (Heavy)).\n" +
+                "\n" +
+                "Energy Shields come in three varieties: Light, Medium, and Heavy. Each Energy Shield type corresponds to an armor type (Light is Light Armor, Medium is Medium Armor, and Heavy is Heavy Armor). A character with an active Energy Shield without the relevant Armor Proficiency feat takes a -5 penalty to their Reflex Defense, and the wearer is denied its Dexterity bonus to their Reflex Defense (though they still gain the benefits of the Energy Shield).\n" +
+                "\n" +
+                "Regardless of whether or not the character is proficient with the Energy Shield, the character always takes the Armor Check Penalty associated with the Energy Shield while it is activated. Additionally, each type of Energy Shield imposes its Maximum Dexterity Bonus restriction only when activated, not when worn and inert.\n" +
+                "\n" +
+                "An Energy Shield can be added to a suit of armor as an Armor Accessory. An Energy Shield can be modified by Armor Templates only if the Template specifically states that it can be used on Energy Shields, and the Energy Shield confers that benefit only when it is activated.";
+        items.add(Item.create("Energy Shield (SR 5)", "armor")
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withDescription(energyShieldDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 5))
+                .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 4))
+                .withCost("500")
+                .withSubtype("Light Armor")
+                .toJSON());
+
+        items.add(Item.create("Energy Shield (SR 10)", "armor")
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withDescription(energyShieldDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 10))
+                .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 4))
+                .withCost("2000")
+                .withSubtype("Light Armor")
+                .toJSON());
+
+        items.add(Item.create("Energy Shield (SR 15)", "armor")
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withDescription(energyShieldDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 15))
+                .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 3))
+                .withCost("4500")
+                .withSubtype("Medium Armor")
+                .toJSON());
+
+        items.add(Item.create("Energy Shield (SR 20)", "armor")
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withDescription(energyShieldDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 20))
+                .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 3))
+                .withCost("8000")
+                .withSubtype("Medium Armor")
+                .toJSON());
+
+        items.add(Item.create("Energy Shield (SR 25)", "armor")
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withDescription(energyShieldDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 25))
+                .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 2))
+                .withCost("12500")
+                .withSubtype("Heavy Armor")
+                .toJSON());
+
+        items.add(Item.create("Energy Shield (SR 30)", "armor")
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withDescription(energyShieldDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 30))
+                .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 2))
+                .withCost("18000")
+                .withSubtype("Heavy Armor")
+                .toJSON());
+
+        String sheildGeneratorDescription = "The Droid is fitted with a deflector Shield Generator- the same type mounted on Starships. Whenever the Droid would take damage, reduce the damage by the Droid's Shield Rating (SR). If the damage is equal to or greater than the Droid's Shield Rating, the Droid's Shield Rating is reduced by 5. By spending three Swift Actions on the same or consecutive rounds, the Droid may make a DC 20 Endurance check to restore lost shield power. If the check succeeds, the Droid's Shield Rating increases by 5 points (up to its normal Shield Rating).";
         items.add(Item.create("Shield Generator (SR 5)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 5))
                 .withCost("2500 x Cost Factor")
@@ -996,6 +1067,7 @@ public class ItemExporter extends BaseExporter {
         final String SR10Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
         items.add(Item.create("Shield Generator (SR 10)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 10))
                 .withCost("5000 x Cost Factor")
@@ -1015,6 +1087,7 @@ public class ItemExporter extends BaseExporter {
         final String SR15Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
         items.add(Item.create("Shield Generator (SR 15)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 15))
                 .withCost("7500 x Cost Factor")
@@ -1033,6 +1106,7 @@ public class ItemExporter extends BaseExporter {
         final String SR20Prerequisite = "Only Droids of Large or bigger size can be equipped with a SR 20 generator.";
         items.add(Item.create("Shield Generator (SR 20)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(sheildGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 20))
                 .withCost("10000 x Cost Factor")

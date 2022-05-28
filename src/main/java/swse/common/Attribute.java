@@ -111,4 +111,9 @@ public class Attribute implements JSONy, Copyable<Attribute> {
         this.prerequisite = prerequisite;
         return this;
     }
+
+    @Override
+    public String toString(){
+        return toJSON().toString();
+    }
 }

@@ -94,7 +94,6 @@ class Talent extends FoundryItem<Talent> implements Copyable<Talent>
         }
 
     public Talent withPossibleProviders(List<String> talentProviders) {
-        printUnique(talentProviders);
         this.talentProviders.addAll(talentProviders);
         return this;
     }

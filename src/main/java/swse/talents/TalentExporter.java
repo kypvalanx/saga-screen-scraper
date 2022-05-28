@@ -197,6 +197,26 @@ public class TalentExporter extends BaseExporter
             choice.withOption("AVAILABLE_GREATER_WEAPON_FOCUS", new Option().withPayload("AVAILABLE_GREATER_WEAPON_FOCUS"));
             attributes.add(choice);
         }
+        if ("Penetrating Attack".equals(talentName)){
+            Choice choice = new Choice("Select a Weapon to use Penetrating Attack.", "You Must have Weapon Focus with a weapon group or an Exotic Weapon to select one for Penetrating Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Penetrating Attack");
+            choice.withOption("AVAILABLE_PENETRATING_ATTACK", new Option().withPayload("AVAILABLE_PENETRATING_ATTACK"));
+            attributes.add(choice);
+        }
+        if ("Devastating Attack".equals(talentName)){
+            Choice choice = new Choice("Select a Weapon to use Devastating Attack.", "You Must have Weapon Focus with a weapon group or an Exotic Weapon to select one for Devastating Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Devastating Attack");
+            choice.withOption("AVAILABLE_DEVASTATING_ATTACK", new Option().withPayload("AVAILABLE_DEVASTATING_ATTACK"));
+            attributes.add(choice);
+        }
+        if ("Greater Penetrating Attack".equals(talentName)){
+            Choice choice = new Choice("Select a Weapon to use Greater Penetrating Attack.", "You Must have Greater Weapon Focus and Penetrating Attack with a weapon group or an Exotic Weapon to select one for Greater Penetrating Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Greater Penetrating Attack");
+            choice.withOption("AVAILABLE_GREATER_PENETRATING_ATTACK", new Option().withPayload("AVAILABLE_GREATER_PENETRATING_ATTACK"));
+            attributes.add(choice);
+        }
+        if ("Greater Devastating Attack".equals(talentName)){
+            Choice choice = new Choice("Select a Weapon to use Greater Devastating Attack.", "You Must have Greater Weapon Focus and Devastating Attack with a weapon group or an Exotic Weapon to select one for Greater Devastating Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Greater Devastating Attack");
+            choice.withOption("AVAILABLE_GREATER_DEVASTATING_ATTACK", new Option().withPayload("AVAILABLE_GREATER_DEVASTATING_ATTACK"));
+            attributes.add(choice);
+        }
 
         return attributes;
     }
@@ -215,6 +235,22 @@ public class TalentExporter extends BaseExporter
             case "Greater Weapon Specialization":
                 attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
                 attributes.add(Attribute.create(AttributeKey.GREATER_WEAPON_SPECIALIZATION, "#payload#"));
+                break;
+            case "Penetrating Attack":
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.PENETRATING_ATTACK, "#payload#"));
+                break;
+            case "Greater Penetrating Attack":
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.GREATER_PENETRATING_ATTACK, "#payload#"));
+                break;
+            case "Devastating Attack":
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.DEVASTATING_ATTACK, "#payload#"));
+                break;
+            case "Greater Devastating Attack":
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.GREATER_DEVASTATING_ATTACK, "#payload#"));
                 break;
             case "Greater Weapon Focus":
                 attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
@@ -275,6 +311,12 @@ public class TalentExporter extends BaseExporter
                 break;
             case "Vaapad":
                 attributes.add(Attribute.create(AttributeKey.NOTE, "When attacking with a Lightsaber, you score a critical hit on a natural roll of 19 or 20. However, a natural 19 is not considered an automatic hit; if you roll a natural 19 and still miss the target, you do not score a critical hit."));
+                break;
+            case "Armored Defense":
+                attributes.add(Attribute.create(AttributeKey.ARMORED_DEFENSE, true));
+                break;
+            case "Improved Armored Defense":
+                attributes.add(Attribute.create(AttributeKey.IMPROVED_ARMORED_DEFENSE, true));
                 break;
 
         }

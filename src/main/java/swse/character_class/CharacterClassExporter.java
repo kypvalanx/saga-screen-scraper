@@ -120,8 +120,8 @@ public class CharacterClassExporter extends BaseExporter {
                 .withProvided(ClassSkill.getClassSkills(content.select("p,ul,h4")))
                 .withProvided(HitPoints.getHitPoints(content.select("p,h4"), itemName))
                 .withProvided(ForcePoints.getForcePoints(content.select("p,h4,h3")))
-                .withProvided(DefenceBonuses.getDefenseBonuses(content.select("p,h4")))
-                .withPrerequisite(Prerequisite.getClassPrerequisite(content.select("p,ul,h4")))
+                .withProvided(DefenceBonuses.getDefenseBonuses(content.select("p,h4"), itemName))
+                .withPrerequisite(Prerequisite.getClassPrerequisite(content.select("p,ul,h4"), itemName))
                 .withProvided(StartingFeats.getStartingFeats(content.select("p,ul,h4")))
                 .withProvided(getClassChoice(itemName))
                 .withProvided(getClassType(itemName))
@@ -152,6 +152,7 @@ public class CharacterClassExporter extends BaseExporter {
         if ("Technician".equals(itemName)) {
             return new Choice("Select a Starting Feat:")
                     .isFirstLevel(true)
+                    .withShowSelectionInName(false)
                     .withOption("Skill Focus (Mechanics)",
                             new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Mechanics))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Mechanics)", ItemType.FEAT)))
                     .withOption("Skill Focus (Treat Injury)",
@@ -175,6 +176,7 @@ public class CharacterClassExporter extends BaseExporter {
         } else if ("Jedi".equals(itemName)) {
 
             return new Choice("Select a Starting Weapon:")
+                    .withShowSelectionInName(false)
                     .isFirstLevel(true).withOneOption("On First level you receive:")
                     .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.ITEM)));
         }

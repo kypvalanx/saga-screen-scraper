@@ -454,7 +454,8 @@ public class SpeciesExporter extends BaseExporter {
     private static Collection<Object> getSpeciesSpecificChoice(String speciesName) {
         Collection<Object> choices = new ArrayList<>();
         if ("Arkanian Offshoot".equals(speciesName)) {
-            Choice choice = new Choice("Select a Bonus Feat:");
+            Choice choice = new Choice("Select a Bonus Feat:")
+                    .withShowSelectionInName(false);
             choice.withOption("Skill Focus (Endurance)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Endurance))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Endurance)", ItemType.FEAT)));
             choice.withOption("Skill Focus (Mechanics)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Mechanics))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Mechanics)", ItemType.FEAT)));
             choice.withOption("Skill Focus (Pilot)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Pilot))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Pilot)", ItemType.FEAT)));
@@ -469,7 +470,8 @@ public class SpeciesExporter extends BaseExporter {
             choice.withOption("Ualaq", new Option().withProvidedItem(ProvidedItem.create("Ualaq", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Darkvision", ItemType.TRAIT)));
             choices.add(choice);
         } else if ("Killik".equals(speciesName)) {
-            Choice choice = new Choice("Select a Size:");
+            Choice choice = new Choice("Select a Size:")
+                    .withShowSelectionInName(false);
             choice.withOption("Tiny", new Option().withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d3)", ItemType.ITEM)));
             choice.withOption("Small", new Option().withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d4)", ItemType.ITEM)));
             choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
@@ -493,7 +495,8 @@ public class SpeciesExporter extends BaseExporter {
             return choices;
         }
 
-        Choice locomotionChoice = new Choice("Select locomotion type:");
+        Choice locomotionChoice = new Choice("Select locomotion type:")
+                .withShowSelectionInName(false);
 
         locomotionChoice.withOption("Walking", new Option().withProvidedItem(ProvidedItem.create("Walking", ItemType.ITEM)));
         locomotionChoice.withOption("Tracked", new Option().withProvidedItem(ProvidedItem.create("Tracked", ItemType.ITEM)));
@@ -541,7 +544,8 @@ public class SpeciesExporter extends BaseExporter {
             return choices;
         }
 
-        Choice droidChoice = new Choice("Select the size of your droid's chassis:");
+        Choice droidChoice = new Choice("Select the size of your droid's chassis:")
+                .withShowSelectionInName(false);
 
         droidChoice.withOption(new Option("Fine (GM Only)").withProvidedItem(ProvidedItem.create("Fine", ItemType.TRAIT)));
         droidChoice.withOption(new Option("Diminutive (GM Only)").withProvidedItem(ProvidedItem.create("Diminutive", ItemType.TRAIT)));

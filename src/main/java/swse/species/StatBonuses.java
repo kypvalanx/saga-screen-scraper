@@ -44,6 +44,7 @@ class StatBonuses
                     if("Arkanian Offshoot".equals(speciesName)){
                         bonuses.add(ProvidedItem.create("Constitution (-2)", ItemType.TRAIT));
                         bonuses.add(new Choice("Select an Attribute Bonus")
+                                .withShowSelectionInName(false)
                                 .withOption("Strength", new Option().withProvidedItem(ProvidedItem.create("Strength (+2)", ItemType.TRAIT)))
                                 .withOption("Dexterity", new Option().withProvidedItem(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT))));
                     } else if("Melodie".equals(speciesName)){
@@ -106,6 +107,7 @@ class StatBonuses
                         bonuses.add(ProvidedItem.create("Disable Attribute Modification", ItemType.TRAIT));
 
                         bonuses.add(new Choice("Select an Attribute Bonus")
+                                .withShowSelectionInName(false)
                                 .withOption("Strength", new Option().withProvidedItem(ProvidedItem.create("Strength (+2)", ItemType.TRAIT)))
                                 .withOption("Dexterity", new Option().withProvidedItem(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT)))
                                 .withOption("Constitution", new Option().withProvidedItem(ProvidedItem.create("Constitution (+2)", ItemType.TRAIT)))

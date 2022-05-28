@@ -216,7 +216,15 @@ public enum AttributeKey {
     UNTRAINED_SKILL_BONUS("untrainedSkillBonus"),
     DESTINY_BONUS("destinyBonus"),
     DESTINY_PENALTY("destinyPenalty"),
-    DESTINY_FULFILLED("destinyFulfilled");
+    DESTINY_FULFILLED("destinyFulfilled"),
+    ARMORED_DEFENSE("armoredDefense"),
+    IMPROVED_ARMORED_DEFENSE("improvedArmoredDefense"),
+    ACTS_AS_FOR_PROFICIENCY("actsAsForProficiency"),
+    PENETRATING_ATTACK("penetratingAttack"),
+    GREATER_PENETRATING_ATTACK("greaterPenetratingAttack"),
+    DEVASTATING_ATTACK("devastatingAttack"),
+    GREATER_DEVASTATING_ATTACK("greaterDevastatingAttack"),
+    SKIP_CRITICAL_MULTIPLY("skipCriticalMultiply");
 
     private final String value;
 

@@ -12,11 +12,11 @@ import swse.common.AttributeKey;
 
 public class DefenceBonuses
 {
-    public static final Pattern REFLEX_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (their|your) (fortitude defense, )?reflex defense");
-    public static final Pattern FORTITUDE_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (their|your) fortitude defense");
-    public static final Pattern WILL_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (their|your) (fortitude defense, reflex defense, and )?will defense");
+    public static final Pattern REFLEX_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (both )?(their|your) (fortitude defense, |will defense, )?reflex defense");
+    public static final Pattern FORTITUDE_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (both )?(their|your) (reflex defense|will defense, reflex defense)?(, | and their |, and )?fortitude defense");
+    public static final Pattern WILL_PATTERN = Pattern.compile("\\+(\\d*) (class )?bonus to (both )?(their|your) (fortitude defense, reflex defense, and |reflex defense, fortitude defense, and |reflex defense, fortitude defense and )?will defense");
 
-    public static List<Attribute> getDefenseBonuses(Elements entries)
+    public static List<Attribute> getDefenseBonuses(Elements entries, String itemName)
     {
         List<Attribute> attributes = new ArrayList<>();
         boolean found = false;
@@ -30,6 +30,7 @@ public class DefenceBonuses
                 if (allowP && entry.tag().equals(Tag.valueOf("p")))
                 {
                     allowP = false;
+                    //printUnique(input);
 
                     Matcher fortMatcher = FORTITUDE_PATTERN.matcher(input);
                     if (fortMatcher.find())
@@ -54,7 +55,8 @@ public class DefenceBonuses
                 found = true;
             }
         }
-
+        //System.out.println(itemName);
+       // attributes.forEach(System.out::println);
         return attributes;
     }
 }

@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 public class Choice implements JSONy, Copyable<Choice>
 {
-    private boolean isFirstLevel = false;
+    private boolean isFirstLevel;
     private final String description;
     private String noAvailableOptionsDescription;
     private final List<Option> options = new LinkedList<>();
@@ -17,6 +17,7 @@ public class Choice implements JSONy, Copyable<Choice>
     private int availableSelections = 1;
     private Type type = Type.SELECT;
     private String payload;
+    private boolean showSelectionInName = true;
 
     public static Choice create(String description){
         return new Choice(description);
@@ -52,6 +53,7 @@ public class Choice implements JSONy, Copyable<Choice>
         json.put("oneOption", oneOption);
         json.put("rollOption", rollOption);
         json.put("availableSelections", availableSelections);
+        json.put("showSelectionInName", showSelectionInName);
         json.put("type", type);
         if(payload != null){
             json.put("payload", payload);
@@ -63,6 +65,13 @@ public class Choice implements JSONy, Copyable<Choice>
             optionJSON.put(entry.toJSON());
         }
         return json;
+    }
+
+
+
+    public Choice withShowSelectionInName(boolean showSelectionInName){
+        this.showSelectionInName = showSelectionInName;
+        return this;
     }
 
     public Choice withOption(String key, Option option){
@@ -101,17 +110,9 @@ public class Choice implements JSONy, Copyable<Choice>
     @Override
     public String toString()
     {
-        return "Choice{" +
-                "isFirstLevel=" + isFirstLevel +
-                ", description='" + description + '\'' +
-                ", noAvailableOptionsDescription='" + noAvailableOptionsDescription + '\'' +
-                ", options=" + options +
-                ", oneOption='" + oneOption + '\'' +
-                '}';
+        return toJSON().toString();
     }
 
-//    private final Map<String, Option> options = new HashMap();
-//    private String oneOption;
     @Override
     public Choice copy() {
         Choice copy = new Choice(description, noAvailableOptionsDescription)
