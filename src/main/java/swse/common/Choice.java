@@ -16,7 +16,7 @@ public class Choice implements JSONy, Copyable<Choice>
     private String rollOption;
     private int availableSelections = 1;
     private Type type = Type.SELECT;
-    private String payload;
+    private String payload = "#payload#";
     private boolean showSelectionInName = true;
 
     public static Choice create(String description){

@@ -22,6 +22,7 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     private final List<Modification> modifications = new LinkedList<>();
     private final List<NamedCrew> namedCrewMembers = new LinkedList<>();
     private String equip;
+    private boolean unlocked = false;
 
     private ProvidedItem(String name, ItemType type, Prerequisite prerequisite){
 //        Pattern p = Pattern.compile("(Dexterity|Strength|Constitution|Intelligence|Wisdom|Charisma)");
@@ -79,6 +80,9 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
         data.put("name", name);
         data.put("type", type.toString());
         data.put("prerequisite", JSONy.toJSON(prerequisite));
+        if(unlocked){
+           data.put("unlocked", true);
+        }
         if(equip != null){
             data.put("equip", equip);
         }
@@ -143,6 +147,11 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
 
     public ProvidedItem withEquip(String type) {
         this.equip = type;
+        return this;
+    }
+
+    public ProvidedItem withUnlocked(boolean b) {
+        this.unlocked = b;
         return this;
     }
 }

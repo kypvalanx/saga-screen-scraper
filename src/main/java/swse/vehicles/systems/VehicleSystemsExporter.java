@@ -26,7 +26,7 @@ import swse.util.Context;
 import static swse.util.Util.toEnumCase;
 
 public class VehicleSystemsExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\Vehicle Systems.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\Vehicle Systems.json";
     public static final Pattern HYPERDRIVE = Pattern.compile("Class ([\\d\\.]*) Hyperdrive");
     public static final String ASTROMECH_DROID = "Astromech Droid";
     public static final Pattern STARSHIP_SYSTEM_TYPE = Pattern.compile("(?:Starship Systems|Droid System|Weapon) Type: ([\\s\\w]*)");

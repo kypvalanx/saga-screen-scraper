@@ -22,7 +22,7 @@ import swse.util.Context;
 import swse.util.Timer;
 
 public class CharacterClassExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\classes.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\classes.json";
     private static List<String> allClasses = new ArrayList<>();
 
 
@@ -179,6 +179,22 @@ public class CharacterClassExporter extends BaseExporter {
                     .withShowSelectionInName(false)
                     .isFirstLevel(true).withOneOption("On First level you receive:")
                     .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.ITEM)));
+        }else if ("Beast".equals(itemName)) {
+            return new Choice("Select a Size:")
+                    .isFirstLevel(true)
+                    .withShowSelectionInName(false)
+                    .withOption("Fine",new Option().withProvidedItem(ProvidedItem.create("Fine", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Diminutive",new Option().withProvidedItem(ProvidedItem.create("Diminutive", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Tiny",new Option().withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Small",new Option().withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Medium",new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Large",new Option().withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Huge",new Option().withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Gargantuan",new Option().withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Colossal",new Option().withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Colossal (Frigate)",new Option().withProvidedItem(ProvidedItem.create("Colossal (Frigate)", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Colossal (Cruiser)",new Option().withProvidedItem(ProvidedItem.create("Colossal (Cruiser)", ItemType.TRAIT).withUnlocked(true)))
+                    .withOption("Colossal (Station)",new Option().withProvidedItem(ProvidedItem.create("Colossal (Station)", ItemType.TRAIT).withUnlocked(true)));
         }
         return null;
     }

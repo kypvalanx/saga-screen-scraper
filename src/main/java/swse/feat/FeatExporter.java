@@ -22,7 +22,7 @@ import swse.prerequisite.Prerequisite;
 import swse.util.Context;
 
 public class FeatExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\feats.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\feats.json";
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\feats.csv";
     public static final String WEAPON_PROFICIENCY = "Weapon Proficiency";
     public static final String WEAPON_FOCUS = "Weapon Focus";

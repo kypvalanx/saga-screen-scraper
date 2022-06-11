@@ -36,7 +36,7 @@ import static swse.util.Util.getNumber;
 import static swse.util.Util.getParensContent;
 
 public class ItemExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\items.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\items.json";
     public static final Mode MODE_AUTOFIRE = Mode.create("Autofire", "ROF", List.of(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-5"), Attribute.create(AttributeKey.SKIP_CRITICAL_MULTIPLY, "true")));
     public static final Mode MODE_SINGLE_SHOT = Mode.create("Single-Shot", "ROF", List.of());
     public static final Mode MODE_BARRAGE = Mode.create("Barrage", "ROF", List.of());

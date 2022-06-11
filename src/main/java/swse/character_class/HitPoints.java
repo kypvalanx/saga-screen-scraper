@@ -63,12 +63,12 @@ class HitPoints
 
         if("Beast".equals(itemName)){
             attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d8"));
-            attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d8"));
+            //attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d8"));
         }
 
         if("Nonheroic".equals(itemName)){
             attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d4"));
-            attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d4"));
+            //attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d4"));
         }
         return attributes;
     }

@@ -36,7 +36,7 @@ import swse.common.ProvidedItem;
 
 public class SpeciesExporter extends BaseExporter {
     public static final String IMAGE_FOLDER = "systems/swse/icon/species";
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\species.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\species.json";
     public static final String ROOT = "G:/FoundryVTT/Data";
     public static final List<String> DUMMY_CATEGORYS = List.of("Damage Reduction", "Conditional Bonus Feat", "Natural Armor", "Bonus Class Skill", "Species");
     public static final Pattern BONUS_FEAT_PATTERN = Pattern.compile("gain one bonus Feat at 1st level");

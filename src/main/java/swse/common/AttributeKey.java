@@ -118,6 +118,7 @@ public enum AttributeKey {
     RECURRENCE("recurrence"),
     REDIRECTED_SHOT_BONUS("redirectedShotBonus"),
     REFLEX_DEFENSE_BONUS("reflexDefenseBonus"),
+    NATURAL_ARMOR_REFLEX_DEFENSE_BONUS("naturalArmorReflexDefenseBonus"),
     REFLEX_DEFENSE_BONUS_ARMOR("armorReflexDefenseBonus"),
     REFLEX_DEFENSE_BONUS_CLASS("classReflexDefenseBonus"),
     REJECTION_ATTACK_BONUS("rejectionAttackBonus"),
@@ -172,7 +173,6 @@ public enum AttributeKey {
     WILL_DEFENSE_BONUS("willDefenseBonus"),
     WISDOM_BONUS("wisdomBonus"),
     WRITES("writes"),
-
     SHIELD_FAILURE_CHANCE("shieldFailureChance"),
     LIVING_VEHICLE("livingVehicle"),
     ATTACK_BONUS_VEHICLE("vehicleAttackBonus"),
@@ -224,7 +224,9 @@ public enum AttributeKey {
     GREATER_PENETRATING_ATTACK("greaterPenetratingAttack"),
     DEVASTATING_ATTACK("devastatingAttack"),
     GREATER_DEVASTATING_ATTACK("greaterDevastatingAttack"),
-    SKIP_CRITICAL_MULTIPLY("skipCriticalMultiply");
+    SKIP_CRITICAL_MULTIPLY("skipCriticalMultiply"),
+    DAMAGE_THRESHOLD_EFFECTIVE_SIZE("damageThresholdEffectiveSize"),
+    SIZE_INDEX("sizeIndex");
 
     private final String value;
 

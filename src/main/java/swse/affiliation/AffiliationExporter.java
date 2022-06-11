@@ -13,7 +13,7 @@ import swse.common.JSONy;
 
 public class AffiliationExporter extends BaseExporter
 {
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\affiliations.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\affiliations.json";
 
     public static void main(String[] args)
     {

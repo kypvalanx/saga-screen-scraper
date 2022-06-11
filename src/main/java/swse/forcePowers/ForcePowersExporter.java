@@ -15,7 +15,7 @@ import swse.common.JSONy;
 
 public class ForcePowersExporter extends BaseExporter
 {
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\force powers.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\force powers.json";
     private static List<String> allPowers = new ArrayList<>();
 
     public static void main(String[] args)

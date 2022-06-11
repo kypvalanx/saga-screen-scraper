@@ -31,7 +31,7 @@ import static swse.util.Util.toEnumCase;
 
 public class TraitExporter extends BaseExporter {
 
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\traits.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\traits.json";
 
     public static void main(String[] args) {
         Timer timer = new Timer();
@@ -74,10 +74,12 @@ public class TraitExporter extends BaseExporter {
     private static Collection<? extends JSONObject> getSizeTraits() {
         List<String> sizes = Lists.newArrayList("Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)");
         Set<JSONObject> response = new HashSet<>();
+        int i = 0;
         for (String size : sizes) {
             response.add(Trait
                     .create(size)
-                    .withProvided(getSizeModifiers(size))
+                            .withProvided(Attribute.create(AttributeKey.SIZE_INDEX, i++))
+                    //.withProvided(getSizeModifiers(size))
                     .toJSON());
 
         }
@@ -98,13 +100,13 @@ public class TraitExporter extends BaseExporter {
 
     private static Set<JSONObject> getSpeedTraits() {
         Set<JSONObject> response = new HashSet<>();
-        response.add(Trait.create("Base Speed").withDescription("A being has a base speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Base Speed #payload#")).toJSON());
-        response.add(Trait.create("Swim Speed").withDescription("A being has a swim speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Swim Speed #payload#")).toJSON());
-        response.add(Trait.create("Fly Speed").withDescription("A being has a fly speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Fly Speed #payload#")).toJSON());
-        response.add(Trait.create("Wheeled Speed").withDescription("A being has a wheeled speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Wheeled Speed #payload#")).toJSON());
-        response.add(Trait.create("Walking Speed").withDescription("A being has a walking speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Walking Speed #payload#")).toJSON());
-        response.add(Trait.create("Tracked Speed").withDescription("A being has a tracked speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Tracked Speed #payload#")).toJSON());
-        response.add(Trait.create("Hover Speed").withDescription("A being has a hover speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Hover Speed #payload#")).toJSON());
+        response.add(Trait.create("Base Speed").withDescription("A being has a base speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Base Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Swim Speed").withDescription("A being has a swim speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Swim Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Fly Speed").withDescription("A being has a fly speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Fly Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Wheeled Speed").withDescription("A being has a wheeled speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Wheeled Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Walking Speed").withDescription("A being has a walking speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Walking Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Tracked Speed").withDescription("A being has a tracked speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Tracked Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Hover Speed").withDescription("A being has a hover speed of #payload#.").withProvided(Attribute.create(AttributeKey.SPEED, "Hover Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
 
         response.add(Trait.create("Stationary Speed").withDescription("A being cannot move.").toJSON());
         return response;
@@ -133,6 +135,23 @@ public class TraitExporter extends BaseExporter {
 
     private static Set<JSONObject> getManualAbilities() {
         Set<JSONObject> response = new HashSet<>();
+
+        response.add(Trait.create("Squad").withDescription("Squads are collections of lower-CL enemies that work together as a single creature on the battlefield. Squads are ideal for encounters in which the Gamemaster wants to include a large number of weaker enemies and allies, and can help replicate the chaos of a battlefield in a more manageable fashion. Similarly, Squads provide the Gamemaster with ways to transform low-CL enemies into a more significant threat. By the time the heroes hit 10th level, those CL 1 Battle Droids have ceased to be a challenge, but transforming those Droids into Squads raises their CL to the point where they can be sufficiently dangerous.\n" +
+                "\n" +
+                "A Squad represents a small number of creatures (Usually three to four) of the same type that come together into a single unit. They occupy the same space and have only one turn's worth of Actions. The Squad is an abstract concept that allows the Gamemaster to populate an encounter with low-level troopers and still maintain the speed and ease of combat they need. Squads are by no means necessary, but they do streamline the game experience. For example, a Gamemaster could create an encounter with 15 Battle Droids, or the same encounter could be created using only 5 Squads, which is more manageable.")
+                .withProvided(Attribute.create(AttributeKey.SIZE_BONUS, 1))
+                .withProvided(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_EFFECTIVE_SIZE, -1))
+                .withProvided(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, 10))
+                .withProvided(Attribute.create(AttributeKey.TO_HIT_MODIFIER, 4))
+                .withProvided(Attribute.create(AttributeKey.CHALLENGE_LEVEL, 2))
+                .withProvided(Attribute.create(AttributeKey.HIT_POINT_EQ, "*2"))
+                .withProvided(Attribute.create(AttributeKey.SPECIAL, "All melee attacks made by a Squad are considered melee Area Attacks that affect all squares within the Squad's Reach (Although a Squad can choose not to affect a target with its attacks)."))
+                .withProvided(Attribute.create(AttributeKey.SPECIAL, "All ranged attacks made by a Squad are considered to have a 1-square Splash. If the Squad's weapon already has a Splash effect, increase the Splash radius by 1 square."))
+                .withProvided(Attribute.create(AttributeKey.SPECIAL, "A Squad can choose not to affect allies with its attacks."))
+                .withProvided(Attribute.create(AttributeKey.SPECIAL, "Area Attacks deal +2 dice of damage against a Squad."))
+                .withProvided(Attribute.create(AttributeKey.SPECIAL, "A Squad cannot be Grabbed or Grappled."))
+                .withProvided(Attribute.create(AttributeKey.SPECIAL, "A Squad can make Attacks of Opportunity against creatures that provoke them, though these Attacks of Opportunity are not considered Area Attacks."))
+                .toJSON());
 
         response.add(Trait.create("GM Bonus").withDescription("Grants a bonus outside the usual character building mechanics")
                 .withProvided(Choice.create("Select a bonus")
@@ -672,7 +691,8 @@ public class TraitExporter extends BaseExporter {
 
         List<Object> attributes = new ArrayList<>();
         if (itemName.equals("Natural Armor")) {
-            attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, "#payload#"));
+            attributes.add(Attribute.create(AttributeKey.NATURAL_ARMOR_REFLEX_DEFENSE_BONUS, "#payload#"));
+            attributes.add(new Choice("Choose amount of Natural Armor to add").withType(Choice.Type.INTEGER));
         }
         return attributes;
     }

@@ -14,7 +14,7 @@ import swse.common.JSONy;
 public class ForceSecretsExporter extends BaseExporter
 {
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\secrets.csv";
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\force secrets.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\force secrets.json";
 
     public static void main(String[] args)
     {

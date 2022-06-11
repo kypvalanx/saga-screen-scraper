@@ -35,7 +35,7 @@ import static swse.prerequisite.SimplePrerequisite.simple;
 
 public class TemplateExporter extends BaseExporter {
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\templates.csv";
-    public static final String JSON_OUTPUT = "G:\\FoundryVTT\\Data\\systems\\swse\\raw_export\\templates.json";
+    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\templates.json";
     private static int num = 0;
     private static Set<String> allPrerequisites = new HashSet<String>();
     public static final Pattern TEMPLATE_PREFIX_PATTERN = Pattern.compile("([\\w\\s\\d-]*) (?:Droid|General|Weapon|Armor) Template");
