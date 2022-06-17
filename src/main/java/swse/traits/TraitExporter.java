@@ -25,6 +25,7 @@ import swse.common.JSONy;
 import swse.common.Option;
 import swse.common.ProvidedItem;
 import swse.common.Regex;
+import swse.prerequisite.SimplePrerequisite;
 import swse.util.Timer;
 import swse.util.Util;
 import static swse.util.Util.toEnumCase;
@@ -79,7 +80,7 @@ public class TraitExporter extends BaseExporter {
             response.add(Trait
                     .create(size)
                             .withProvided(Attribute.create(AttributeKey.SIZE_INDEX, i++))
-                    //.withProvided(getSizeModifiers(size))
+                    .withProvided(getSizeModifiers(size))
                     .toJSON());
 
         }
@@ -114,7 +115,7 @@ public class TraitExporter extends BaseExporter {
 
     private static Set<JSONObject> getDroidUnarmedDamageTraits() {
         Set<JSONObject> response = new HashSet<>();
-        response.add(Trait.create("Droid Unarmed Damage").withDescription("A droid has a limb that grants it #payload# damage when used in an unarmed attack.").withProvided(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "#payload#")).toJSON());
+        //response.add(Trait.create("Droid Unarmed Damage").withDescription("A droid has a limb that grants it #payload# damage when used in an unarmed attack.").withProvided(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "#payload#")).toJSON());
         response.add(Trait.create("Droid Default Appendage Offset").withDescription("A droid has no appendages until appendage items are added.").withProvided(Attribute.create(AttributeKey.APPENDAGES, "-2")).toJSON());
 
         return response;
@@ -568,107 +569,99 @@ public class TraitExporter extends BaseExporter {
         List<Attribute> attributes = new ArrayList<>();
         switch (itemName) {
             case "Colossal (Frigate)":
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10));
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8"));
-                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "1 square"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +100));
-                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +25));
-                break;
             case "Colossal (Cruiser)":
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10));
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8"));
-                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "4 squares"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +200));
-                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +30));
-                break;
             case "Colossal (Station)":
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10));
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8"));
-                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "4 squares"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +500));
-                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +35));
-                break;
             case "Colossal":
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10));
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8"));
-                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "1 square"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +50));
-                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +20));
-                break;
             case "Gargantuan":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -5));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "16 squares"));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -5));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d6"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -15));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +20));
-                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +15));
-                break;
             case "Huge":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -2));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "9 squares"));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -2));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d8"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -10));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +10));
-                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +10));
-                break;
             case "Large":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -1));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "4 squares"));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -1));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d6"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -5));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +5));
-                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +5));
-                break;
             case "Medium":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +0));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square"));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +0));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d4"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +0));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
-                break;
             case "Small":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +1));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square"));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +1));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d3"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +5));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
-                break;
             case "Tiny":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +2));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +2));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square"));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d2"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +10));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
-                break;
             case "Diminutive":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +5));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +5));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square"));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +15));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
-                break;
             case "Fine":
-                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +10));
-                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +10));
-                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square"));
-                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1"));
-                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +20));
-                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +100).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +25).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +200).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +30).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +500).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +35).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                attributes.add(Attribute.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -20).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +50).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "16 squares").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "2d6").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -15).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +15).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "9 squares").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d8").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d6").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, -5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                attributes.add(Attribute.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d4").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d3").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +5).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1d2").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +10).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +15).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+
+                attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                attributes.add(Attribute.create(AttributeKey.SHIP_SKILL_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                attributes.add(Attribute.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                attributes.add(Attribute.create(AttributeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                attributes.add(Attribute.create(AttributeKey.STEALTH_BONUS, +20).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
                 break;
         }
 

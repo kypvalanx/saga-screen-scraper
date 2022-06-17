@@ -226,7 +226,7 @@ public enum AttributeKey {
     GREATER_DEVASTATING_ATTACK("greaterDevastatingAttack"),
     SKIP_CRITICAL_MULTIPLY("skipCriticalMultiply"),
     DAMAGE_THRESHOLD_EFFECTIVE_SIZE("damageThresholdEffectiveSize"),
-    SIZE_INDEX("sizeIndex");
+    SIZE_INDEX("sizeIndex"), APPENDAGE_TYPE("appendageType");
 
     private final String value;
 

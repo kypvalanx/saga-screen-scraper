@@ -579,6 +579,7 @@ public class ItemExporter extends BaseExporter {
         }
         if (List.of("Probe", "Instrument", "Tool", "Claw", "Hand").contains(itemName)) {
             item.withProvided(Attribute.create(AttributeKey.APPENDAGES, "1"));
+            item.withProvided(Attribute.create(AttributeKey.APPENDAGE_TYPE, itemName));
             //printUnique(itemName);
         }
         if ("Stormtrooper Armor".equals(itemName)) {
