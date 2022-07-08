@@ -36,4 +36,9 @@ class BeastComponent extends FoundryItem<BeastComponent> implements Copyable<Bea
     public BeastComponent copy() {
         return null;
     }
+
+    public BeastComponent withType(String type) {
+        this.type = type;
+        return this;
+    }
 }

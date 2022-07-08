@@ -203,7 +203,7 @@ public enum AttributeKey {
     ALLOWS_REDIRECT_SHOT("allowsRedirectShot"),
     SIZE_BONUS("sizeBonus"),
     RANGE_MULTIPLIER("rangeMultiplier"),
-    STEALTH_BONUS("stealthBonus"),
+    STEALTH_BONUS("skillBonus"),
     SPEED_BONUS("speedBonus"),
     INITIATIVE_BONUS("initiativeBonus"),
     CARRIED_CRAFT("carriedCraft"),
@@ -226,7 +226,18 @@ public enum AttributeKey {
     GREATER_DEVASTATING_ATTACK("greaterDevastatingAttack"),
     SKIP_CRITICAL_MULTIPLY("skipCriticalMultiply"),
     DAMAGE_THRESHOLD_EFFECTIVE_SIZE("damageThresholdEffectiveSize"),
-    SIZE_INDEX("sizeIndex"), APPENDAGE_TYPE("appendageType");
+    SIZE_INDEX("sizeIndex"),
+    APPENDAGE_TYPE("appendageType"),
+    DARKVISION("darkvision"),
+    LIMITED_VISION("limitedVision"),
+    HEAT_SENSE("heatSense"),
+    MOTION_VISION("motionVision"),
+    CAMOUFLAGE("camouflage"),
+    FAST_HEALING("fastHealing"),
+    SNEAK_ATTACK("sneakAttack"),
+    POISON("poison"),
+    REND("rend"),
+    SKILL_RE_ROLL("skillReRoll");
 
     private final String value;
 

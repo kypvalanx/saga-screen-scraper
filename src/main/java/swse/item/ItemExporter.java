@@ -578,9 +578,7 @@ public class ItemExporter extends BaseExporter {
             item.withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, armorType));
         }
         if (List.of("Probe", "Instrument", "Tool", "Claw", "Hand").contains(itemName)) {
-            item.withProvided(Attribute.create(AttributeKey.APPENDAGES, "1"));
-            item.withProvided(Attribute.create(AttributeKey.APPENDAGE_TYPE, itemName));
-            //printUnique(itemName);
+            item.withProvided(getDroidAppendageAttributes(itemName));
         }
         if ("Stormtrooper Armor".equals(itemName)) {
             item.withProvided(Attribute.create(AttributeKey.PERCEPTION_MODIFIER, 2));
@@ -594,6 +592,110 @@ public class ItemExporter extends BaseExporter {
         jsonObjects.add(item);
 
         return jsonObjects;
+    }
+
+    private List<Object> getDroidAppendageAttributes(String itemName) {
+        List<Object> provided = new LinkedList<>();
+        provided.add(Attribute.create(AttributeKey.APPENDAGES, "1"));
+        provided.add(Attribute.create(AttributeKey.APPENDAGE_TYPE, itemName));
+
+        switch(itemName){
+            case "Probe":
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                        .withParentPrerequisite(OrPrerequisite.or(
+                                new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
+                                new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"),
+                                new SimplePrerequisite("Tiny Size", "SIZE", "Tiny"),
+                                new SimplePrerequisite("Small Size", "SIZE", "Small"))));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                        .withParentPrerequisite(OrPrerequisite.or(
+                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
+                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
+                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
+                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                break;
+            case "Instrument":
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                        .withParentPrerequisite(OrPrerequisite.or(
+                                new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
+                                new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"),
+                                new SimplePrerequisite("Tiny Size", "SIZE", "Tiny"))));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                        .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
+                        .withParentPrerequisite(OrPrerequisite.or(
+                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
+                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
+                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
+                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                break;
+            case "Tool":
+            case "Hand":
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                        .withParentPrerequisite(OrPrerequisite.or(
+                                new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
+                                new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"))));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                        .withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                        .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
+                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
+                        .withParentPrerequisite(OrPrerequisite.or(
+                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
+                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
+                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
+                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                break;
+            case "Claw":
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                        .withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                        .withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                        .withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                        .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
+                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
+                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                provided.add(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "2d8")
+                        .withParentPrerequisite(OrPrerequisite.or(
+                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
+                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
+                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
+                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                break;
+        }
+        return provided;
     }
 
     private static Collection<? extends JSONy> getItemVariants(Item item, String itemName) {

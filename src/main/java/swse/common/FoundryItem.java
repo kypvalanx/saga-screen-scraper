@@ -13,7 +13,7 @@ import swse.item.Mode;
 import swse.prerequisite.Prerequisite;
 
 public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
-    protected final String type;
+    protected String type;
     protected String name;
     protected String description = "";
     protected Prerequisite prerequisite;

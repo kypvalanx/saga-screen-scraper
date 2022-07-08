@@ -486,7 +486,7 @@ public class TemplateExporter extends BaseExporter {
                 break;
             case "Stygian-Triprismatic Polymer Armor Template":
                 response.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "+1"));
-                response.add(Attribute.create(AttributeKey.STEALTH_BONUS, "+2").withModifier("electronic sensors"));
+                response.add(Attribute.create(AttributeKey.STEALTH_BONUS, "stealth:2").withModifier("electronic sensors"));
                 break;
             case "Advanced Droid Template":
                 response.add(Attribute.create(AttributeKey.BONUS_SPECIAL_TRAIT, 1));
@@ -547,7 +547,7 @@ public class TemplateExporter extends BaseExporter {
                 response.add(Attribute.create(AttributeKey.FRAGILE, "true"));
                 break;
             case "GenoHaradan General Template (armor)":
-                response.add(Attribute.create(AttributeKey.STEALTH_BONUS, 2));
+                response.add(Attribute.create(AttributeKey.STEALTH_BONUS, "stealth:2"));
                 response.add(Attribute.create(AttributeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, -1));
                 break;
             case "Iridonian General Template (weapon)":
