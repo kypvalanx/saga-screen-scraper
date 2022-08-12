@@ -23,6 +23,9 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     private final List<NamedCrew> namedCrewMembers = new LinkedList<>();
     private String equip;
     private boolean unlocked = false;
+    private String quantity;
+    private String nameOverride;
+    private String payload;
 
     private ProvidedItem(String name, ItemType type, Prerequisite prerequisite){
 //        Pattern p = Pattern.compile("(Dexterity|Strength|Constitution|Intelligence|Wisdom|Charisma)");
@@ -78,6 +81,9 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     public JSONObject toJSON(){
         JSONObject data = new JSONObject();
         data.put("name", name);
+        if(nameOverride!= null) {
+            data.put("nameOverride", nameOverride);
+        }
         data.put("type", type.toString());
         data.put("prerequisite", JSONy.toJSON(prerequisite));
         if(unlocked){
@@ -91,6 +97,8 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
         data.put("providedItems", JSONy.toArray(providedItems));
         data.put("modifications", JSONy.toArray(modifications));
         data.put("namedCrew", JSONy.toArray(namedCrewMembers));
+        data.put("quantity", quantity);
+        data.put("payload", payload);
         return data;
     }
 
@@ -152,6 +160,21 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
 
     public ProvidedItem withUnlocked(boolean b) {
         this.unlocked = b;
+        return this;
+    }
+
+    public ProvidedItem withQuantity(String quantity) {
+        this.quantity = quantity;
+        return this;
+    }
+
+    public ProvidedItem withCustomName(String nameOverride) {
+        this.nameOverride = nameOverride;
+        return this;
+    }
+
+    public ProvidedItem withPayload(String payload) {
+        this.payload = payload;
         return this;
     }
 }

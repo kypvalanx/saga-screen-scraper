@@ -22,6 +22,8 @@ public class AffiliationExporter extends BaseExporter
 
         List<JSONObject> entries = new AffiliationExporter().getEntriesFromCategoryPage(talentLinks);
 
+        printUniqueNames(entries);
+
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args,"d"));
     }
 

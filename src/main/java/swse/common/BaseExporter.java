@@ -322,6 +322,15 @@ public abstract class BaseExporter {
     //        }
 
 
+    public static void printUniqueNames(List<JSONObject> entries) {
+        List<String> names = new LinkedList<>();
+        for(JSONObject entry : entries){
+            names.add((String) entry.get("name"));
+        }
+
+        System.out.println("List.of(\"" + names.stream().map(s -> s.replaceAll("\"", "\\\"")).collect(Collectors.joining("\", \"")) + "\")");
+    }
+
     abstract protected Collection<JSONy> parseItem(String itemLink, boolean overwrite);
 
     private Collection<? extends JSONObject> readCategoryItemPage(String itemPageLink, boolean overwrite) {
@@ -347,7 +356,12 @@ public abstract class BaseExporter {
         List<String> names = new LinkedList<>();
         for (String talentLink : talentLinks) {
             //entries.addAll(readCategoryItemPage(talentLink, false));
-            Collection<? extends JSONObject> newEntities = readCategoryItemPage(talentLink, false);
+            Collection<? extends JSONObject> newEntities = List.of();
+            if(talentLink.contains("Category")) {
+                newEntities = readCategoryItemPage(talentLink, true);
+            } else {
+                newEntities = parseItem(talentLink, true).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
+            }
             for (JSONObject newEntity : newEntities) {
                 if (names.contains(newEntity.get("name"))) {
                     System.out.println("Duplicate: " + newEntity.get("name") + " from: " + talentLink);
@@ -358,7 +372,6 @@ public abstract class BaseExporter {
             }
         }
 
-        System.out.println("List.of(\"" + String.join("\", \"", names) + "\")");
         return entries;
     }
 }

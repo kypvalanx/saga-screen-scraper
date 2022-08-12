@@ -24,6 +24,7 @@ public class ForcePowersExporter extends BaseExporter
         talentLinks.add("/wiki/Category:Force_Powers");
 
         List<JSONObject> entries = new ForcePowersExporter().getEntriesFromCategoryPage(talentLinks);
+        printUniqueNames(entries);
 
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
     }

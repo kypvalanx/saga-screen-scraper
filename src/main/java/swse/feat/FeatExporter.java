@@ -39,6 +39,7 @@ public class FeatExporter extends BaseExporter {
 
         List<JSONObject> entries = new FeatExporter().getEntriesFromCategoryPage(featLinks);
 
+        printUniqueNames(entries);
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }

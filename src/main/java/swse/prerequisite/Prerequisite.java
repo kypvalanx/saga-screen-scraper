@@ -42,7 +42,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
     protected final String type;
 
     public Prerequisite(String plainText, String type) {
-        printUnique("---"+type);
+        //printUnique("---"+type);
         this.plainText = plainText;
         this.type = type;
         //Util.printUnique("TYPE: "+ type);

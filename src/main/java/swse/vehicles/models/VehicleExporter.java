@@ -55,6 +55,7 @@ public class VehicleExporter extends BaseExporter {
 
         List<JSONObject> entries = new VehicleExporter().getEntriesFromCategoryPage(vehicleSystemLinks);
 
+        printUniqueNames(entries);
 
         System.out.println("processed " + entries.size() + " of 647");
 

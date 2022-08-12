@@ -118,6 +118,8 @@ public class ItemExporter extends BaseExporter {
 
         entries.addAll(getManualItems());
 
+        printUniqueNames(entries);
+
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }
 
@@ -137,18 +139,16 @@ public class ItemExporter extends BaseExporter {
         {
             Elements rows = table.getElementsByTag("tr");
             rows.forEach(row ->
-            {
-                row.getElementsByTag("td").forEach(element -> {
-                    if (element != null) {
-                        Element anchor = element.getElementsByTag("a").first();
-                        if (anchor != null) {
-                            String href = anchor.attr("href");
-                            hrefs.add(href);
-                            //items.addAll(parseItem(href));
+                    row.getElementsByTag("td").forEach(element -> {
+                        if (element != null) {
+                            Element anchor = element.getElementsByTag("a").first();
+                            if (anchor != null) {
+                                String href = anchor.attr("href");
+                                hrefs.add(href);
+                                //items.addAll(parseItem(href));
+                            }
                         }
-                    }
-                });
-            });
+                    }));
         });
 
 
@@ -489,6 +489,10 @@ public class ItemExporter extends BaseExporter {
         attributes.addAll(getManualAttributes(itemName, itemSubType));
         attributes.addAll(getModes(rateOfFire, itemName));
         String damageDie = getDamageDie(itemName, damage);
+
+        if(itemType.equals("upgrade")){
+            attributes.add(Attribute.create(AttributeKey.ITEM_MOD, true));
+        }
 
         if (damageDie == null && damage != null) {
             if (damage.toLowerCase().contains(" to unarmed attacks")) {

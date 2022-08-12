@@ -58,12 +58,7 @@ public class SpeciesExporter extends BaseExporter {
         System.out.println("processed "+ entries.size() + " of 345");
         System.out.println("species with auto languages " + languages);
 
-        List<String> names = new LinkedList<>();
-        for(JSONObject entry : entries){
-            names.add((String) entry.get("name"));
-        }
-
-        System.out.println("List.of(\"" + String.join("\", \"", names) + "\")");
+        printUniqueNames(entries);
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }

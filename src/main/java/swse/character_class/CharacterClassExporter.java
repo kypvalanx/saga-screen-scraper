@@ -73,12 +73,21 @@ public class CharacterClassExporter extends BaseExporter {
         classLinkList.add("/wiki/Pathfinder");
         classLinkList.add("/wiki/Martial_Arts_Master");
 
+        List<String> names = new ArrayList<>();
+
         List<JSONObject> entries = new ArrayList<>();
         final CharacterClassExporter characterClassExporter = new CharacterClassExporter();
         for (String speciesLink : classLinkList) {
-            entries.addAll(characterClassExporter.parseItem(speciesLink, false).stream().map(item -> item.toJSON()).collect(Collectors.toList()));
+            List<JSONObject> collect = characterClassExporter.parseItem(speciesLink, false).stream().map(item -> item.toJSON()).collect(Collectors.toList());
+            for(JSONObject entity: collect){
+                names.add((String) entity.get("name"));
+            }
+            entries.addAll(collect);
         }
 
+
+
+        System.out.println("List.of(\"" + String.join("\", \"", names) + "\")");
         //System.out.println(allClasses.stream().map(feat -> "\""+feat+"\"").collect(Collectors.toList()));
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
         //writeToCSV(new File(OUTPUT_FILE), entries);

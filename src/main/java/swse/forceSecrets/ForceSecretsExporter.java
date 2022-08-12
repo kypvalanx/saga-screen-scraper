@@ -20,8 +20,10 @@ public class ForceSecretsExporter extends BaseExporter
     {
         List<String> talentLinks = new ArrayList<String>();
         talentLinks.add("/wiki/Category:Force_Secrets");
+        talentLinks.add("/wiki/Pure_Power");
 
         List<JSONObject> entries = new ForceSecretsExporter().getEntriesFromCategoryPage(talentLinks);
+        printUniqueNames(entries);
 
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
     }

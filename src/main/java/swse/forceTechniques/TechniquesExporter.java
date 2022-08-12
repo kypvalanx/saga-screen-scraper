@@ -23,6 +23,7 @@ public class TechniquesExporter extends BaseExporter
 
 
         List<JSONObject> entries = new TechniquesExporter().getEntriesFromCategoryPage(talentLinks);
+        printUniqueNames(entries);
 
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
     }

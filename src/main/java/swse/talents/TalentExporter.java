@@ -72,11 +72,14 @@ public class TalentExporter extends BaseExporter
         List<String> talentLinks = new ArrayList<String>();
         //talentLinks.add("/wiki/Talents");
         //talentLinks.add("/wiki/Force_Talents");
-        //talentLinks.add("/wiki/Droid_Talents");
+        //talentLinks.add("/wiki/Master_of_Ter%C3%A4s_K%C3%A4si_Talent_Tree");
         talentLinks.add("/wiki/Category:Talent_Trees");
+       // List<String> talentLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Talent_Trees?from="));
 
 
         List<JSONObject> entries = new TalentExporter().getEntriesFromCategoryPage(talentLinks);
+
+        printUniqueNames(entries);
 
         System.out.println("Generated " + entries.size() + " of 1381");
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
