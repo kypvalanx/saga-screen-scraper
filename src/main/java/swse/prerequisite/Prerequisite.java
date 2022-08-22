@@ -666,17 +666,32 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(and(text, prerequisites));
         }
 
+        if(text.equals("Weapon Focus (Melee Weapon)")){
+            return List.of(or(simple("Weapon Focus (Advanced Melee Weapons)", "FEAT", "Weapon Focus (Advanced Melee Weapons)"),
+                    simple("Weapon Focus (Lightsaber)", "FEAT", "Weapon Focus (Lightsabers)"),
+                    simple("Weapon Focus (Simple Melee Weapons)", "FEAT", "Weapon Focus (Simple Melee Weapons)"),
+                    simple("Weapon Focus (Melee Natural Weapons)", "FEAT", "Weapon Focus (Melee Natural Weapons)"),
+                    simple("Weapon Focus (Exotic Melee Weapons)", "FEAT", "Weapon Focus (Exotic Melee Weapons)")));
+        }
+
         if (text.startsWith("Skill Focus") || text.startsWith("Weapon Proficiency")
                 || text.startsWith("Weapon Focus") || text.startsWith("Armor Proficiency")
                 || text.startsWith("Double Attack") || text.startsWith("Exotic Weapon Proficiency")
-                || text.startsWith("Devastating Attack")
-                || text.startsWith("Penetrating Attack")
                 || text.startsWith("Brutal Attack")) {
             final String requirement = text.replace("Chosen Weapon", "#payload#").replace("Chosen Skill", "#payload#");
             if (requirement.contains("#payload#")) {
                 //printUnique(Context.getValue("name"), requirement);
             }
             return List.of(simple(requirement, "FEAT", requirement));
+        }
+
+        if (text.startsWith("Devastating Attack")
+                || text.startsWith("Penetrating Attack")) {
+            final String requirement = text.replace("Chosen Weapon", "#payload#").replace("Chosen Skill", "#payload#");
+            if (requirement.contains("#payload#")) {
+                //printUnique(Context.getValue("name"), requirement);
+            }
+            return List.of(simple(requirement, "TALENT", requirement));
         }
 
         if (text.startsWith("Greater Weapon Focus") || text.startsWith("Weapon Specialization")) {

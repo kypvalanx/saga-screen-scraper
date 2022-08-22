@@ -111,6 +111,8 @@ public class FeatExporter extends BaseExporter {
                                     payload.startsWith("This Feat may be selected multiple times")) {
                                 provided.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, "true"));
                             }
+//                        case "Effect":
+//                            printUnique(payload);
                         default:
                     }
                 }
@@ -222,6 +224,12 @@ public class FeatExporter extends BaseExporter {
                 break;
             case "Armor Proficiency (Heavy)":
                 attributes.add(Attribute.create(AttributeKey.ARMOR_PROFICIENCY, "heavy"));
+                break;
+            case "Grand Army of the Republic Training":
+                attributes.add(Attribute.create(AttributeKey.APPLY_BONUS_TO, AttributeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT + ":will"));
+                break;
+            case "Force Regimen Mastery":
+                attributes.add(Attribute.create(AttributeKey.PROVIDES, "Force Regimen:MAX(1 + @WISMOD,1)"));
                 break;
             default:
         }

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
+import org.apache.commons.collections4.Bag;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import static swse.common.BaseExporter.getDescription;
@@ -25,6 +27,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     protected String source;
     protected String availability;
     protected String subtype;
+    private List<Modification> modifications;
 
     public FoundryItem(String name, String type) {
         this.name = name;
@@ -32,6 +35,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         this.categories = new ArrayList<>();
         this.attributes =  new ArrayList<>();
         this.providedItems =  new ArrayList<>();
+        this.modifications =  new ArrayList<>();
         this.type = type;
     }
 
@@ -87,11 +91,10 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         if (prerequisite != null) {
             data.put("prerequisite", JSONy.toJSON(prerequisite));
         }
-        if (categories != null) {
-            data.put("categories", JSONy.toArray(categories));
-            //categories.forEach(category -> providedItems.add(ProvidedItem.create(category.getValue(), ItemType.TRAIT)));
-        }
+        data.put("categories", JSONy.toArray(categories));
+        //categories.forEach(category -> providedItems.add(ProvidedItem.create(category.getValue(), ItemType.TRAIT)));
         data.put("providedItems",JSONy.toArray(providedItems));
+        data.put("modifications",JSONy.toArray(modifications));
 
         data.put("attributes", createAttributes(attributes.stream().filter(Objects::nonNull).map(Attribute::toJSON).collect(Collectors.toList())));
 
@@ -205,6 +208,8 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
                 providedItems.add((ProvidedItem)object);
             } else if(object instanceof Category){
                 categories.add((Category)object);
+            } else if(object instanceof Modification){
+                modifications.add((Modification)object);
             }
         }
         return (T) this;

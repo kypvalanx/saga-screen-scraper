@@ -203,7 +203,7 @@ public enum AttributeKey {
     ALLOWS_REDIRECT_SHOT("allowsRedirectShot"),
     SIZE_BONUS("sizeBonus"),
     RANGE_MULTIPLIER("rangeMultiplier"),
-    STEALTH_BONUS("skillBonus"),
+    SKILL_BONUS("skillBonus"),
     SPEED_BONUS("speedBonus"),
     INITIATIVE_BONUS("initiativeBonus"),
     CARRIED_CRAFT("carriedCraft"),
@@ -237,7 +237,8 @@ public enum AttributeKey {
     SNEAK_ATTACK("sneakAttack"),
     POISON("poison"),
     REND("rend"),
-    SKILL_RE_ROLL("skillReRoll");
+    SKILL_RE_ROLL("skillReRoll"),
+    APPLY_BONUS_TO("applyBonusTo");
 
     private final String value;
 
@@ -252,4 +253,16 @@ public enum AttributeKey {
     }
 
 
+    public static void main(String[] args){
+        AttributeKey[] keys = AttributeKey.values();
+
+        System.out.println("# Attribute Key Documentation");
+        System.out.println("below lists all currently used attributes.  coming soon a description of what they do and examples");
+
+        System.out.println();
+        System.out.println();
+        for(AttributeKey key : keys){
+            System.out.println(key.value());
+        }
+    }
 }

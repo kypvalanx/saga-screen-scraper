@@ -24,10 +24,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import swse.common.Attribute;
-import swse.common.AttributeKey;
-import swse.common.BaseExporter;
-import swse.common.JSONy;
+import swse.common.*;
 import swse.prerequisite.OrPrerequisite;
 import swse.prerequisite.SimplePrerequisite;
 import swse.util.Context;
@@ -585,8 +582,7 @@ public class ItemExporter extends BaseExporter {
             item.withProvided(getDroidAppendageAttributes(itemName));
         }
         if ("Stormtrooper Armor".equals(itemName)) {
-            item.withProvided(Attribute.create(AttributeKey.PERCEPTION_MODIFIER, 2));
-            item.withProvided(Attribute.create(AttributeKey.LOW_LIGHT_VISION, true));
+            item.withProvided(Modification.create(ProvidedItem.create("Helmet Package", ItemType.ITEM)));
             //response.add(swse.traits.Trait.create("Stormtrooper Perception Bonus").withProvided(Attribute.create("perceptionModifier", 2)).toJSON());
             //response.add(swse.traits.Trait.create("Low-Light Vision").withProvided(Attribute.create("lowLightVision", true)).toJSON());
         }
@@ -912,6 +908,11 @@ public class ItemExporter extends BaseExporter {
         }
         if("Heuristic Processor".equals(itemName)){
             attributes.add(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Basic Processor"));
+        }
+        if("Helmet Package".equals(itemName)){
+            attributes.add(Attribute.create(AttributeKey.SKILL_BONUS, "perception:+2"));
+            attributes.add(Attribute.create(AttributeKey.LOW_LIGHT_VISION, "true"));
+            attributes.add(Modification.create(ProvidedItem.create("Hands-Free Comlink", ItemType.ITEM)));
         }
 
         return attributes;
