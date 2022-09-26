@@ -13,7 +13,7 @@ import java.util.*;
 
 public class BeastComponentExporter extends BaseExporter
 {
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\beast components.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\beast components.json";
     private static List<String> allPowers = new ArrayList<>();
 
     public static void main(String[] args)

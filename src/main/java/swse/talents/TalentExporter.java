@@ -62,7 +62,7 @@ public class TalentExporter extends BaseExporter
         "Ambush",
         "Keep it Together");
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\talents.csv";
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\talents.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\talents.json";
     private static int num = 0;
     private static Set<Category> allCategories = new HashSet<Category>();
     private static List<String> allTalents = new ArrayList<>();
@@ -77,7 +77,7 @@ public class TalentExporter extends BaseExporter
        // List<String> talentLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Talent_Trees?from="));
 
 
-        List<JSONObject> entries = new TalentExporter().getEntriesFromCategoryPage(talentLinks);
+        List<JSONObject> entries = new TalentExporter().getEntriesFromCategoryPage(talentLinks, true);
 
         printUniqueNames(entries);
 

@@ -19,7 +19,7 @@ import swse.common.JSONy;
 
 public class LanguageExporter extends BaseExporter {
     public static final String IMAGE_FOLDER = "systems/swse/icon/species";
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\languages.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\languages.json";
 
 
     public static void main(String[] args) {
@@ -28,9 +28,9 @@ public class LanguageExporter extends BaseExporter {
         speciesLinks.add("/wiki/Droid_Chassis");
 
         List<JSONObject> entries = new ArrayList<>();
-        for (String itemLink : speciesLinks) {
-            entries.addAll(readItemMenuPage(itemLink, true));
-        }
+//        for (String itemLink : speciesLinks) {
+//            entries.addAll(readItemMenuPage(itemLink, true));
+//        }
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }

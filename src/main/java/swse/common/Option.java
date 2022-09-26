@@ -1,6 +1,7 @@
 package swse.common;
 
 import com.google.common.base.MoreObjects;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,23 +9,33 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
 import org.json.JSONObject;
+
 import static swse.common.FoundryItem.createAttributes;
 
 public class Option implements JSONy, Copyable<Option> {
-    private String name;
+    private String display;
+    private final String value;
     List<ProvidedItem> providedItems = new ArrayList<>();
     List<Attribute> attributes = new ArrayList<>();
     private final Map<String, String> payloads = new HashMap<>();
     private String rollRange;
     private boolean isDefault = false;
 
-    public Option(){
-        this.name = null;
+    public Option() {
+        this.display = null;
+        this.value = null;
     }
 
-    public Option(String name){
-        this.name = name;
+    public Option(String display) {
+        this.display = display;
+        this.value = display;
+    }
+
+    public Option(String display, String value) {
+        this.display = display;
+        this.value = value;
     }
 
 
@@ -45,11 +56,16 @@ public class Option implements JSONy, Copyable<Option> {
                 .put("rollRange", rollRange)
                 .put("payloads", payloadsObj);
 
-        if(name != null){
-            obj.put("name", name);
+
+        if (value != null) {
+            obj.put("value", value);
+        }
+        if (display != null) {
+            obj.put("display", display);
+            obj.put("name", display);
         }
 
-        if(isDefault){
+        if (isDefault) {
             obj.put("isDefault", true);
         }
 
@@ -73,7 +89,7 @@ public class Option implements JSONy, Copyable<Option> {
         return this;
     }
 
-    public Option isDefault(){
+    public Option isDefault() {
         this.isDefault = true;
         return this;
     }
@@ -118,8 +134,8 @@ public class Option implements JSONy, Copyable<Option> {
         return this;
     }
 
-    public Option withName(String name) {
-        this.name = name;
+    public Option withDisplay(String name) {
+        this.display = name;
         return this;
     }
 }

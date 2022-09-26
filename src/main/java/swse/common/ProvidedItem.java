@@ -1,11 +1,13 @@
 package swse.common;
 
 import com.google.common.base.Objects;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import swse.prerequisite.AndPrerequisite;
@@ -25,7 +27,8 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     private boolean unlocked = false;
     private String quantity;
     private String nameOverride;
-    private String payload;
+    private Map<String, String> payloads = new HashMap<>();
+    private List<String> answers = new ArrayList<>();
 
     private ProvidedItem(String name, ItemType type, Prerequisite prerequisite){
 //        Pattern p = Pattern.compile("(Dexterity|Strength|Constitution|Intelligence|Wisdom|Charisma)");
@@ -92,13 +95,16 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
         if(equip != null){
             data.put("equip", equip);
         }
+        if(answers.size() > 0){
+            data.put("answers", answers);
+        }
 
         data.put("attributes", JSONy.toArray(attributes));
         data.put("providedItems", JSONy.toArray(providedItems));
         data.put("modifications", JSONy.toArray(modifications));
         data.put("namedCrew", JSONy.toArray(namedCrewMembers));
         data.put("quantity", quantity);
-        data.put("payload", payload);
+        data.put("payloads", JSONy.toObject(payloads));
         return data;
     }
 
@@ -174,7 +180,17 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     }
 
     public ProvidedItem withPayload(String payload) {
-        this.payload = payload;
+        this.payloads.put("payload", payload);
+        return this;
+    }
+
+    public ProvidedItem withPayload(String key, String payload) {
+        this.payloads.put(key, payload);
+        return this;
+    }
+
+    public ProvidedItem withAnswers(List<String> speciesAnswers) {
+        this.answers.addAll(speciesAnswers);
         return this;
     }
 }

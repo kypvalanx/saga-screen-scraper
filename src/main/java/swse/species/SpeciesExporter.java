@@ -36,7 +36,7 @@ import swse.common.ProvidedItem;
 
 public class SpeciesExporter extends BaseExporter {
     public static final String IMAGE_FOLDER = "systems/swse/icon/species";
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\species.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\species.json";
     public static final String ROOT = "G:/FoundryVTT/Data";
     public static final List<String> DUMMY_CATEGORYS = List.of("Damage Reduction", "Conditional Bonus Feat", "Natural Armor", "Bonus Class Skill", "Species");
     public static final Pattern BONUS_FEAT_PATTERN = Pattern.compile("gain one bonus Feat at 1st level");
@@ -108,8 +108,8 @@ public class SpeciesExporter extends BaseExporter {
 
         Elements headingElements = doc.getElementsByClass("page-header__title");
 
-        if (headingElements.size() > 1) {
-            throw new IllegalStateException("too many headers " + headingElements);
+        if (headingElements.size() != 1) {
+            return List.of();
         }
 
         String speciesName = headingElements.first().text();
@@ -147,7 +147,6 @@ public class SpeciesExporter extends BaseExporter {
                 .withProvided(addTraitsFromCategories(categories, speciesName))
                 .withProvided(StartingFeats.getStartingFeatsFromCategories(categories))
                 .withProvided(StatBonuses.getStatBonuses(content, speciesName))
-                .withProvided(getDroidUnarmedDamage(speciesName))
                 .withProvided(getDroidChoice(speciesName))
                 .withProvided(getMechanicLocomotionChoice(speciesName))
                 .withProvided(getSpeciesSpecificChoice(speciesName))
@@ -160,60 +159,6 @@ public class SpeciesExporter extends BaseExporter {
                 .withProvided(getBonusItems(content));
 
         return Lists.newArrayList(species);
-    }
-
-    private static Collection<Object> getDroidUnarmedDamage(String speciesName) {
-        if (!speciesName.toLowerCase().contains("droid")) {
-            return new ArrayList<>();
-        }
-
-        if(defaultDroidUnarmedDamage != null){
-            return defaultDroidUnarmedDamage;
-        }
-        defaultDroidUnarmedDamage = new ArrayList<>();
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Diminutive"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Tiny"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Tiny"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Medium"));
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Tiny"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d2)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Large"));
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Small"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d3)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Huge"));
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Medium"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d4)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Gargantuan"));
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Large"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d6)", ItemType.TRAIT, "EQUIPPED:Probe", "TRAIT:Colossal"));
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Huge"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (1d8)", ItemType.TRAIT, "EQUIPPED:Instrument", "TRAIT:Colossal"));
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d6)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Gargantuan"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d6)", ItemType.TRAIT, "EQUIPPED:Tool", "TRAIT:Colossal"));
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d6)", ItemType.TRAIT, "EQUIPPED:Hand", "TRAIT:Colossal"));
-
-        defaultDroidUnarmedDamage.add(ProvidedItem.create("Droid Unarmed Damage (2d8)", ItemType.TRAIT, "EQUIPPED:Claw", "TRAIT:Colossal"));
-
-        return defaultDroidUnarmedDamage;
     }
 
     private static Collection<?> addTraitsFromCategories(Set<Category> categories, String speciesName) {
@@ -542,15 +487,15 @@ public class SpeciesExporter extends BaseExporter {
         Choice droidChoice = new Choice("Select the size of your droid's chassis:")
                 .withShowSelectionInName(false);
 
-        droidChoice.withOption(new Option("Fine (GM Only)").withProvidedItem(ProvidedItem.create("Fine", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Diminutive (GM Only)").withProvidedItem(ProvidedItem.create("Diminutive", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Tiny (GM Only)").withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Fine (GM Only)", "Fine").withProvidedItem(ProvidedItem.create("Fine", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Diminutive (GM Only)", "Diminutive").withProvidedItem(ProvidedItem.create("Diminutive", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Tiny (GM Only)", "Tiny").withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)));
         droidChoice.withOption(new Option("Small").withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)));
         droidChoice.withOption(new Option("Medium").withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Large (GM Only)").withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Huge (GM Only)").withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Gargantuan (GM Only)").withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Colossal (GM Only)").withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Large (GM Only)", "Large").withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Huge (GM Only)", "Huge").withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Gargantuan (GM Only)", "Gargantuan").withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Colossal (GM Only)", "Colossal").withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT)));
         choices.add(droidChoice);
         return choices;
     }

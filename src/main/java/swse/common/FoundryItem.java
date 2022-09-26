@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.collections4.Bag;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import static swse.common.BaseExporter.getDescription;
@@ -28,6 +29,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     protected String availability;
     protected String subtype;
     private List<Modification> modifications;
+    private String id;
 
     public FoundryItem(String name, String type) {
         this.name = name;
@@ -78,10 +80,21 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     @Override
     public JSONObject toJSON(){
         preJSON();
+        List<String> flags = getFlags();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         jsonObject.put("img", image);
         jsonObject.put("type", type);
+        jsonObject.put("effects", new JSONArray());
+        jsonObject.put("flags", new JSONObject());
+        jsonObject.put("folder", (String)null );
+        jsonObject.put("sort", 0);
+        if(id != null){
+            jsonObject.put("_id", id);
+        }
+        JSONObject permission = new JSONObject();
+        permission.put("default", 0);
+        jsonObject.put("permission", permission);
 
         JSONObject data = new JSONObject();
         data.put("description", description);
@@ -96,12 +109,18 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         data.put("providedItems",JSONy.toArray(providedItems));
         data.put("modifications",JSONy.toArray(modifications));
 
-        data.put("attributes", createAttributes(attributes.stream().filter(Objects::nonNull).map(Attribute::toJSON).collect(Collectors.toList())));
+        data.put("attributes", createAttributes(attributes.stream().filter(Objects::nonNull).map(Attribute::toJSON).collect(Collectors.toList()), flags));
+
+
 
         //printUnique("------ "+type + " - " + subtype);
         jsonObject.put("data", data);
         return jsonObject;
     }
+
+    protected List<String> getFlags(){
+        return new ArrayList<>();
+    };
 
     /**
      * returns a JSONObject that resembles an array.  we are doing this because we want to be able to add and remove attributes from items more easily in foundry
@@ -109,9 +128,19 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
      * @return
      */
     public static JSONObject createAttributes(List<JSONObject> attributes){
+        return createAttributes(attributes, List.of());
+    }
+
+    private static JSONObject createAttributes(List<JSONObject> attributes, List<String> flags) {
+        boolean isEstimate = flags.contains("ATTRIBUTES_ARE_ESTIMATE");
+        boolean useNameInKey = flags.contains("USE_NAME_IN_KEY");
         JSONObject json = new JSONObject();
-        for(int i = 0; i<attributes.size(); i++){
-            json.put(String.valueOf(i), attributes.get(i));
+        int i = 0;
+        for (JSONObject value : attributes) {
+            if(isEstimate){
+                value.put("estimate", value.get("value"));
+            }
+            json.put(useNameInKey ? (String)value.get("key") : String.valueOf(i++), value);
         }
 
         return json;
@@ -254,6 +283,11 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         return (T) this;
     }
 
+    public T withId(String id) {
+        this.id = id;
+        return (T) this;
+    }
+
 
     public String getName() {
         return name;
@@ -264,4 +298,6 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         this.attributes.add(attribute);
         return (T) this;
     }
+
+
 }

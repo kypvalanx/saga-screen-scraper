@@ -22,7 +22,7 @@ import swse.common.Option;
 import swse.common.ProvidedItem;
 
 public class BackgroundExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\background.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\background.json";
 
     public static void main(String[] args) {
         List<String> destinyLinks = new LinkedList<>();

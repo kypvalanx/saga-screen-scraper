@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static java.util.regex.Pattern.compile;
+import static swse.util.Util.printUnique;
+
 import java.util.stream.Collectors;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
@@ -23,7 +25,7 @@ public class StartingFeats
 
     public static final Pattern BONUS_FEAT_PATTERN = compile("(?:Conditional )?Bonus Feat \\(([\\w\\s()]*)\\)");
 
-    static List<Attribute> getStartingFeats(Elements entries)
+    static List<Attribute> getStartingFeats(Elements entries, String itemName)
     {
         List<Attribute> attributes = new ArrayList<>();
         boolean found = false;
@@ -37,21 +39,22 @@ public class StartingFeats
                 {
                     allowUL = false;
                     found = false;
-                    attributes.addAll(entry.select("li").stream()
+                    entry.select("li").stream()
                             .map(Element::text)
-                            .map(text -> Attribute.create(AttributeKey.CLASS_FEAT, text)).collect(Collectors.toList()));
+                            .map(StartingFeats::createAttribute).forEach(attributes::add);
+                    //attributes.addAll();
 
                 } else if ((entry.tag().equals(Tag.valueOf("p")) && (entry.text().toLowerCase().startsWith("weapon proficiency") || entry.text().toLowerCase().startsWith("skill focus") || entry.text().toLowerCase().startsWith("technologist") || entry.text().toLowerCase().startsWith("force sensitivity") || entry.text().toLowerCase().startsWith("force training")|| entry.text().toLowerCase().startsWith("tech specialist")))
                         && !entry.text().toLowerCase().contains(" or "))
                 {
                     allowUL = false;
-                    attributes.add(Attribute.create(AttributeKey.CLASS_FEAT, entry.text()));
+                    attributes.add(createAttribute(entry.text()));
                 } else if (entry.tag().equals(Tag.valueOf("p")) && (entry.text().toLowerCase().startsWith("armor proficiency")))
                 {
                     allowUL = false;
                     found = false;
                     attributes.add(Attribute.create(AttributeKey.AVAILABLE_CLASS_FEATS, 3));
-                    attributes.addAll(Arrays.stream(entry.text().split(",")).map(text -> Attribute.create(AttributeKey.CLASS_FEAT, text)).collect(Collectors.toList()));
+                    Arrays.stream(entry.text().split(",")).map(StartingFeats::createAttribute).forEach(attributes::add);
                 }
             } else if (entry.tag().equals(Tag.valueOf("h4")) && entry.text().toLowerCase().contains("starting feats"))
             {
@@ -59,7 +62,22 @@ public class StartingFeats
             }
         }
         //System.out.println(found && !allowP && !allowUL);
+
+        //printClassFeatList(attributes, itemName);
+
         return attributes;
+    }
+
+    private static Attribute createAttribute(String text) {
+        return Attribute.create(AttributeKey.CLASS_FEAT, cleanStartingFeat(text));
+    }
+
+    private static String cleanStartingFeat(String text) {
+        return text.trim().replace("*", "").replace(".", "");
+    }
+
+    private static void printClassFeatList(List<Attribute> attributes, String itemName) {
+        System.out.println("List<String> " + itemName.toUpperCase()+ "_STARTING_FEATS = List.of(" + attributes.stream().filter(attribute -> attribute.getKey().equals("classFeat")).map(attribute -> "\"" + attribute.getValue() + "\"").collect(Collectors.joining(", ")) + ");");
     }
 
     public static List<Object> getStartingFeatsFromCategories(Set<Category> categories)

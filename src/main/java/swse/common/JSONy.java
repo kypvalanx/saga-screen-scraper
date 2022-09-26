@@ -1,6 +1,7 @@
 package swse.common;
 
 import java.util.Collection;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,6 +27,20 @@ public interface JSONy
             return null;
         }
         return jsony.toJSON();
+    }
+
+    static JSONObject toObject(Map<String, ?> payloads) {
+
+        JSONObject object = new JSONObject();
+        if(payloads != null){
+            for(Map.Entry<String, ?> entry : payloads.entrySet()){
+                object.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if(object.isEmpty()){
+            return null;
+        }
+        return object;
     }
 
     @Nonnull

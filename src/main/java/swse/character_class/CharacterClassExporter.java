@@ -22,7 +22,7 @@ import swse.util.Context;
 import swse.util.Timer;
 
 public class CharacterClassExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\classes.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\classes.json";
     private static List<String> allClasses = new ArrayList<>();
 
 
@@ -131,7 +131,7 @@ public class CharacterClassExporter extends BaseExporter {
                 .withProvided(ForcePoints.getForcePoints(content.select("p,h4,h3")))
                 .withProvided(DefenceBonuses.getDefenseBonuses(content.select("p,h4"), itemName))
                 .withPrerequisite(Prerequisite.getClassPrerequisite(content.select("p,ul,h4"), itemName))
-                .withProvided(StartingFeats.getStartingFeats(content.select("p,ul,h4")))
+                .withProvided(StartingFeats.getStartingFeats(content.select("p,ul,h4"), itemName))
                 .withProvided(getClassChoice(itemName))
                 .withProvided(getClassType(itemName))
                 .withProvided(getProvidedItems(itemName))

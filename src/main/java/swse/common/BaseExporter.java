@@ -7,13 +7,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,8 +23,40 @@ import org.jsoup.select.Elements;
 
 public abstract class BaseExporter {
     public static String ROOT = "https://swse.fandom.com";
+public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/Data/systems/swse";
 
+    protected static void writeToDB(File jsonOutputFile, List<JSONObject> entries, boolean dryRun) {
+        if (dryRun) {
+            return;
+        }
+//        JSONObject data = new JSONObject();
+//        StringWriter writer = new StringWriter();
+//
+//        JSONArray jsonArray = new JSONArray();
+//
+//        jsonArray.putAll(entries);
+//
+//        data.put("version", Instant.now().toEpochMilli());
+//
+//        data.put("entries", jsonArray);
+//        data.write(writer);
 
+        try {
+            jsonOutputFile.getParentFile().mkdirs();
+            jsonOutputFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try (PrintWriter pw = new PrintWriter(jsonOutputFile)) {
+            for (Iterator<JSONObject> it = entries.iterator(); it.hasNext(); ) {
+                JSONObject o = it.next();
+                pw.print(o);
+            }
+            //pw.print(writer);
+        } catch (FileNotFoundException e) {
+            System.err.println("oh fuck");
+        }
+    }
     protected static void writeToJSON(File jsonOutputFile, List<JSONObject> entries, boolean dryRun) {
         if (dryRun) {
             return;
@@ -57,6 +83,31 @@ public abstract class BaseExporter {
             pw.print(writer);
         } catch (FileNotFoundException e) {
             System.err.println("oh fuck");
+        }
+    }
+
+
+
+    public static void addIdsFromDb(File dbFile, List<JSONObject> entries) {
+        Map<String, String> nameToId = new HashMap<>();
+        try {
+            Scanner myReader = new Scanner(dbFile);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                JSONObject o = new JSONObject(data);
+                nameToId.put(o.getString("name"), o.getString("_id"));
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        for(JSONObject o : entries){
+            String id = nameToId.get(o.getString("name"));
+            if(id == null){
+                System.out.println(o);
+            }
+            o.put("_id", id);
         }
     }
 
@@ -238,8 +289,12 @@ public abstract class BaseExporter {
     }
 
     protected static List<String> getAlphaLinks(String alphaCategory) {
+        return getAlphaLinks(alphaCategory, 'Z');
+    }
+
+    protected static List<String> getAlphaLinks(String alphaCategory, char limit) {
         List<String> expandedLinks = new LinkedList<>();
-        for (char alpha = 'A'; alpha <= 'Z'; alpha++) {
+        for (char alpha = 'A'; alpha <= limit; alpha++) {
 
             expandedLinks.add(alphaCategory + alpha);
         }
@@ -351,16 +406,16 @@ public abstract class BaseExporter {
                 .map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
     }
 
-    public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks) {
+    public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite) {
         List<JSONObject> entries = new ArrayList<>();
         List<String> names = new LinkedList<>();
         for (String talentLink : talentLinks) {
             //entries.addAll(readCategoryItemPage(talentLink, false));
             Collection<? extends JSONObject> newEntities = List.of();
             if(talentLink.contains("Category")) {
-                newEntities = readCategoryItemPage(talentLink, true);
+                newEntities = readCategoryItemPage(talentLink, overwrite);
             } else {
-                newEntities = parseItem(talentLink, true).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
+                newEntities = parseItem(talentLink, overwrite).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
             }
             for (JSONObject newEntity : newEntities) {
                 if (names.contains(newEntity.get("name"))) {

@@ -75,7 +75,7 @@ public class Choice implements JSONy, Copyable<Choice>
     }
 
     public Choice withOption(String key, Option option){
-        option.withName(key);
+        option.withDisplay(key);
         return this.withOption(option);
     }
 

@@ -17,7 +17,7 @@ import swse.common.BaseExporter;
 import swse.common.JSONy;
 
 public class DestinyExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\destiny.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\destiny.json";
 
     public static void main(String[] args) {
         List<String> destinyLinks = new LinkedList<>();

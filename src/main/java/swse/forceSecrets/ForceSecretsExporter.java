@@ -14,7 +14,7 @@ import swse.common.JSONy;
 public class ForceSecretsExporter extends BaseExporter
 {
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\secrets.csv";
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\force secrets.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\force secrets.json";
 
     public static void main(String[] args)
     {
@@ -22,7 +22,7 @@ public class ForceSecretsExporter extends BaseExporter
         talentLinks.add("/wiki/Category:Force_Secrets");
         talentLinks.add("/wiki/Pure_Power");
 
-        List<JSONObject> entries = new ForceSecretsExporter().getEntriesFromCategoryPage(talentLinks);
+        List<JSONObject> entries = new ForceSecretsExporter().getEntriesFromCategoryPage(talentLinks, true);
         printUniqueNames(entries);
 
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));

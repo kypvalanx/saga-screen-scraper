@@ -13,6 +13,7 @@ public class MoveWorldCompendiumsToSystem {
         String source = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world/packs";
         String jsonFolder = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems/swse/raw_export";
         String itemDB = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world/data/items.db";
+        String actorDB = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world/data/actors.db";
 
 
         System.out.println("MOVING");
@@ -34,6 +35,9 @@ public class MoveWorldCompendiumsToSystem {
 
         System.out.println(itemDB);
         Files.delete(Paths.get(itemDB));
+
+        System.out.println(actorDB);
+        Files.delete(Paths.get(actorDB));
 //
 //        for (File file :
 //                Objects.requireNonNull(new File(target).listFiles())) {

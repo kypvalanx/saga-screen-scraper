@@ -22,7 +22,8 @@ import swse.prerequisite.Prerequisite;
 import swse.util.Context;
 
 public class FeatExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\feats.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\feats.json";
+    public static final String DB_FILE = SYSTEM_LOCATION + "/packs/swse-feats.db";
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\feats.csv";
     public static final String WEAPON_PROFICIENCY = "Weapon Proficiency";
     public static final String WEAPON_FOCUS = "Weapon Focus";
@@ -37,10 +38,12 @@ public class FeatExporter extends BaseExporter {
         List<String> featLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Feats?from="));
 
 
-        List<JSONObject> entries = new FeatExporter().getEntriesFromCategoryPage(featLinks);
+        List<JSONObject> entries = new FeatExporter().getEntriesFromCategoryPage(featLinks, true);
 
         printUniqueNames(entries);
-
+        
+        //addIdsFromDb(new File(DB_FILE), entries);
+        //writeToDB(new File(DB_FILE), entries, hasArg(args, "d"));
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }
 

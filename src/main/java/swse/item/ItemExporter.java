@@ -33,7 +33,7 @@ import static swse.util.Util.getNumber;
 import static swse.util.Util.getParensContent;
 
 public class ItemExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\items.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\items.json";
     public static final Mode MODE_AUTOFIRE = Mode.create("Autofire", "ROF", List.of(Attribute.create(AttributeKey.TO_HIT_MODIFIER, "-5"), Attribute.create(AttributeKey.SKIP_CRITICAL_MULTIPLY, "true")));
     public static final Mode MODE_SINGLE_SHOT = Mode.create("Single-Shot", "ROF", List.of());
     public static final Mode MODE_BARRAGE = Mode.create("Barrage", "ROF", List.of());
@@ -109,13 +109,17 @@ public class ItemExporter extends BaseExporter {
         double size = itemLinks.size();
         AtomicInteger i = new AtomicInteger();
         for (String itemLink : itemLinks) {
-            entries.addAll(itemExporter.readItemMenuPage(itemLink, true));
+            entries.addAll(itemExporter.readItemMenuPage(itemLink, false));
             drawProgressBar(i.getAndIncrement() * 100 / size);
         }
 
         entries.addAll(getManualItems());
 
         printUniqueNames(entries);
+
+        System.out.println("DROID SYSTEMS:");
+
+        printUniqueNames(entries.stream().filter(entry -> ((String)((JSONObject)entry.get("data")).get("subtype")).toLowerCase().contains("droid")).collect(Collectors.toList()));
 
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }
@@ -1161,11 +1165,11 @@ public class ItemExporter extends BaseExporter {
                 .withSubtype("Heavy Armor")
                 .toJSON());
 
-        String sheildGeneratorDescription = "The Droid is fitted with a deflector Shield Generator- the same type mounted on Starships. Whenever the Droid would take damage, reduce the damage by the Droid's Shield Rating (SR). If the damage is equal to or greater than the Droid's Shield Rating, the Droid's Shield Rating is reduced by 5. By spending three Swift Actions on the same or consecutive rounds, the Droid may make a DC 20 Endurance check to restore lost shield power. If the check succeeds, the Droid's Shield Rating increases by 5 points (up to its normal Shield Rating).";
+        String shieldGeneratorDescription = "The Droid is fitted with a deflector Shield Generator- the same type mounted on Starships. Whenever the Droid would take damage, reduce the damage by the Droid's Shield Rating (SR). If the damage is equal to or greater than the Droid's Shield Rating, the Droid's Shield Rating is reduced by 5. By spending three Swift Actions on the same or consecutive rounds, the Droid may make a DC 20 Endurance check to restore lost shield power. If the check succeeds, the Droid's Shield Rating increases by 5 points (up to its normal Shield Rating).";
         items.add(Item.create("Shield Generator (SR 5)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
-                .withDescription(sheildGeneratorDescription)
+                .withDescription(shieldGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 5))
                 .withCost("2500 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
@@ -1176,7 +1180,7 @@ public class ItemExporter extends BaseExporter {
         items.add(Item.create("Shield Generator (SR 10)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
-                .withDescription(sheildGeneratorDescription)
+                .withDescription(shieldGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 10))
                 .withCost("5000 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
@@ -1196,7 +1200,7 @@ public class ItemExporter extends BaseExporter {
         items.add(Item.create("Shield Generator (SR 15)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
-                .withDescription(sheildGeneratorDescription)
+                .withDescription(shieldGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 15))
                 .withCost("7500 x Cost Factor")
                 .withWeight("(30 x Cost Factor) kg")
@@ -1215,7 +1219,7 @@ public class ItemExporter extends BaseExporter {
         items.add(Item.create("Shield Generator (SR 20)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
-                .withDescription(sheildGeneratorDescription)
+                .withDescription(shieldGeneratorDescription)
                 .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 20))
                 .withCost("10000 x Cost Factor")
                 .withWeight("(40 x Cost Factor) kg")
@@ -1228,6 +1232,71 @@ public class ItemExporter extends BaseExporter {
                                 new SimplePrerequisite("Gargantuan", "TRAIT", "Gargantuan")
                         ), 1))
                 .toJSON());
+
+       items.add(Item.create("Ion Shield Generator (SR 5)", "equipment")
+                .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withDescription(shieldGeneratorDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 5).withModifier("Ion"))
+                .withCost("1250 x Cost Factor")
+                .withWeight("(10 x Cost Factor) kg")
+                .withSubtype("Droid Accessories (Shield Generator Systems)")
+                .toJSON());
+
+        items.add(Item.create("Ion Shield Generator (SR 10)", "equipment")
+                .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withDescription(shieldGeneratorDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 10).withModifier("Ion"))
+                .withCost("2500 x Cost Factor")
+                .withWeight("(20 x Cost Factor) kg")
+                .withSubtype("Droid Accessories (Shield Generator Systems)")
+                .withPrerequisite(new OrPrerequisite(SR10Prerequisite,
+                        List.of(
+                                new SimplePrerequisite("Small", "TRAIT", "Small"),
+                                new SimplePrerequisite("Medium", "TRAIT", "Medium"),
+                                new SimplePrerequisite("Large", "TRAIT", "Large"),
+                                new SimplePrerequisite("Huge", "TRAIT", "Huge"),
+                                new SimplePrerequisite("Colossal", "TRAIT", "Colossal"),
+                                new SimplePrerequisite("Gargantuan", "TRAIT", "Gargantuan")
+                        ), 1))
+                .toJSON());
+
+        items.add(Item.create("Ion Shield Generator (SR 15)", "equipment")
+                .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withDescription(shieldGeneratorDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 15).withModifier("Ion"))
+                .withCost("3750 x Cost Factor")
+                .withWeight("(30 x Cost Factor) kg")
+                .withSubtype("Droid Accessories (Shield Generator Systems)")
+                .withPrerequisite(new OrPrerequisite(SR15Prerequisite,
+                        List.of(
+                                new SimplePrerequisite("Medium", "TRAIT", "Medium"),
+                                new SimplePrerequisite("Large", "TRAIT", "Large"),
+                                new SimplePrerequisite("Huge", "TRAIT", "Huge"),
+                                new SimplePrerequisite("Colossal", "TRAIT", "Colossal"),
+                                new SimplePrerequisite("Gargantuan", "TRAIT", "Gargantuan")
+                        ), 1))
+                .toJSON());
+
+        items.add(Item.create("Ion Shield Generator (SR 20)", "equipment")
+                .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withDescription(shieldGeneratorDescription)
+                .withProvided(Attribute.create(AttributeKey.SHIELD_RATING, 20).withModifier("Ion"))
+                .withCost("5000 x Cost Factor")
+                .withWeight("(40 x Cost Factor) kg")
+                .withSubtype("Droid Accessories (Shield Generator Systems)")
+                .withPrerequisite(new OrPrerequisite(SR20Prerequisite,
+                        List.of(
+                                new SimplePrerequisite("Large", "TRAIT", "Large"),
+                                new SimplePrerequisite("Huge", "TRAIT", "Huge"),
+                                new SimplePrerequisite("Colossal", "TRAIT", "Colossal"),
+                                new SimplePrerequisite("Gargantuan", "TRAIT", "Gargantuan")
+                        ), 1))
+                .toJSON());
+
 
         items.add(Item.create("Translator Unit (DC 20)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
@@ -1259,7 +1328,7 @@ public class ItemExporter extends BaseExporter {
 
 
         final String hardenedSystem = "Droids of Large or greater size can be designed to have internal armor and redundant systems that enable it to continue functioning despite heavy damage";
-        items.add(Item.create("Hardened Systems x2", "equipment")
+        items.add(Item.create("Hardened Systems (x2)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("1000 x Cost Factor")
@@ -1276,7 +1345,7 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Hardened Systems x3", "equipment")
+        items.add(Item.create("Hardened Systems (x3)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("2500 x Cost Factor")
@@ -1293,7 +1362,7 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Hardened Systems x4", "equipment")
+        items.add(Item.create("Hardened Systems (x4)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("4000 x Cost Factor")
@@ -1310,7 +1379,7 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-        items.add(Item.create("Hardened Systems x5", "equipment")
+        items.add(Item.create("Hardened Systems (x5)", "equipment")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("6250 x Cost Factor")
@@ -1327,6 +1396,15 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
+        items.add(Item.create("Repulsor-Assisted Lifting System", "equipment")
+                .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withSubtype("Droid Accessories (Hardened Systems)")
+                .withCost("200 x Cost Factor")
+                .withWeight("(200 x Cost Factor) kg")
+                .withAvailability("-")
+                .withProvided(Attribute.create(AttributeKey.CARGO_CAPACITY, "x3"))
+                .toJSON());
+
         items.add(Item.create("Plasteel Shell", "armor")
                 .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
                 .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
@@ -1336,6 +1414,16 @@ public class ItemExporter extends BaseExporter {
                 .withAvailability("-")
                 .withProvided(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "2"))
                 .withProvided(Attribute.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "5"))
+                .toJSON());
+
+        items.add(Item.create("Stealth Shell", "armor")
+                .withProvided(Attribute.create(AttributeKey.DROID_PART, true))
+                .withProvided(Attribute.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
+                .withSubtype("Droid Accessories (Droid Armor)")
+                .withCost("400 x Cost Factor")
+                .withWeight("(2 x Cost Factor) kg")
+                .withAvailability("-")
+                .withProvided(Attribute.create(AttributeKey.SKILL_BONUS, "stealth:2"))
                 .toJSON());
 
         items.add(Item.create("Quadanium Shell", "armor")

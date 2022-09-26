@@ -33,7 +33,7 @@ import static swse.util.Util.toEnumCase;
 
 public class TraitExporter extends BaseExporter {
 
-    public static final String JSON_OUTPUT = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems\\swse\\raw_export\\traits.json";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\traits.json";
 
     public static void main(String[] args) {
         Timer timer = new Timer();
@@ -137,6 +137,9 @@ public class TraitExporter extends BaseExporter {
 
     private static Set<JSONObject> getManualAbilities() {
         Set<JSONObject> response = new HashSet<>();
+
+        response.add(Trait.create("Homebew Content").withDescription("This trait notes that this is homebrew and not official content.").withProvided(Attribute.create(AttributeKey.HOMEBREW, true)).toJSON());
+        response.add(Trait.create("Untested").withDescription("This trait notes that at the time of generation, this actor or item has not been play tested.").toJSON());
 
         response.add(Trait.create("Squad").withDescription("Squads are collections of lower-CL enemies that work together as a single creature on the battlefield. Squads are ideal for encounters in which the Gamemaster wants to include a large number of weaker enemies and allies, and can help replicate the chaos of a battlefield in a more manageable fashion. Similarly, Squads provide the Gamemaster with ways to transform low-CL enemies into a more significant threat. By the time the heroes hit 10th level, those CL 1 Battle Droids have ceased to be a challenge, but transforming those Droids into Squads raises their CL to the point where they can be sufficiently dangerous.\n" +
                 "\n" +

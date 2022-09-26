@@ -238,7 +238,14 @@ public enum AttributeKey {
     POISON("poison"),
     REND("rend"),
     SKILL_RE_ROLL("skillReRoll"),
-    APPLY_BONUS_TO("applyBonusTo");
+    APPLY_BONUS_TO("applyBonusTo"),
+    FULFILLED("fulfilled"),
+    STRENGTH("str"),
+    DEXTERITY("dex"),
+    CONSTITUTION("con"),
+    INTELLIGENCE("int"),
+    WISDOM("wis"),
+    CHARISMA("cha"), HOMEBREW("isHomebrew");
 
     private final String value;
 
