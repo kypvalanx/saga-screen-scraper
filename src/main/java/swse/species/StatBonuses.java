@@ -25,7 +25,7 @@ class StatBonuses
     {
         List<Object> bonuses = new ArrayList<>();
         Map<String, Map<String, Integer>> bonusMap = new HashMap<>();
-        List<String> weirdSpecies = Lists.newArrayList("Devaronian", "Melodie", "Ruurian", "Rybet", "Arkanian Offshoot", "Republic Clone");
+        List<String> weirdSpecies = Lists.newArrayList("Devaronian", "Melodie", "Ruurian", "Rybet", "Arkanian Offshoot", "Republic Clone", "Hutt");
 
 
         String subset = "all";
@@ -114,6 +114,12 @@ class StatBonuses
                                 .withOption("Intelligence", new Option().withProvidedItem(ProvidedItem.create("Intelligence (+2)", ItemType.TRAIT)))
                                 .withOption("Wisdom", new Option().withProvidedItem(ProvidedItem.create("Wisdom (+2)", ItemType.TRAIT)))
                                 .withOption("Charisma", new Option().withProvidedItem(ProvidedItem.create("Charisma (+2)", ItemType.TRAIT))));
+                    } else if ("Hutt".equals(speciesName)) {
+
+                        bonuses.add(ProvidedItem.create("Constitution (+2)", ItemType.TRAIT));
+                        bonuses.add(ProvidedItem.create("Intelligence (+2)", ItemType.TRAIT));
+                        bonuses.add(ProvidedItem.create("Strength (+2)", ItemType.TRAIT));
+                        bonuses.add(ProvidedItem.create("Dexterity (-6)", ItemType.TRAIT));
                     }
 
                     //System.out.println(speciesName);
