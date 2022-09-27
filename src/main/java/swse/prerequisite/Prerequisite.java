@@ -22,7 +22,6 @@ import static swse.prerequisite.OrPrerequisite.or;
 import static swse.prerequisite.SimplePrerequisite.simple;
 import static swse.talents.TalentExporter.DUPLICATE_TALENT_NAMES;
 import swse.util.Util;
-import static swse.util.Util.printUnique;
 //import static swse.util.Util.printUnique;
 
 public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
@@ -78,7 +77,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
 
         List<Prerequisite> prerequisites = new ArrayList<>();
         for (Element element : elements) {
-            prerequisites.add(getPrerequisite(null, element.text()));
+            prerequisites.add(getPrerequisite(null, element.text(), null));
         }
         return merge(prerequisites);
     }
@@ -98,7 +97,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
         return null;
     }
 
-    public static Prerequisite getPrerequisite(String itemName, String text) {
+    public static Prerequisite getPrerequisite(String itemName, String text, String talent) {
         List<Prerequisite> prerequisites = new ArrayList<>();
         if (text.toLowerCase().startsWith("prerequisite")) {
             String prerequisite = text.split(":")[1].trim();
@@ -111,9 +110,9 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
                     || "Bothan, or two Talents from the Infiltration Talent Tree".equals(prerequisite)) {
                 prerequisites.add(create(prerequisite, itemName));
             } else if (prerequisite.contains(";")) {
-                prerequisites.addAll(Arrays.stream(prerequisite.trim().split(";")).map(prereq -> create(prereq, itemName)).collect(Collectors.toList()));
+                prerequisites.addAll(Arrays.stream(prerequisite.trim().split(";")).map(prereq -> create(prereq, itemName, talent)).collect(Collectors.toList()));
             } else {
-                prerequisites.addAll(Arrays.stream(prerequisite.trim().split(",")).map(prereq -> create(prereq, itemName)).collect(Collectors.toList()));
+                prerequisites.addAll(Arrays.stream(prerequisite.trim().split(",")).map(prereq -> create(prereq, itemName, talent)).collect(Collectors.toList()));
             }
         }
         return merge(prerequisites);
@@ -129,8 +128,15 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
 
         return merge(prerequisites);
     }
+    private static Prerequisite create(String plainText, String itemName, String talent) {
+        final List<Prerequisite> prerequisites = parsePrerequisites(plainText.trim(), itemName, talent);
 
+        return merge(prerequisites);
+    }
     private static List<Prerequisite> parsePrerequisites(String text, String itemName) {
+        return parsePrerequisites(text, itemName, null);
+    }
+    private static List<Prerequisite> parsePrerequisites(String text, String itemName, String talent) {
         if ("None".equals(text) || "-".equals(text)) {
             return List.of();
         }
@@ -603,6 +609,10 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(simple(text, "SPECIAL", "is part of a major interstellar corporation"));
         }
 
+        if("Weapon Specialization".equals(text) && "Disarming Attack".equals(talent)){
+            text = "Weapon Specialization (Chosen Weapon)";
+        }
+
 
         if (FEAT_LIST.contains(text)) {
             return List.of(simple(text + " feat", "FEAT", text));
@@ -694,7 +704,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(simple(requirement, "TALENT", requirement));
         }
 
-        if (text.startsWith("Greater Weapon Focus") || text.startsWith("Weapon Specialization")) {
+        if (text.startsWith("Greater Weapon Focus") || text.startsWith("Weapon Specialization") ) {
             final String requirement = text.replace("Chosen Weapon", "#payload#").replace("Chosen Skill", "#payload#");
             if (requirement.contains("#payload#")) {
                 //printUnique(Context.getValue("name"), requirement);

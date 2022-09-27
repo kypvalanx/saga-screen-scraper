@@ -153,7 +153,7 @@ public class TalentExporter extends BaseExporter
                     Context.setValue("name", itemName);
 
 
-                    prerequisite = Prerequisite.getPrerequisite(itemName, text);
+                    prerequisite = Prerequisite.getPrerequisite(itemName, text, talentName);
                     //allPrerequisites.addAll(prerequisite.getAll());
                 } else{
                     if(talentDescription == null){
@@ -220,6 +220,11 @@ public class TalentExporter extends BaseExporter
             choice.withOption("AVAILABLE_GREATER_DEVASTATING_ATTACK", new Option().withPayload("AVAILABLE_GREATER_DEVASTATING_ATTACK"));
             attributes.add(choice);
         }
+        if ("Disarming Attack".equals(talentName)){
+            Choice choice = new Choice("Select a Weapon to use Disarming Attack.", "You Must have Weapon Specialization with a weapon group or an Exotic Weapon to select one for Disarming Attack.").withOneOption("You have a single weapon group or exotic weapon that qualifies for Disarming Attack");
+            choice.withOption("AVAILABLE_DISARMING_ATTACK", new Option().withPayload("AVAILABLE_DISARMING_ATTACK"));
+            attributes.add(choice);
+        }
 
         return attributes;
     }
@@ -250,6 +255,10 @@ public class TalentExporter extends BaseExporter
             case "Devastating Attack":
                 attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
                 attributes.add(Attribute.create(AttributeKey.DEVASTATING_ATTACK, "#payload#"));
+                break;
+            case "Disarming Attack":
+                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Attribute.create(AttributeKey.DISARMING_ATTACK, "#payload#"));
                 break;
             case "Greater Devastating Attack":
                 attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
