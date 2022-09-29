@@ -157,9 +157,9 @@ public class CharacterClassExporter extends BaseExporter {
         return classTypes;
     }
 
-    private static Choice getClassChoice(String itemName) {
+    private static Collection<?> getClassChoice(String itemName) {
         if ("Technician".equals(itemName)) {
-            return new Choice("Select a Starting Feat:")
+            return List.of(new Choice("Select a Starting Feat:")
                     .isFirstLevel(true)
                     .withShowSelectionInName(false)
                     .withOption("Skill Focus (Mechanics)",
@@ -181,15 +181,25 @@ public class CharacterClassExporter extends BaseExporter {
                     .withOption("Skill Focus (Knowledge (Tactics))",
                             new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Tactics)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Tactics))", ItemType.FEAT)))
                     .withOption("Skill Focus (Knowledge (Technology))",
-                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Technology)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Technology))", ItemType.FEAT)));
+                            new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Technology)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Technology))", ItemType.FEAT))),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Mechanics)"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Treat Injury)"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Use Computer)"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Bureaucracy))"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Galactic Lore))"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Life Sciences))"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Physical Sciences))"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Social Sciences))"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Tactics))"),
+                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Technology))"));
         } else if ("Jedi".equals(itemName)) {
 
-            return new Choice("Select a Starting Weapon:")
+            return List.of(new Choice("Select a Starting Weapon:")
                     .withShowSelectionInName(false)
                     .isFirstLevel(true).withOneOption("On First level you receive:")
-                    .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.ITEM)));
+                    .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.ITEM))));
         }else if ("Beast".equals(itemName)) {
-            return new Choice("Select a Size:")
+            return List.of(new Choice("Select a Size:")
                     .isFirstLevel(true)
                     .withShowSelectionInName(false)
                     .withOption("Fine",new Option().withProvidedItem(ProvidedItem.create("Fine", ItemType.TRAIT).withUnlocked(true)))
@@ -203,7 +213,7 @@ public class CharacterClassExporter extends BaseExporter {
                     .withOption("Colossal",new Option().withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT).withUnlocked(true)))
                     .withOption("Colossal (Frigate)",new Option().withProvidedItem(ProvidedItem.create("Colossal (Frigate)", ItemType.TRAIT).withUnlocked(true)))
                     .withOption("Colossal (Cruiser)",new Option().withProvidedItem(ProvidedItem.create("Colossal (Cruiser)", ItemType.TRAIT).withUnlocked(true)))
-                    .withOption("Colossal (Station)",new Option().withProvidedItem(ProvidedItem.create("Colossal (Station)", ItemType.TRAIT).withUnlocked(true)));
+                    .withOption("Colossal (Station)",new Option().withProvidedItem(ProvidedItem.create("Colossal (Station)", ItemType.TRAIT).withUnlocked(true))));
         }
         return null;
     }

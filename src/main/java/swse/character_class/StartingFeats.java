@@ -69,6 +69,10 @@ public class StartingFeats
     }
 
     private static Attribute createAttribute(String text) {
+        if("Skill Focus (Knowledge (Any), Mechanics, Treat Injury, or Use Computer)".equals(text))
+        {
+            return null;
+        }
         return Attribute.create(AttributeKey.CLASS_FEAT, cleanStartingFeat(text));
     }
 

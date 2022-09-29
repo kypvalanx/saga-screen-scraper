@@ -31,6 +31,8 @@ import swse.prerequisite.Prerequisite;
 import swse.prerequisite.SimplePrerequisite;
 import swse.util.Context;
 
+import static swse.util.Util.printUnique;
+
 public class TalentExporter extends BaseExporter
 {
 
@@ -128,6 +130,7 @@ public class TalentExporter extends BaseExporter
                 if(talentName != null && !talentName.isEmpty()){
 
                     talents.add(Talent.create(talentName)
+                                    .withProvided(getCountsAsForPrerequisite(talentName))
                             .withTalentTreeUrl("https://swse.fandom.com" + itemLink)
                             .withDescription(talentDescription)
                             .withPrerequisite(prerequisite)
@@ -162,12 +165,17 @@ public class TalentExporter extends BaseExporter
                         talentDescription = talentDescription.concat("<br><br>").concat( getDescription(element));
                     }
                 }
+
+                if (text.startsWith("This Talent is identical")){
+                    printUnique(talentName, text);
+                }
             }
 
         }
 
         if(talentName != null && !talentName.isEmpty()){
             talents.add(Talent.create(talentName)
+                    .withProvided(getCountsAsForPrerequisite(talentName))
                     .withTalentTreeUrl("https://swse.fandom.com" +itemLink)
                     .withDescription(talentDescription)
                     .withPrerequisite(prerequisite)
@@ -180,6 +188,17 @@ public class TalentExporter extends BaseExporter
         }
 
         return talents;
+    }
+
+    private List<Object> getCountsAsForPrerequisite(String talentName) {
+        List<Object> attributes = new ArrayList<>();
+        if("Charm Beast (Beastwarden Talent Tree)".equals(talentName)){
+            attributes.add(Attribute.create(AttributeKey.ACTS_AS, "Charm Beast (Dathomiri Witch Talent Tree)"));
+        }
+        if("Charm Beast (Dathomiri Witch Talent Tree)".equals(talentName)){
+            attributes.add(Attribute.create(AttributeKey.ACTS_AS, "Charm Beast (Beastwarden Talent Tree)"));
+        }
+        return attributes;
     }
 
     private static List<Object> getChoices(String talentName) {

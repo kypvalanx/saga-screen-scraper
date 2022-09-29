@@ -245,7 +245,7 @@ public enum AttributeKey {
     CONSTITUTION("con"),
     INTELLIGENCE("int"),
     WISDOM("wis"),
-    CHARISMA("cha"), HOMEBREW("isHomebrew"), DISARMING_ATTACK("disarmingAttack");
+    CHARISMA("cha"), HOMEBREW("isHomebrew"), DISARMING_ATTACK("disarmingAttack"), MULTICLASS_FEAT("multiclassFeat"), ACTS_AS("actsAs");
 
     private final String value;
 
