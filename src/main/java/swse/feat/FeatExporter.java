@@ -234,6 +234,9 @@ public class FeatExporter extends BaseExporter {
             case "Force Regimen Mastery":
                 attributes.add(Attribute.create(AttributeKey.PROVIDES, "Force Regimen:MAX(1 + @WISMOD,1)"));
                 break;
+            case "Fight Through Pain":
+                attributes.add(Attribute.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, "MAX(@FortDef, @WillDef) - @FortDef"));
+                break;
             default:
         }
         if (itemName.startsWith("Martial Arts ")) {
