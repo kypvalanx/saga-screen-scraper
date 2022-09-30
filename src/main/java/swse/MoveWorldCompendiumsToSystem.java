@@ -35,9 +35,9 @@ public class MoveWorldCompendiumsToSystem {
 
         System.out.println(itemDB);
         Files.delete(Paths.get(itemDB));
-
-        System.out.println(actorDB);
-        Files.delete(Paths.get(actorDB));
+//
+//        System.out.println(actorDB);
+//        Files.delete(Paths.get(actorDB));
 //
 //        for (File file :
 //                Objects.requireNonNull(new File(target).listFiles())) {

@@ -494,6 +494,9 @@ public class TraitExporter extends BaseExporter {
                 attributes.add(Attribute.create(AttributeKey.WILL_DEFENSE_BONUS, "1"));
                 attributes.add(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS, "1"));
                 break;
+            case "Strength of Conviction":
+                attributes.add(Attribute.create(AttributeKey.WILL_DEFENSE_BONUS, "MAX(@WISMOD, @CHAMOD) - @WISMOD"));
+                break;
         }
 
         return attributes;
