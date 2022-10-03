@@ -229,6 +229,7 @@ public class FeatExporter extends BaseExporter {
                 attributes.add(Attribute.create(AttributeKey.ARMOR_PROFICIENCY, "heavy"));
                 break;
             case "Grand Army of the Republic Training":
+                //TODO this requires some very specific code...  maybe generalize this
                 attributes.add(Attribute.create(AttributeKey.APPLY_BONUS_TO, AttributeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT + ":will"));
                 break;
             case "Force Regimen Mastery":
