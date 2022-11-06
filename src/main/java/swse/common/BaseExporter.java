@@ -1,10 +1,6 @@
 package swse.common;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.time.Instant;
 import java.util.*;
@@ -14,12 +10,12 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
+import org.jsoup.nodes.*;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
+import org.jsoup.select.NodeFilter;
 
 public abstract class BaseExporter {
     public static String ROOT = "https://swse.fandom.com";
@@ -142,6 +138,37 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         }
     }
 
+
+    public static List<String> getNames(List<JSONObject> names){
+        return names.stream().map(name -> name.getString("name")).collect(Collectors.toList());
+    }
+
+    public static List<JSONObject> getOverrides(String folderName) {
+        File folder = new File("src/main/resources/manual/" + folderName);
+        List<JSONObject> manualEntries = new ArrayList<>();
+        if(!folder.exists()){
+            return manualEntries;
+        }
+        List<File> files = List.of(Objects.requireNonNull(folder.listFiles(pathname -> pathname.getName().endsWith(".json"))));
+
+        for(File file : files){
+            InputStream is = null;
+            try {
+                is = new FileInputStream(file);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            if (is == null) {
+                throw new NullPointerException("Cannot find resource file " + file.getAbsolutePath());
+            }
+
+            JSONTokener tokener = new JSONTokener(is);
+            JSONObject object = new JSONObject(tokener);
+            manualEntries.add(object);
+        }
+        return manualEntries;
+    }
+
     protected static Document getDoc(String itemPageLink, boolean overwrite) {
         try {
 
@@ -218,17 +245,28 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
                 anchor.attr("href", "https://swse.fandom.com" + anchor.attr("href"));
             }
         }
-        for (Element element : content.children()) {
-            String text = element.text().toLowerCase();
-            if (text.contains("return to main article") || text.contains("weapon type:") || text
-                    .contains("size:") || text.contains("cost:") || text.contains("damage:") || text
-                    .contains("stun setting:") || text.contains("type:") || text.contains("weight:") || text
-                    .contains("rate of fire:") || text.contains("availability:")) {
-                element.remove();
+
+
+
+        StringBuilder response = new StringBuilder();
+        for (Node node : content.childNodes()) {
+
+            if(node instanceof Element){
+                String text = ((Element)node).text().toLowerCase();
+                if (text.contains("return to main article") || text.contains("weapon type:") || text
+                        .contains("size:") || text.contains("cost:") || text.contains("damage:") || text
+                        .contains("stun setting:") || text.contains("type:") || text.contains("weight:") || text
+                        .contains("rate of fire:") || text.contains("availability:") || text.isBlank()) {
+                    continue;
+                }
+            } else if (node instanceof Comment) {continue;
+            } else if (node instanceof TextNode && ((TextNode) node).text().isBlank()) {continue;
             }
+            response.append(node.toString().trim());
+
         }
 
-        return content.toString().trim();
+        return response.toString().trim();
     }
 
     protected static Object getProvidedItemOrChoiceOfProvidedItemsInList(String value, String listDelimiter, String description) {
@@ -407,6 +445,9 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
     }
 
     public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite) {
+        return getEntriesFromCategoryPage(talentLinks, overwrite, List.of());
+    }
+    public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite, List<String> exclusion) {
         List<JSONObject> entries = new ArrayList<>();
         List<String> names = new LinkedList<>();
         for (String talentLink : talentLinks) {
@@ -418,10 +459,14 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
                 newEntities = parseItem(talentLink, overwrite).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
             }
             for (JSONObject newEntity : newEntities) {
-                if (names.contains(newEntity.get("name"))) {
-                    System.out.println("Duplicate: " + newEntity.get("name") + " from: " + talentLink);
+                String name = newEntity.getString("name");
+                if(exclusion.contains(name)){
+                    continue;
+                }
+                if (names.contains(name)) {
+                    System.out.println("Duplicate: " + name + " from: " + talentLink);
                 } else {
-                    names.add((String) newEntity.get("name"));
+                    names.add(name);
                     entries.add(newEntity);
                 }
             }

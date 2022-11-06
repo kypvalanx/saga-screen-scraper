@@ -93,15 +93,26 @@ public class UnitExporter extends BaseExporter {
 
         populateTalentMappings();
 
+        List<JSONObject> overrides = getOverrides("units");
 
-        List<JSONObject> entries = new UnitExporter().getEntriesFromCategoryPage(nonHeroicUnits, false);
-        entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false));
+        List<String> exclusionByName = getNames(overrides);
 
-        List<Integer> filter = List.of(2);
+
+        List<JSONObject> entries = new UnitExporter().getEntriesFromCategoryPage(nonHeroicUnits, false, exclusionByName);
+        entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false, exclusionByName));
+        entries.addAll(overrides);
+
+        List<Integer> filter = List.of(3);
+        List<String> nameFilter = List.of(); //"B1-Series Battle Droid Squad");
 
         for (Integer i :
-                cls.stream().filter(cl -> filter.size() == 0 ||filter.contains(cl) ).collect(Collectors.toList())) {
-            List<JSONObject> filtered = entries.stream().filter(entry -> ((JSONObject) entry.get("data")).get("cl").equals(i)).collect(Collectors.toList());
+                cls.stream()
+                        .filter(cl -> filter.size() == 0 ||filter.contains(cl) )
+                        .collect(Collectors.toList())) {
+            List<JSONObject> filtered = entries.stream()
+                    .filter(entry -> ((JSONObject) entry.get("data")).get("cl").equals(i))
+                    .filter(entry -> nameFilter.size() == 0 ||nameFilter.contains(entry.get("name")) )
+                    .collect(Collectors.toList());
 
             writeToJSON(new File(JSON_OUTPUT + i + ".json"), filtered, hasArg(args, "d"));
         }
@@ -110,6 +121,7 @@ public class UnitExporter extends BaseExporter {
         System.out.println("processed " + entries.size() + " of 2277");
 
     }
+
 
 
     protected List<JSONy> parseItem(String itemLink, boolean overwrite) {

@@ -56,8 +56,10 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
         if (organizationScores != null) {
             data.put("organizationScores", JSONy.toObject(organizationScores));
         }
+        JSONObject health = new JSONObject();
+        data.put("health", health);
         if (hitPoints != null) {
-            data.put("hitPoints", hitPoints);
+            health.put("hitPointOverride", hitPoints);
         }
 
             JSONObject skills = new JSONObject();

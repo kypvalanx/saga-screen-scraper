@@ -618,7 +618,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(simple(text + " feat", "FEAT", text));
         }
         if (SPECIES_LIST.contains(text)) {
-            return List.of(simple(text + " species", "SPECIES", text));
+            return List.of(simple(text + "manual/species", "SPECIES", text));
         }
         if (TALENT_LIST.contains(text) || DUPLICATE_TALENT_NAMES.contains(text)) {
             if (DUPLICATE_TALENT_NAMES.contains(text)) {
