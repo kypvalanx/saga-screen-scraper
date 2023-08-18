@@ -25,7 +25,7 @@ public class ForceSecretsExporter extends BaseExporter
         List<JSONObject> entries = new ForceSecretsExporter().getEntriesFromCategoryPage(talentLinks, true);
         printUniqueNames(entries);
 
-        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Force Secrets");
     }
 
 

@@ -2,12 +2,15 @@ package swse.common;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
+import org.iq80.leveldb.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -15,13 +18,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.*;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
-import org.jsoup.select.NodeFilter;
+
+import static org.fusesource.leveldbjni.JniDBFactory.*;
+
 
 public abstract class BaseExporter {
     public static String ROOT = "https://swse.fandom.com";
 public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/Data/systems/swse";
 
-    protected static void writeToDB(File jsonOutputFile, List<JSONObject> entries, boolean dryRun) {
+    protected static void writeToDB(File dbFile, List<JSONObject> entries, boolean dryRun) throws IOException {
         if (dryRun) {
             return;
         }
@@ -36,24 +41,46 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 //
 //        data.put("entries", jsonArray);
 //        data.write(writer);
-
+        DB levelDBStore;
+        Options options = new Options();
+        levelDBStore = factory.open(dbFile, options);
         try {
-            jsonOutputFile.getParentFile().mkdirs();
-            jsonOutputFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+
+//            WriteBatch batch = levelDBStore.createWriteBatch();
+//
+//            int i = 0;
+//            for (JSONObject entry : entries) {
+//                batch.put(bytes(Integer.toString(i)), bytes(entry.toString()));
+//            }
+//
+//            levelDBStore.write(batch);
+        } finally {
+
+            levelDBStore.close();
         }
-        try (PrintWriter pw = new PrintWriter(jsonOutputFile)) {
-            for (Iterator<JSONObject> it = entries.iterator(); it.hasNext(); ) {
-                JSONObject o = it.next();
-                pw.print(o);
-            }
-            //pw.print(writer);
-        } catch (FileNotFoundException e) {
-            System.err.println("oh fuck");
-        }
+
+
+//        try {
+//            jsonOutputFile.getParentFile().mkdirs();
+//            jsonOutputFile.createNewFile();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        try (PrintWriter pw = new PrintWriter(jsonOutputFile)) {
+//            for (Iterator<JSONObject> it = entries.iterator(); it.hasNext(); ) {
+//                JSONObject o = it.next();
+//                pw.print(o);
+//            }
+//            //pw.print(writer);
+//        } catch (FileNotFoundException e) {
+//            System.err.println("oh fuck");
+//        }
     }
-    protected static void writeToJSON(File jsonOutputFile, List<JSONObject> entries, boolean dryRun) {
+    protected static void writeToJSON(File jsonOutputFile, Collection<JSONObject> entries, boolean dryRun, String name) {
+        writeToJSON( jsonOutputFile,  entries,  dryRun,  name,  "Item");
+    }
+    protected static void writeToJSON(File jsonOutputFile, Collection<JSONObject> entries, boolean dryRun, String name, String type) {
         if (dryRun) {
             return;
         }
@@ -65,6 +92,8 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         jsonArray.putAll(entries);
 
         data.put("version", Instant.now().toEpochMilli());
+        data.put("name", name);
+        data.put("type", type);
 
         data.put("entries", jsonArray);
         data.write(writer);
@@ -80,31 +109,84 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         } catch (FileNotFoundException e) {
             System.err.println("oh fuck");
         }
+
+        File parent = jsonOutputFile.getParentFile();
+
+
+        File manifest = new File(parent.getAbsolutePath() + "/manifest.json");
+        try{
+            manifest.delete();
+            manifest.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        JSONObject manifestData = new JSONObject();
+        StringWriter manifestWriter = new StringWriter();
+        JSONArray fileArray = new JSONArray();
+
+        for(File file : Objects.requireNonNull(parent.listFiles(file -> !file.getName().endsWith("manifest.json")))){
+            fileArray.put(file.getAbsolutePath().substring(45));
+        }
+
+
+
+
+        manifestData.put("files", fileArray);
+        manifestData.write(manifestWriter);
+        try (PrintWriter pw = new PrintWriter(manifest)) {
+            pw.print(manifestWriter);
+        } catch (FileNotFoundException e) {
+            System.err.println("oh fuck");
+        }
     }
 
 
 
-    public static void addIdsFromDb(File dbFile, List<JSONObject> entries) {
-        Map<String, String> nameToId = new HashMap<>();
+    public static void addIdsFromDb(File dbFile, List<JSONObject> entries) throws IOException {
+        //DB levelDBStore;
+        if(Objects.requireNonNull(dbFile.listFiles((dir, name) -> name.endsWith("sst"))).length == 0){
+            for(File f : Objects.requireNonNull(dbFile.listFiles((dir, name) -> name.endsWith("ldb")))){
+                Files.createLink(Paths.get(f.getAbsolutePath().replace(".ldb", ".sst")), Paths.get(f.getAbsolutePath()));
+            }
+        }
+
+        Options options = new Options();
+        DB levelDBStore = factory.open(dbFile,options);
+
+        DBIterator iterator = levelDBStore.iterator();
+
         try {
-            Scanner myReader = new Scanner(dbFile);
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                JSONObject o = new JSONObject(data);
-                nameToId.put(o.getString("name"), o.getString("_id"));
+            while (iterator.hasNext()) {
+                Map.Entry<byte[], byte[]> item = iterator.next();
+
+                System.out.println(item);
             }
-            myReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
+        } finally {
+            levelDBStore.close();
         }
-        for(JSONObject o : entries){
-            String id = nameToId.get(o.getString("name"));
-            if(id == null){
-                System.out.println(o);
-            }
-            o.put("_id", id);
-        }
+
+//        Map<String, String> nameToId = new HashMap<>();
+//        try {
+//            Scanner myReader = new Scanner(dbFile);
+//            while (myReader.hasNextLine()) {
+//                String data = myReader.nextLine();
+//                JSONObject o = new JSONObject(data);
+//                nameToId.put(o.getString("name"), o.getString("_id"));
+//            }
+//            myReader.close();
+//        } catch (FileNotFoundException e) {
+//            System.out.println("An error occurred.");
+//            e.printStackTrace();
+//        }
+//        for(JSONObject o : entries){
+//            String id = nameToId.get(o.getString("name"));
+//            if(id == null){
+//                System.out.println(o);
+//            }
+//            o.put("_id", id);
+//        }
     }
 
     protected static boolean hasArg(String[] args, String arg) {
@@ -140,7 +222,7 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 
 
     public static List<String> getNames(List<JSONObject> names){
-        return names.stream().map(name -> name.getString("name")).collect(Collectors.toList());
+        return names.stream().map(name -> name.getJSONObject("data").getString("name")).collect(Collectors.toList());
     }
 
     public static List<JSONObject> getOverrides(String folderName) {
@@ -164,6 +246,11 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 
             JSONTokener tokener = new JSONTokener(is);
             JSONObject object = new JSONObject(tokener);
+            if(!object.has("data")){
+                JSONObject temp = new JSONObject();
+                temp.put("data", object);
+                object = temp;
+            }
             manualEntries.add(object);
         }
         return manualEntries;
@@ -210,7 +297,7 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
     }
 
     private static String clean(String itemPageLink) {
-        return itemPageLink.replace(":", "").replace("?", "").replace("=", "");
+        return itemPageLink.replace(":", "").replace("?", "").replace("=", "").replace("\\", "");
     }
 
     protected static void drawProgressBar(double v) {
@@ -227,25 +314,11 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         }
 
         content = content.clone();
-        content.select("span.mw-editsection").remove();
-        final Elements toc = content.select("div.toc");
-        try {
-            toc.remove();
-        }catch(Exception e){
-            //Ignore
-        }
-        final Elements figure = content.select("img,figure");
-        if(figure.size() > 0) {
-            figure.remove();
-        }
-
-        Elements anchors = content.select("a");
-        for (Element anchor : anchors) {
-            if (!anchor.attr("href").startsWith("http")) {
-                anchor.attr("href", "https://swse.fandom.com" + anchor.attr("href"));
-            }
-        }
-
+        removeEditSpan(content);
+        removeTableOfContents(content);
+        removeImagesAndFigures(content);
+        removeComments(content);
+        makeLocalLinksAbsolute(content);
 
 
         StringBuilder response = new StringBuilder();
@@ -266,7 +339,44 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 
         }
 
-        return response.toString().trim();
+        return getDescription(response.toString().trim());
+    }
+
+    private static void makeLocalLinksAbsolute(Element content) {
+        Elements anchors = content.select("a");
+        for (Element anchor : anchors) {
+            if (!anchor.attr("href").startsWith("http")) {
+                anchor.attr("href", "https://swse.fandom.com" + anchor.attr("href"));
+            }
+        }
+    }
+
+    private static void removeImagesAndFigures(Element content) {
+        try {
+            content.select("img,figure").remove();
+        }catch(Exception e){
+            //Ignore
+        }
+    }
+
+    private static void removeTableOfContents(Element content) {
+        try {
+            content.select("div.toc").remove();
+        }catch(Exception e){
+            //Ignore
+        }
+    }
+
+    private static void removeEditSpan(Element content) {
+        try {
+            content.select("span.mw-editsection").remove();
+        }catch(Exception e){
+            //Ignore
+        }
+    }
+
+    public static String getDescription(String description) {
+        return description;
     }
 
     protected static Object getProvidedItemOrChoiceOfProvidedItemsInList(String value, String listDelimiter, String description) {

@@ -1,14 +1,16 @@
 package swse.character_class;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import com.google.common.collect.Lists;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import swse.common.Attribute;
+import swse.common.Change;
+import swse.item.Effect;
+import swse.item.FoundryEffect;
+
 import static swse.util.Util.getNumber;
 
 class Levels {
@@ -62,7 +64,7 @@ class Levels {
                         featuresByLevel.get(level).withBAB(getNumber(text));
                         continue;
                     case "CLASS FEATURES":
-                        featuresByLevel.get(level).withProvided(parseFeatures(text, className));
+                        featuresByLevel.get(level).withChanges(parseFeatures(text, className));
                         continue;
                     default:
                         System.err.println("THING: " + header);
@@ -79,8 +81,8 @@ class Levels {
         return featuresByLevel;
     }
 
-    private static List<Attribute> parseFeatures(String text, String className) {
-        List<Attribute> features = new ArrayList<>();
+    private static List<Change> parseFeatures(String text, String className) {
+        List<Change> features = new ArrayList<>();
         for (String tok : text.split(", ")) {
             features.addAll(Feature.parseFeature(tok, className));
         }
@@ -89,10 +91,15 @@ class Levels {
 
     public JSONObject toJSON() {
         JSONObject leveledMapJson = new JSONObject();
-        for (Map.Entry<Integer, Level> leveledMap : leveledStats.entrySet()) {
-            leveledMapJson.put(String.valueOf(leveledMap.getKey()), leveledMap.getValue().toJSON());
-        }
+
         return leveledMapJson;
     }
 
+    public Collection<? extends FoundryEffect<?>> getEffects() {
+        List<FoundryEffect<?>> effects = Lists.newArrayList();
+        for (Map.Entry<Integer, Level> leveledMap : leveledStats.entrySet()) {
+            effects.add(leveledMap.getValue());
+        }
+        return effects;
+    }
 }

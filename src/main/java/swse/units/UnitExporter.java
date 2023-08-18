@@ -93,16 +93,16 @@ public class UnitExporter extends BaseExporter {
 
         populateTalentMappings();
 
-        List<JSONObject> overrides = getOverrides("units");
+        //List<JSONObject> overrides = getOverrides("units");
 
-        List<String> exclusionByName = getNames(overrides);
+        List<String> exclusionByName = List.of();//getNames(overrides);
 
 
         List<JSONObject> entries = new UnitExporter().getEntriesFromCategoryPage(nonHeroicUnits, false, exclusionByName);
         entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false, exclusionByName));
-        entries.addAll(overrides);
+        //entries.addAll(overrides);
 
-        List<Integer> filter = List.of(3);
+        List<Integer> filter = List.of(0, 1, 2, 3, 4);
         List<String> nameFilter = List.of(); //"B1-Series Battle Droid Squad");
 
         for (Integer i :
@@ -110,11 +110,11 @@ public class UnitExporter extends BaseExporter {
                         .filter(cl -> filter.size() == 0 ||filter.contains(cl) )
                         .collect(Collectors.toList())) {
             List<JSONObject> filtered = entries.stream()
-                    .filter(entry -> ((JSONObject) entry.get("data")).get("cl").equals(i))
+                    .filter(entry -> entry.getJSONObject("system").get("cl").equals(i))
                     .filter(entry -> nameFilter.size() == 0 ||nameFilter.contains(entry.get("name")) )
                     .collect(Collectors.toList());
 
-            writeToJSON(new File(JSON_OUTPUT + i + ".json"), filtered, hasArg(args, "d"));
+            writeToJSON(new File(JSON_OUTPUT + i + ".json"), filtered, hasArg(args, "d"), "Units CL " + i);
         }
 
 
@@ -786,10 +786,10 @@ public class UnitExporter extends BaseExporter {
                 for (int i = 0; i < count; i++) {
                     ProvidedItem providedItem = ProvidedItem.create(itemName, ItemType.ITEM).withEquip("equipped");
                     if (suffix != null) {
-                        providedItem.withProvided(Attribute.create(AttributeKey.SUFFIX, suffix));
+                        providedItem.withProvided(Change.create(AttributeKey.SUFFIX, suffix));
                     }
                     if (special != null) {
-                        providedItem.withProvided(Attribute.create(AttributeKey.SPECIAL, special));
+                        providedItem.withProvided(Change.create(AttributeKey.SPECIAL, special));
                     }
                     modifiers.forEach((String mn, Integer c) -> {
                         if (c != 0) {
@@ -822,7 +822,7 @@ public class UnitExporter extends BaseExporter {
 
                 if (GeneratedLists.ITEMS.contains(base)) {
                     ProvidedItem providedItem = ProvidedItem.create(base, ItemType.ITEM);
-                    providedItem.withProvided(Attribute.create(AttributeKey.PAYLOAD, pm.group(2)));
+                    providedItem.withProvided(Change.create(AttributeKey.PAYLOAD, pm.group(2)));
                     current.withProvided(providedItem);
                     continue;
                 }
@@ -856,7 +856,7 @@ public class UnitExporter extends BaseExporter {
                         ProvidedItem providedItem = ProvidedItem.create(languageName, ItemType.LANGUAGE);
                         if (modifier != null) {
                             modifier = modifier.trim();
-                            providedItem.withProvided(Attribute.create(AttributeKey.PAYLOAD, modifier));
+                            providedItem.withProvided(Change.create(AttributeKey.PAYLOAD, modifier));
 
                         }
 
@@ -1153,22 +1153,22 @@ public class UnitExporter extends BaseExporter {
                         Matcher m1 = CREDITS.matcher(item);
                         if (m1.find()) {
                             ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                            providedItem.withProvided(Attribute.create(AttributeKey.CREDIT, m1.group(1)));
+                            providedItem.withProvided(Change.create(AttributeKey.CREDIT, m1.group(1)));
                             current.withProvided(providedItem);
                         } else {
                             try {
                                 if (!"".equals(modifier) && Integer.parseInt(modifier) > 0) {
                                     ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                                    providedItem.withProvided(Attribute.create(AttributeKey.CREDIT, modifier));
+                                    providedItem.withProvided(Change.create(AttributeKey.CREDIT, modifier));
                                     current.withProvided(providedItem);
                                 } else if (item.equals("Multiple Credit Chips") || item.equals("Thousands of Credits")) {
                                     ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                                    providedItem.withProvided(Attribute.create(AttributeKey.CREDIT, "8d100"));
+                                    providedItem.withProvided(Change.create(AttributeKey.CREDIT, "8d100"));
                                     providedItem.withQuantity("1d4");
                                     current.withProvided(providedItem);
                                 } else if (item.equals("Credits") || item.equals("Credits for Strong Drinks")) {
                                     ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                                    providedItem.withProvided(Attribute.create(AttributeKey.CREDIT, "8d6"));
+                                    providedItem.withProvided(Change.create(AttributeKey.CREDIT, "8d6"));
                                     current.withProvided(providedItem);
                                 } else {
                                     //printUnique("MISSING ITEM: " + item + " : " + modifier + " : " + current.getName());
@@ -1218,7 +1218,7 @@ public class UnitExporter extends BaseExporter {
                     String two = quantity.group(2);
 
                     if (two.equalsIgnoreCase("credits")) {
-                        provided.withProvided(Attribute.create(AttributeKey.CREDIT, one));
+                        provided.withProvided(Change.create(AttributeKey.CREDIT, one));
                     } else {
                         if (!GeneratedLists.ITEMS.contains(two) && !GeneratedLists.ITEMS.contains(two.substring(0, two.length() - 1))) {
                             ProvidedItem providedItem;

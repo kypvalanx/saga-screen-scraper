@@ -3,7 +3,7 @@ package swse.character_class;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.JSONy;
 import swse.util.Util;
@@ -22,7 +22,7 @@ public class Feature implements JSONy
         this.amount = amount;
     }
 
-    public static List<Attribute> parseFeature(String tok, String className)
+    public static List<Change> parseFeature(String tok, String className)
     {
         if (List.of("Defense Bonuses", "Starting Feats", "Lightsaber Construction").contains(tok))
         {
@@ -165,19 +165,19 @@ public class Feature implements JSONy
         return List.of(Feature.create("TRAIT", tok));
     }
 
-    private static Attribute create(String key, String payload, int amount)
+    private static Change create(String key, String payload, int amount)
     {
         switch (key){
             case "PROVIDES":
                 //printUnique(payload);
-                return Attribute.create(AttributeKey.PROVIDES, payload);
+                return Change.create(AttributeKey.PROVIDES, payload);
 
             case "TRAIT":
-                return Attribute.create(AttributeKey.PROVIDED_TRAIT, payload);
+                return Change.create(AttributeKey.PROVIDED_TRAIT, payload);
 
             case "BONUS":
 //                try {
-                    return Attribute.create(AttributeKey.valueOf(Util.toEnumCase(payload)), amount);
+                    return Change.create(AttributeKey.valueOf(Util.toEnumCase(payload)), amount);
 //                } catch (IllegalArgumentException e){
 //                    printUnique(toEnumCase(payload) + "(\""+ toCamelCase(payload)+"\"),");
 //                    return Attribute.create(AttributeKey.PROVIDED_TRAIT, payload);
@@ -186,7 +186,7 @@ public class Feature implements JSONy
         throw new IllegalArgumentException("keys have to be PROVIDES, TRAIT, or BONUS.  it's currently:"+key);
     }
 
-    private static Attribute create(String key, String payload)
+    private static Change create(String key, String payload)
     {
 
         return create(key, payload, 1);

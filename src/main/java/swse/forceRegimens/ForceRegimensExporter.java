@@ -25,7 +25,7 @@ public class ForceRegimensExporter extends BaseExporter
 
         printUniqueNames(entries);
 
-        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Force Regimes");
     }
 
     protected List<JSONy> parseItem(String itemLink, boolean overwrite)

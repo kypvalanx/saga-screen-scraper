@@ -6,8 +6,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import swse.prerequisite.AndPrerequisite;
@@ -19,7 +17,7 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     private final String name;
     private final ItemType type;
     private final Prerequisite prerequisite;
-    private final List<Attribute> attributes = new LinkedList<>();
+    private final List<Change> changes = new LinkedList<>();
     private final List<ProvidedItem> providedItems = new LinkedList<>();
     private final List<Modification> modifications = new LinkedList<>();
     private final List<NamedCrew> namedCrewMembers = new LinkedList<>();
@@ -99,7 +97,7 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
             data.put("answers", answers);
         }
 
-        data.put("attributes", JSONy.toArray(attributes));
+        data.put("attributes", JSONy.toArray(changes));
         data.put("providedItems", JSONy.toArray(providedItems));
         data.put("modifications", JSONy.toArray(modifications));
         data.put("namedCrew", JSONy.toArray(namedCrewMembers));
@@ -132,17 +130,17 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
         return new ProvidedItem(name, type, prerequisite.copy());
     }
 
-    public ProvidedItem withProvided(Attribute attribute) {
-        attributes.add(attribute);
+    public ProvidedItem withProvided(Change change) {
+        changes.add(change);
         return this;
     }
-    public ProvidedItem overwriteProvided(Attribute attribute) {
-        List<Attribute> filtered = attributes.stream().filter(a -> a.getKey().equals(attribute.getKey())).collect(Collectors.toList());
+    public ProvidedItem overwriteProvided(Change change) {
+        List<Change> filtered = changes.stream().filter(a -> a.getKey().equals(change.getKey())).collect(Collectors.toList());
 
         if(filtered.size() > 0){
-            filtered.forEach(a -> a.withValue(attribute.getValue()));
+            filtered.forEach(a -> a.withValue(change.getValue()));
         } else {
-            attributes.add(attribute);
+            changes.add(change);
         }
         return this;
     }

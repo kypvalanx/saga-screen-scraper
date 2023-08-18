@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.ItemType;
@@ -59,7 +59,7 @@ public class VehicleExporter extends BaseExporter {
 
         System.out.println("processed " + entries.size() + " of 647");
 
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Vehicles");
     }
 
 
@@ -113,22 +113,22 @@ public class VehicleExporter extends BaseExporter {
             final String text = cursor.text();
             Matcher matcher = STRENGTH_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.BASE_STRENGTH, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.BASE_STRENGTH, matcher.group(1)));
                 found = true;
             }
             matcher = DEXTERITY_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.BASE_DEXTERITY, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.BASE_DEXTERITY, matcher.group(1)));
                 found = true;
             }
             matcher = INTELLIGENCE_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.BASE_INTELLIGENCE, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.BASE_INTELLIGENCE, matcher.group(1)));
                 found = true;
             }
             matcher = SIZE_AND_SUBTYPE.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.VEHICLE_SUB_TYPE, matcher.group(2)));
+                customTemplate.withProvided(Change.create(AttributeKey.VEHICLE_SUB_TYPE, matcher.group(2)));
                 customTemplate.withProvided(ProvidedItem.create(matcher.group(1), ItemType.TRAIT));
                 if(matcher.group(3)!=null) {
                     customTemplate.withProvided(ProvidedItem.create(matcher.group(3), ItemType.TEMPLATE));
@@ -137,30 +137,30 @@ public class VehicleExporter extends BaseExporter {
             }
             matcher = DAMAGE_REDUCTION.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.DAMAGE_REDUCTION, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.DAMAGE_REDUCTION, matcher.group(1)));
                 found = true;
             }
             matcher = CHARACTER_SCALE_SPEED.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.SPEED_CHARACTER_SCALE, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.SPEED_CHARACTER_SCALE, matcher.group(1)));
                 found = true;
             }
             matcher = SHIP_SCALE_SPEED.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.SPEED_STARSHIP_SCALE, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.SPEED_STARSHIP_SCALE, matcher.group(1)));
                 found = true;
             }
             matcher = MAXIMUM_VELOCITY.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.MAXIMUM_VELOCITY, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.MAXIMUM_VELOCITY, matcher.group(1)));
                 found = true;
             }
             matcher = CREW_PASSENGERS.matcher(text);
             if(text.contains("Crew:")) {
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create(AttributeKey.CREW, matcher.group(1)));
-                    customTemplate.withProvided(Attribute.create(AttributeKey.CREW_QUALITY, matcher.group(3)));
-                    customTemplate.withProvided(Attribute.create(AttributeKey.PASSENGERS, matcher.group(4)));
+                    customTemplate.withProvided(Change.create(AttributeKey.CREW, matcher.group(1)));
+                    customTemplate.withProvided(Change.create(AttributeKey.CREW_QUALITY, matcher.group(3)));
+                    customTemplate.withProvided(Change.create(AttributeKey.PASSENGERS, matcher.group(4)));
                     if (" plus Astromech Droid".equals(matcher.group(2))) {
                         customTemplate.withProvided(ProvidedItem.create("Droid Socket", ItemType.VEHICLE_SYSTEM).withEquip("installed"));
                     }
@@ -173,9 +173,9 @@ public class VehicleExporter extends BaseExporter {
                         Matcher m2 = NAMED_CREW_QUALITY_PATTERN.matcher(text);
                         if(m2.find()){
 
-                            customTemplate.withProvided(Attribute.create(AttributeKey.CREW_QUALITY, m2.group(1)));
+                            customTemplate.withProvided(Change.create(AttributeKey.CREW_QUALITY, m2.group(1)));
                         }
-                        customTemplate.withProvided(Attribute.create(AttributeKey.CREW, matcher.group(1)));
+                        customTemplate.withProvided(Change.create(AttributeKey.CREW, matcher.group(1)));
                         //printUnique(itemName, matcher.group(2));
 
                         for (NamedCrew namedCrew: resolveNamedCrew(matcher.group(2))){
@@ -190,9 +190,9 @@ public class VehicleExporter extends BaseExporter {
             matcher = COVER_PATTERN.matcher(text);
             while (matcher.find()) {
                 if (matcher.group(2) != null) {
-                    customTemplate.withProvided(Attribute.create(AttributeKey.COVER, matcher.group(1) + ":" + matcher.group(2)));
+                    customTemplate.withProvided(Change.create(AttributeKey.COVER, matcher.group(1) + ":" + matcher.group(2)));
                 } else {
-                    customTemplate.withProvided(Attribute.create(AttributeKey.COVER, matcher.group(1)));
+                    customTemplate.withProvided(Change.create(AttributeKey.COVER, matcher.group(1)));
                 }
                 found = true;
             }
@@ -201,7 +201,7 @@ public class VehicleExporter extends BaseExporter {
                 final String value = matcher.group(1);
                 final String unit = matcher.group(2);
 
-                customTemplate.withProvided(Attribute.create(AttributeKey.CARGO_CAPACITY, toString(getKilograms(value, unit))));
+                customTemplate.withProvided(Change.create(AttributeKey.CARGO_CAPACITY, toString(getKilograms(value, unit))));
                 found = true;
             }
 
@@ -223,29 +223,29 @@ public class VehicleExporter extends BaseExporter {
 
             matcher = CONSUMABLE_PATTERN.matcher(text);
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create(AttributeKey.CONSUMABLES, matcher.group(1)));
+                    customTemplate.withProvided(Change.create(AttributeKey.CONSUMABLES, matcher.group(1)));
                     found = true;
                 }
             matcher = HIT_POINT_PATTERN.matcher(text);
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create(AttributeKey.HIT_POINT_EQ, matcher.group(1).replace(",", "")));
+                    customTemplate.withProvided(Change.create(AttributeKey.HIT_POINT_EQ, matcher.group(1).replace(",", "")));
                     found = true;
                 }
             matcher = SHIELD_RATING_PATTERN.matcher(text);
                     if (matcher.find()) {
-                        customTemplate.withProvided(Attribute.create(AttributeKey.SHIELD_RATING, matcher.group(1).replace(",", "")));
+                        customTemplate.withProvided(Change.create(AttributeKey.SHIELD_RATING, matcher.group(1).replace(",", "")));
                         found = true;
                     }
 
             matcher = ARMOR_PATTERN.matcher(text);
             if (matcher.find()) {
-                customTemplate.withProvided(Attribute.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, matcher.group(1)));
+                customTemplate.withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, matcher.group(1)));
                 found = true;
             }
 
             matcher = PAYLOAD_PATTERN.matcher(text);
                 if (matcher.find()) {
-                    customTemplate.withProvided(Attribute.create(AttributeKey.PAYLOAD, matcher.group(1)));
+                    customTemplate.withProvided(Change.create(AttributeKey.PAYLOAD, matcher.group(1)));
                     found = true;
                 }
 
@@ -379,7 +379,7 @@ public class VehicleExporter extends BaseExporter {
 
         if(damage.contains("Damage:")){
             if(m.find()){
-                vehicleWeapon.overwriteProvided(Attribute.create(AttributeKey.DAMAGE, m.group(1)));
+                vehicleWeapon.overwriteProvided(Change.create(AttributeKey.DAMAGE, m.group(1)));
             } else {
                 //printUnique(damage); TODO weapons that are harder to aim at small targets
             }
@@ -387,7 +387,7 @@ public class VehicleExporter extends BaseExporter {
 
         //TODO make these into mods
         for (String modifier : modifiers) {
-            vehicleWeapon.withProvided(Attribute.create(AttributeKey.SUFFIX, ", "+modifier));
+            vehicleWeapon.withProvided(Change.create(AttributeKey.SUFFIX, ", "+modifier));
             vehicleWeapon.withProvided(Modification.create(ProvidedItem.create(modifier, ItemType.VEHICLE_SYSTEM)));
             switch (modifier) {
                 case "Rapid-Fire":
@@ -411,7 +411,7 @@ public class VehicleExporter extends BaseExporter {
                     break;
                 case "Battery":
                     for(int i = 1; i < positions; i++) {
-                        vehicleWeapon.withProvided(Attribute.create(AttributeKey.PROVIDES_SLOT, crewPosition));
+                        vehicleWeapon.withProvided(Change.create(AttributeKey.PROVIDES_SLOT, crewPosition));
                     }
 
 

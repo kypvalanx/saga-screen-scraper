@@ -24,7 +24,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.character_class.StartingFeats;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Category;
@@ -60,7 +60,7 @@ public class SpeciesExporter extends BaseExporter {
 
         printUniqueNames(entries);
 
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Species");
     }
 
 
@@ -232,9 +232,9 @@ public class SpeciesExporter extends BaseExporter {
                         provided.add(new Choice("After the fall of the Empire, Dressellese are also fluent in Bothese.")
                                 .withOption("Before the fall of the Empire", new Option())
                                 .withOption("After the fall of the Empire", new Option()
-                                        .withAttribute(Attribute.create(AttributeKey.SPEAKS, "Bothese"))
-                                        .withAttribute(Attribute.create(AttributeKey.READS, "Bothese"))
-                                        .withAttribute(Attribute.create(AttributeKey.WRITES, "Bothese")))
+                                        .withAttribute(Change.create(AttributeKey.SPEAKS, "Bothese"))
+                                        .withAttribute(Change.create(AttributeKey.READS, "Bothese"))
+                                        .withAttribute(Change.create(AttributeKey.WRITES, "Bothese")))
                         );
                     }
 
@@ -243,40 +243,40 @@ public class SpeciesExporter extends BaseExporter {
                     Set<String> langs = Arrays.stream(m.group(1).split(" and ")).filter(lang -> null != lang && !lang.isBlank()).map(String::trim).collect(Collectors.toSet());
                     for(String s : langs){
                         if("Basic, Chev,".equals(s)){
-                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Basic"));
-                            provided.add(Attribute.create(AttributeKey.READS, "Basic"));
-                            provided.add(Attribute.create(AttributeKey.WRITES, "Basic"));
+                            provided.add(Change.create(AttributeKey.SPEAKS, "Basic"));
+                            provided.add(Change.create(AttributeKey.READS, "Basic"));
+                            provided.add(Change.create(AttributeKey.WRITES, "Basic"));
 
-                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Chev"));
-                            provided.add(Attribute.create(AttributeKey.READS, "Chev"));
-                            provided.add(Attribute.create(AttributeKey.WRITES, "Chev"));
+                            provided.add(Change.create(AttributeKey.SPEAKS, "Chev"));
+                            provided.add(Change.create(AttributeKey.READS, "Chev"));
+                            provided.add(Change.create(AttributeKey.WRITES, "Chev"));
                         } else if("Basic, Huttese,".equals(s)){
-                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Basic"));
-                            provided.add(Attribute.create(AttributeKey.READS, "Basic"));
-                            provided.add(Attribute.create(AttributeKey.WRITES, "Basic"));
+                            provided.add(Change.create(AttributeKey.SPEAKS, "Basic"));
+                            provided.add(Change.create(AttributeKey.READS, "Basic"));
+                            provided.add(Change.create(AttributeKey.WRITES, "Basic"));
 
-                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Huttese"));
-                            provided.add(Attribute.create(AttributeKey.READS, "Huttese"));
-                            provided.add(Attribute.create(AttributeKey.WRITES, "Huttese"));
+                            provided.add(Change.create(AttributeKey.SPEAKS, "Huttese"));
+                            provided.add(Change.create(AttributeKey.READS, "Huttese"));
+                            provided.add(Change.create(AttributeKey.WRITES, "Huttese"));
                         } else if("Nikto, as well as either Basic or Huttese".equals(s)){
-                            provided.add(Attribute.create(AttributeKey.SPEAKS, "Nikto"));
-                            provided.add(Attribute.create(AttributeKey.READS, "Nikto"));
-                            provided.add(Attribute.create(AttributeKey.WRITES, "Nikto"));
+                            provided.add(Change.create(AttributeKey.SPEAKS, "Nikto"));
+                            provided.add(Change.create(AttributeKey.READS, "Nikto"));
+                            provided.add(Change.create(AttributeKey.WRITES, "Nikto"));
 
                             provided.add(new Choice("Select an available language")
                                     .withOption("Basic", new Option()
-                                            .withAttribute(Attribute.create(AttributeKey.SPEAKS, "Basic"))
-                                            .withAttribute(Attribute.create(AttributeKey.READS, "Basic"))
-                                            .withAttribute(Attribute.create(AttributeKey.WRITES, "Basic")))
+                                            .withAttribute(Change.create(AttributeKey.SPEAKS, "Basic"))
+                                            .withAttribute(Change.create(AttributeKey.READS, "Basic"))
+                                            .withAttribute(Change.create(AttributeKey.WRITES, "Basic")))
                                     .withOption("Huttese", new Option()
-                                            .withAttribute(Attribute.create(AttributeKey.SPEAKS, "Huttese"))
-                                            .withAttribute(Attribute.create(AttributeKey.READS, "Huttese"))
-                                            .withAttribute(Attribute.create(AttributeKey.WRITES, "Huttese")))
+                                            .withAttribute(Change.create(AttributeKey.SPEAKS, "Huttese"))
+                                            .withAttribute(Change.create(AttributeKey.READS, "Huttese"))
+                                            .withAttribute(Change.create(AttributeKey.WRITES, "Huttese")))
                             );
                         } else {
-                            provided.add(Attribute.create(AttributeKey.SPEAKS, s));
-                            provided.add(Attribute.create(AttributeKey.READS, s));
-                            provided.add(Attribute.create(AttributeKey.WRITES, s));
+                            provided.add(Change.create(AttributeKey.SPEAKS, s));
+                            provided.add(Change.create(AttributeKey.READS, s));
+                            provided.add(Change.create(AttributeKey.WRITES, s));
                         }
                         //printUnique(s);
                         //do i want 3 systems?
@@ -320,32 +320,32 @@ public class SpeciesExporter extends BaseExporter {
         switch (speciesName) {
             case "Medical Droid":
             case "1st-Degree Droid Model":
-                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "1st-Degree Droid Talent Tree"));
+                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "1st-Degree Droid Talent Tree"));
                 break;
             case "Astromech Droid":
             case "Mechanic Droid":
             case "2nd-Degree Droid Model":
-                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "2nd-Degree Droid Talent Tree"));
+                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "2nd-Degree Droid Talent Tree"));
                 break;
             case "Protocol Droid":
             case "Service Droid":
             case "3rd-Degree Droid Model":
-                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "3rd-Degree Droid Talent Tree"));
+                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "3rd-Degree Droid Talent Tree"));
                 break;
             case "Battle Droid":
             case "Probe Droid":
             case "4th-Degree Droid Model":
-                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "4th-Degree Droid Talent Tree"));
+                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "4th-Degree Droid Talent Tree"));
                 break;
             case "Labor Droid":
             case "5th-Degree Droid Model":
-                attributes.add(Attribute.create(AttributeKey.BONUS_TALENT_TREE, "5th-Degree Droid Talent Tree"));
+                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "5th-Degree Droid Talent Tree"));
                 break;
 
         }
 
         if (speciesName.contains(" Droid")) {
-            attributes.add(Attribute.create(AttributeKey.IS_DROID, "true"));
+            attributes.add(Change.create(AttributeKey.IS_DROID, "true"));
             attributes.add(ProvidedItem.create("Droid Default Appendage Offset", ItemType.TRAIT));
         }
 

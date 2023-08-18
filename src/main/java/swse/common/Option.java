@@ -18,7 +18,7 @@ public class Option implements JSONy, Copyable<Option> {
     private String display;
     private final String value;
     List<ProvidedItem> providedItems = new ArrayList<>();
-    List<Attribute> attributes = new ArrayList<>();
+    List<Change> changes = new ArrayList<>();
     private final Map<String, String> payloads = new HashMap<>();
     private String rollRange;
     private boolean isDefault = false;
@@ -50,7 +50,7 @@ public class Option implements JSONy, Copyable<Option> {
 
         final JSONObject obj = new JSONObject()
                 .put("providedItems", JSONy.toArray(providedItems))
-                .put("attributes", createAttributes(attributes.stream().filter(Objects::nonNull).map(Attribute::toJSON)
+                .put("attributes", createAttributes(changes.stream().filter(Objects::nonNull).map(Change::toJSON)
                         .collect(Collectors
                                 .toList())))
                 .put("rollRange", rollRange)
@@ -98,7 +98,7 @@ public class Option implements JSONy, Copyable<Option> {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("providedItems", providedItems)
-                .add("attributes", attributes)
+                .add("attributes", changes)
                 .add("payload", payloads)
                 .add("rollRange", rollRange)
                 .toString();
@@ -111,8 +111,8 @@ public class Option implements JSONy, Copyable<Option> {
         for (ProvidedItem providedItem : providedItems) {
             option.withProvidedItem(providedItem.copy());
         }
-        for (Attribute attribute : attributes) {
-            option.withAttribute(attribute.copy());
+        for (Change change : changes) {
+            option.withAttribute(change.copy());
         }
         return option;
     }
@@ -124,8 +124,8 @@ public class Option implements JSONy, Copyable<Option> {
         return this;
     }
 
-    public Option withAttribute(Attribute attribute) {
-        attributes.add(attribute);
+    public Option withAttribute(Change change) {
+        changes.add(change);
         return this;
     }
 

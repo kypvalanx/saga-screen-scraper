@@ -14,7 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Buff;
@@ -84,7 +84,7 @@ public class TalentExporter extends BaseExporter
         printUniqueNames(entries);
 
         System.out.println("Generated " + entries.size() + " of 1381");
-        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Talents");
     }
 
 
@@ -193,10 +193,10 @@ public class TalentExporter extends BaseExporter
     private List<Object> getCountsAsForPrerequisite(String talentName) {
         List<Object> attributes = new ArrayList<>();
         if("Charm Beast (Beastwarden Talent Tree)".equals(talentName)){
-            attributes.add(Attribute.create(AttributeKey.ACTS_AS, "Charm Beast (Dathomiri Witch Talent Tree)"));
+            attributes.add(Change.create(AttributeKey.ACTS_AS, "Charm Beast (Dathomiri Witch Talent Tree)"));
         }
         if("Charm Beast (Dathomiri Witch Talent Tree)".equals(talentName)){
-            attributes.add(Attribute.create(AttributeKey.ACTS_AS, "Charm Beast (Beastwarden Talent Tree)"));
+            attributes.add(Change.create(AttributeKey.ACTS_AS, "Charm Beast (Beastwarden Talent Tree)"));
         }
         return attributes;
     }
@@ -244,6 +244,9 @@ public class TalentExporter extends BaseExporter
             choice.withOption("AVAILABLE_DISARMING_ATTACK", new Option().withPayload("AVAILABLE_DISARMING_ATTACK"));
             attributes.add(choice);
         }
+        if ("Telekinetic Prodigy".equals(talentName)){
+            attributes.add(ProvidedItem.create("Telekinetic Prodigy Bonus Force Power", ItemType.TRAIT));
+        }
 
         return attributes;
     }
@@ -253,48 +256,48 @@ public class TalentExporter extends BaseExporter
 
         switch (itemName) {
             case "Noble Fencing Style":
-                attributes.add(Attribute.create(AttributeKey.FINESSE_STAT, "CHA"));
+                attributes.add(Change.create(AttributeKey.FINESSE_STAT, "CHA"));
                 break;
             case "Weapon Specialization":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.WEAPON_SPECIALIZATION, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.WEAPON_SPECIALIZATION, "#payload#"));
                 break;
             case "Greater Weapon Specialization":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.GREATER_WEAPON_SPECIALIZATION, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.GREATER_WEAPON_SPECIALIZATION, "#payload#"));
                 break;
             case "Penetrating Attack":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.PENETRATING_ATTACK, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.PENETRATING_ATTACK, "#payload#"));
                 break;
             case "Greater Penetrating Attack":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.GREATER_PENETRATING_ATTACK, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.GREATER_PENETRATING_ATTACK, "#payload#"));
                 break;
             case "Devastating Attack":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.DEVASTATING_ATTACK, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.DEVASTATING_ATTACK, "#payload#"));
                 break;
             case "Disarming Attack":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.DISARMING_ATTACK, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.DISARMING_ATTACK, "#payload#"));
                 break;
             case "Greater Devastating Attack":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.GREATER_DEVASTATING_ATTACK, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.GREATER_DEVASTATING_ATTACK, "#payload#"));
                 break;
             case "Greater Weapon Focus":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
-                attributes.add(Attribute.create(AttributeKey.GREATER_WEAPON_FOCUS, "#payload#"));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.GREATER_WEAPON_FOCUS, "#payload#"));
                 break;
             case "Weapon Specialization (Discblade)":
-                attributes.add(Attribute.create(AttributeKey.WEAPON_SPECIALIZATION, "Discblade"));
+                attributes.add(Change.create(AttributeKey.WEAPON_SPECIALIZATION, "Discblade"));
                 break;
             case "Weapon Specialization (Lightsabers)":
-                attributes.add(Attribute.create(AttributeKey.WEAPON_SPECIALIZATION, "Lightsabers"));
+                attributes.add(Change.create(AttributeKey.WEAPON_SPECIALIZATION, "Lightsabers"));
                 break;
             case "Stolen Form":
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, true));
                 attributes.add(ProvidedItem.create("#payload#", ItemType.TALENT));
                 attributes.add(new Choice("Choose one Talent from the Lightsaber Forms Talent Tree:")
                         .withNoOptionsDescription("There are no available Talents remaining in the Lightsaber Forms Talent Tree")
@@ -302,21 +305,21 @@ public class TalentExporter extends BaseExporter
                 break;
             case "Lightsaber Defense":
                 //when getinheritableby id sees a $ it should lookup the following inheritable value
-                attributes.add(Buff.create("Lightsaber Defense").withProvided(Attribute.create(AttributeKey.DEFLECTION_BONUS, "$lightsaberDefense")));
-                attributes.add(Attribute.create(AttributeKey.LIGHTSABER_DEFENSE, 1));
-                attributes.add(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, 3));
+                attributes.add(Buff.create("Lightsaber Defense").withProvided(Change.create(AttributeKey.DEFLECTION_BONUS, "$lightsaberDefense")));
+                attributes.add(Change.create(AttributeKey.LIGHTSABER_DEFENSE, 1));
+                attributes.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, 3));
             case "Ataru":
                 //damageStat will replace STR to damage, than any specific(group or item name) damage type.  we'll take the highest one.  this will be doubled for 2 handers
-                attributes.add(Attribute.create(AttributeKey.LIGHTSABERS_DAMAGE_STAT, "DEX"));
+                attributes.add(Change.create(AttributeKey.LIGHTSABERS_DAMAGE_STAT, "DEX"));
                 break;
             case "Djem So":
-                attributes.add(Attribute.create(AttributeKey.ACTION, "Once per round when an opponent hits you with a melee attack, you may spend a Force Point as a Reaction to make an immediate attack against that opponent."));
+                attributes.add(Change.create(AttributeKey.ACTION, "Once per round when an opponent hits you with a melee attack, you may spend a Force Point as a Reaction to make an immediate attack against that opponent."));
                 break;
             case "Jar'Kai":
                 attributes.add(ProvidedItem.create("Jar'Kai",ItemType.TRAIT, new OrPrerequisite(List.of(new SimplePrerequisite("Two Lightsabers", "EQUIPPED", "Lightsabers:>1"), new SimplePrerequisite("Double-Bladed Lightsaber", "EQUIPPED", "Double-Bladed Lightsaber")))));
                 break;
             case "Juyo":
-                attributes.add(Attribute.create(AttributeKey.ACTION, "Once per encounter, you may spend a Force Point as a Swift Action to designate a single opponent in your line of sight. For the remainder of the encounter, you may reroll your first attack roll each round against that opponent, keeping the better of the two results."));
+                attributes.add(Change.create(AttributeKey.ACTION, "Once per encounter, you may spend a Force Point as a Swift Action to designate a single opponent in your line of sight. For the remainder of the encounter, you may reroll your first attack roll each round against that opponent, keeping the better of the two results."));
                 break;
             case "Makashi":
                 attributes.add(ProvidedItem.create("Makashi",ItemType.TRAIT, new AndPrerequisite(List.of(new SimplePrerequisite("One Lightsaber", "EQUIPPED", "Lightsabers:<2"), new NotPrerequisite(new SimplePrerequisite("Two-Handed", "EQUIPPED", "2 Hand"))))));
@@ -325,29 +328,29 @@ public class TalentExporter extends BaseExporter
                 attributes.add(ProvidedItem.create("Niman",ItemType.TRAIT, new SimplePrerequisite("A Lightsaber", "EQUIPPED", "Lightsabers")));
                 break;
             case "Shien":
-                attributes.add(Attribute.create(AttributeKey.REDIRECTED_SHOT_BONUS, 5));
+                attributes.add(Change.create(AttributeKey.REDIRECTED_SHOT_BONUS, 5));
                 break;
             case "Shii-cho":
-                attributes.add(Attribute.create(AttributeKey.BLOCK_BONUS, 3));
-                attributes.add(Attribute.create(AttributeKey.DEFLECTION_BONUS, 3));
+                attributes.add(Change.create(AttributeKey.BLOCK_BONUS, 3));
+                attributes.add(Change.create(AttributeKey.DEFLECTION_BONUS, 3));
                 break;
             case "Sokan":
-                attributes.add(Attribute.create(AttributeKey.NOTE, "You may Take 10 on Acrobatics checks to Tumble, even when distracted or threatened. Additionally, each threatened or occupied square that you Tumble through only counts as 1 square of movement."));
+                attributes.add(Change.create(AttributeKey.NOTE, "You may Take 10 on Acrobatics checks to Tumble, even when distracted or threatened. Additionally, each threatened or occupied square that you Tumble through only counts as 1 square of movement."));
                 break;
             case "Soresu":
-                attributes.add(Attribute.create(AttributeKey.NOTE, "You may reroll a failed Use the Force check when using the Block or Deflect Talents."));
+                attributes.add(Change.create(AttributeKey.NOTE, "You may reroll a failed Use the Force check when using the Block or Deflect Talents."));
                 break;
             case "Trakata":
-                attributes.add(Attribute.create(AttributeKey.NOTE, "By harnessing the unique characteristics of a Lightsaber, you can catch your opponent off guard by quickly shutting off and reigniting the blade. When wielding a Lightsaber, you may spend two Swift Actions to make a Deception check to Feint in combat."));
+                attributes.add(Change.create(AttributeKey.NOTE, "By harnessing the unique characteristics of a Lightsaber, you can catch your opponent off guard by quickly shutting off and reigniting the blade. When wielding a Lightsaber, you may spend two Swift Actions to make a Deception check to Feint in combat."));
                 break;
             case "Vaapad":
-                attributes.add(Attribute.create(AttributeKey.NOTE, "When attacking with a Lightsaber, you score a critical hit on a natural roll of 19 or 20. However, a natural 19 is not considered an automatic hit; if you roll a natural 19 and still miss the target, you do not score a critical hit."));
+                attributes.add(Change.create(AttributeKey.NOTE, "When attacking with a Lightsaber, you score a critical hit on a natural roll of 19 or 20. However, a natural 19 is not considered an automatic hit; if you roll a natural 19 and still miss the target, you do not score a critical hit."));
                 break;
             case "Armored Defense":
-                attributes.add(Attribute.create(AttributeKey.ARMORED_DEFENSE, true));
+                attributes.add(Change.create(AttributeKey.ARMORED_DEFENSE, true));
                 break;
             case "Improved Armored Defense":
-                attributes.add(Attribute.create(AttributeKey.IMPROVED_ARMORED_DEFENSE, true));
+                attributes.add(Change.create(AttributeKey.IMPROVED_ARMORED_DEFENSE, true));
                 break;
 
         }

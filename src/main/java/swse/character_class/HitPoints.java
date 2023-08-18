@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 
 class HitPoints
@@ -23,9 +23,9 @@ class HitPoints
         this.levelUpHitPoints = levelUpHitPoints;
     }
 
-    static List<Attribute> getHitPoints(Elements entries, String itemName)
+    static List<Change> getHitPoints(Elements entries, String itemName)
     {
-        List<Attribute> attributes = new ArrayList<>();
+        List<Change> changes = new ArrayList<>();
         boolean found = false;
         boolean allowP = true;
         for (Element entry : entries)
@@ -42,7 +42,7 @@ class HitPoints
 
                     if (m.find())
                     {
-                        attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL,Integer.parseInt(m.group(1))));
+                        changes.add(Change.create(AttributeKey.HIT_POINTS_FIRST_LEVEL,Integer.parseInt(m.group(1))));
                     }
 
                     Pattern levelUpHitPointsPattern = Pattern.compile("(?:gain|hit points equal to) (\\d*d\\d*) (hit point|\\+ their)(s)?");
@@ -51,7 +51,7 @@ class HitPoints
 
                     if (m2.find())
                     {
-                        attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, m2.group(1)));
+                        changes.add(Change.create(AttributeKey.LEVEL_UP_HIT_POINTS, m2.group(1)));
                     }
 
                 }
@@ -62,15 +62,15 @@ class HitPoints
         }
 
         if("Beast".equals(itemName)){
-            attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d8"));
+            changes.add(Change.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d8"));
             //attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d8"));
         }
 
         if("Nonheroic".equals(itemName)){
-            attributes.add(Attribute.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d4"));
+            changes.add(Change.create(AttributeKey.HIT_POINTS_FIRST_LEVEL, "1d4"));
             //attributes.add(Attribute.create(AttributeKey.LEVEL_UP_HIT_POINTS, "1d4"));
         }
-        return attributes;
+        return changes;
     }
 
     @Override

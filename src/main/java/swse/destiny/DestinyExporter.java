@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.JSONy;
@@ -31,7 +31,7 @@ public class DestinyExporter extends BaseExporter {
         }
 
 
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Destinies");
     }
 
 
@@ -104,9 +104,9 @@ public class DestinyExporter extends BaseExporter {
 
     private Collection<?> getDestinyAttributes(Element content) {
         List<Object> response = new LinkedList<>();
-        response.add(Attribute.create(AttributeKey.DESTINY_BONUS, getAttribute(content, "Destiny Bonus:")));
-        response.add(Attribute.create(AttributeKey.DESTINY_PENALTY, getAttribute(content, "Destiny Penalty:")));
-        response.add(Attribute.create(AttributeKey.DESTINY_FULFILLED, getAttribute(content, "Destiny Fulfilled:")));
+        response.add(Change.create(AttributeKey.DESTINY_BONUS, getAttribute(content, "Destiny Bonus:")));
+        response.add(Change.create(AttributeKey.DESTINY_PENALTY, getAttribute(content, "Destiny Penalty:")));
+        response.add(Change.create(AttributeKey.DESTINY_FULFILLED, getAttribute(content, "Destiny Fulfilled:")));
         return response;
     }
 }

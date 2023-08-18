@@ -17,14 +17,6 @@ public class Background extends FoundryItem<Background> implements Copyable<Back
         return new Background(itemName);
     }
 
-    @Nonnull
-    public JSONObject toJSON(){
-        JSONObject json = super.toJSON();
-
-        //JSONObject data = json.getJSONObject("data");
-        return json;
-    }
-
     public Background copy() {
         return null;
     }

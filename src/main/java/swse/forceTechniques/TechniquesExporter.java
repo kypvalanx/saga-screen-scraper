@@ -25,7 +25,7 @@ public class TechniquesExporter extends BaseExporter
         List<JSONObject> entries = new TechniquesExporter().getEntriesFromCategoryPage(talentLinks, true);
         printUniqueNames(entries);
 
-        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Force Techniques");
     }
 
 

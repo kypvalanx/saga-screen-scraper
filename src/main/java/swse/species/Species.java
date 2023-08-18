@@ -9,21 +9,12 @@ public class Species extends FoundryItem<Species> implements Copyable<Species>
 {
     public Species(String name)
     {
-        super(name, "manual/species");
+        super(name, "species");
     }
 
     public static Species create(String itemName)
     {
         return new Species(itemName);
-    }
-
-    @Nonnull
-    public JSONObject toJSON()
-    {
-        JSONObject json = super.toJSON();
-        json.put("type", "manual/species");
-
-        return json;
     }
 
     @Override

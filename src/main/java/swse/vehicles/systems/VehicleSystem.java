@@ -7,7 +7,6 @@ import swse.common.FoundryItem;
 import static swse.util.Util.cloneList;
 
 public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyable<VehicleSystem> {
-    private String cost;
     private boolean asterisk = false;
 
     public VehicleSystem(String name) {
@@ -21,7 +20,6 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
     @Override
     public VehicleSystem copy() {
        VehicleSystem v = VehicleSystem.create(name)
-                .withCost(cost)
                 .withSubtype(subtype)
                 .withDescription(description);
         if (prerequisite != null) {
@@ -29,28 +27,11 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
         }
         v.withImage(image)
                 .withSource(source)
-                .withAvailability(availability)
-                .withProvided(cloneList(attributes))
+                .withProvided(cloneList(changes))
                 .withProvided(cloneList(providedItems))
                 .withProvided(cloneList(categories))
                 .withProvided(cloneList(choices));
         return v ;
-    }
-
-    @Nonnull
-    @Override
-    public JSONObject toJSON(){
-        JSONObject json = super.toJSON();
-        JSONObject data = json.getJSONObject("data");
-
-        data.put("cost", cost);
-
-        return json;
-    }
-
-    public VehicleSystem withCost(String cost) {
-        this.cost = cost;
-        return this;
     }
 
     public VehicleSystem withAsterisk(boolean asterisk) {

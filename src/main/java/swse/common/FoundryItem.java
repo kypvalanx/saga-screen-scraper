@@ -1,79 +1,54 @@
 package swse.common;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
-import org.apache.commons.collections4.Bag;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import static swse.common.BaseExporter.getDescription;
-import swse.item.Mode;
+import swse.item.Effect;
+import swse.item.FoundryEffect;
 import swse.prerequisite.Prerequisite;
 
 public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
+    protected final List<String> providers;
     protected String type;
     protected String name;
     protected String description = "";
     protected Prerequisite prerequisite;
     protected String image;
-    protected final List<Attribute> attributes;
+    protected final List<Change> changes;
     protected final List<ProvidedItem> providedItems;
     protected final List<Category> categories;
     protected final List<Choice> choices;
     protected String source;
-    protected String availability;
     protected String subtype;
-    private List<Modification> modifications;
+    protected List<FoundryEffect<?>> effects = new LinkedList<>();
+    private final List<Modification> modifications;
     private String id;
 
     public FoundryItem(String name, String type) {
         this.name = name;
         this.choices = new ArrayList<>();
         this.categories = new ArrayList<>();
-        this.attributes =  new ArrayList<>();
+        this.changes =  new ArrayList<>();
         this.providedItems =  new ArrayList<>();
         this.modifications =  new ArrayList<>();
         this.type = type;
+        this.providers = new ArrayList<>();
     }
-
-//    public FoundryItem(FoundryItem<?> foundryItem) {
-//        this.name = foundryItem.name;
-//        this.description = foundryItem.description;
-//        this.prerequisite = foundryItem.prerequisite.copy();
-//        this.image = foundryItem.image;
-//        this.choices = cloneList(foundryItem.choices);
-//        this.categories = cloneList(foundryItem.categories);
-//        this.attributes = cloneList(foundryItem.attributes);
-//        this.providedItems = cloneList(foundryItem.providedItems);
-//    }
-
-    public static JSONObject constructModes(List<Mode> modes) {
-        final JSONObject modeObjects = new JSONObject();
-        int i = 0;
-
-        if(modes == null){
-            return modeObjects;
-        }
-
-        for(Mode mode : modes){
-            JSONObject modeObject = new JSONObject();
-            modeObject.put("name", mode.getName());
-            modeObject.put("group", mode.getGroup());
-
-            modeObject.put("attributes",
-                    createAttributes(mode.getAttributes().stream().filter(Objects::nonNull).map(Attribute::toJSON).collect(Collectors.toList()))
-            );
-
-            modeObject.put("modes", constructModes(mode.getModes()));
-
-            modeObjects.put(String.valueOf(i++),modeObject);
-        }
-        return modeObjects;
+    public FoundryItem(String name, String type, String subtype) {
+        this.name = name;
+        this.choices = new ArrayList<>();
+        this.categories = new ArrayList<>();
+        this.changes =  new ArrayList<>();
+        this.providedItems =  new ArrayList<>();
+        this.modifications =  new ArrayList<>();
+        this.type = type;
+        this.providers = new ArrayList<>();
+        this.subtype = subtype;
     }
 
     @Nonnull
@@ -81,51 +56,79 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     public JSONObject toJSON(){
         preJSON();
         List<String> flags = getFlags();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("name", name);
-        jsonObject.put("img", image);
-        jsonObject.put("type", type);
-        jsonObject.put("effects", new JSONArray());
-        jsonObject.put("flags", new JSONObject());
-        jsonObject.put("folder", (String)null );
-        jsonObject.put("sort", 0);
+        JSONObject root = new JSONObject();
+        root.put("name", name);
+        root.put("img", image);
+        root.put("type", type);
+        root.put("effects", FoundryEffect.constructEffectList(effects));
+        root.put("flags", new JSONObject());
+        root.put("folder", (String)null );
+        root.put("sort", 0);
         if(id != null){
-            jsonObject.put("_id", id);
+            root.put("_id", id);
         }
+        root.put("permission", getPermission());
+
+        JSONObject system = new JSONObject();
+        system.put("description", description);
+        system.put("choices", JSONy.toArray(choices));
+        system.put("source", source);
+        system.put("subtype", subtype);
+        if (prerequisite != null) {
+            system.put("prerequisite", JSONy.toJSON(prerequisite));
+        }
+        system.put("categories", JSONy.toArray(categories));
+        if (categories.size()>0){
+            universalChangesFromCategories();
+        }
+        //categories.forEach(category -> providedItems.add(ProvidedItem.create(category.getValue(), ItemType.TRAIT)));
+        system.put("providedItems",JSONy.toArray(providedItems));
+        system.put("modifications",JSONy.toArray(modifications));
+
+        system.put("changes", createChangeArray(changes.stream().filter(Objects::nonNull).map(Change::toJSON).collect(Collectors.toList()), flags));
+
+
+        if(providers.size()>0) {
+            system.put("possibleProviders", providers);
+        }
+
+        root.put("system", system);
+        return root;
+    }
+
+    private JSONArray createChangeArray(List<JSONObject> collect, List<String> flags) {
+        JSONArray json = new JSONArray();
+
+        for (JSONObject change :
+                collect) {
+            json.put(change);
+        }
+
+        return json;
+    }
+
+    private JSONObject getPermission() {
         JSONObject permission = new JSONObject();
         permission.put("default", 0);
-        jsonObject.put("permission", permission);
+        return permission;
+    }
 
-        JSONObject data = new JSONObject();
-        data.put("description", description);
-        data.put("choices", JSONy.toArray(choices));
-        data.put("source", source);
-        data.put("subtype", subtype);
-        if (prerequisite != null) {
-            data.put("prerequisite", JSONy.toJSON(prerequisite));
+    private void universalChangesFromCategories() {
+        List<String> categoryStrings = categories.stream().map(Category::getValue).collect(Collectors.toList());
+        if (categoryStrings.contains("Homebrew Content")){
+            changes.add(Change.create(AttributeKey.HOMEBREW, true));
         }
-        data.put("categories", JSONy.toArray(categories));
-        //categories.forEach(category -> providedItems.add(ProvidedItem.create(category.getValue(), ItemType.TRAIT)));
-        data.put("providedItems",JSONy.toArray(providedItems));
-        data.put("modifications",JSONy.toArray(modifications));
-
-        data.put("attributes", createAttributes(attributes.stream().filter(Objects::nonNull).map(Attribute::toJSON).collect(Collectors.toList()), flags));
-
-
-
-        //printUnique("------ "+type + " - " + subtype);
-        jsonObject.put("data", data);
-        return jsonObject;
+        if (categoryStrings.contains("Untested")){
+            changes.add(Change.create(AttributeKey.HOMEBREW, true));
+        }
     }
 
     protected List<String> getFlags(){
         return new ArrayList<>();
-    };
+    }
 
     /**
      * returns a JSONObject that resembles an array.  we are doing this because we want to be able to add and remove attributes from items more easily in foundry
-     * @param attributes
-     * @return
      */
     public static JSONObject createAttributes(List<JSONObject> attributes){
         return createAttributes(attributes, List.of());
@@ -144,14 +147,6 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         }
 
         return json;
-    }
-
-
-    public static JSONObject createAttribute(Attribute attribute) {
-        if(attribute == null){
-            return null;
-        }
-        return attribute.toJSON();
     }
 
     public static JSONObject createAttribute(String key, Object object) {
@@ -196,7 +191,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     }
 
     public T withAvailability(String availability) {
-        this.availability = availability;
+        this.withProvided(Change.create(AttributeKey.AVAILABILITY, availability));
         return (T) this;
     }
 
@@ -210,26 +205,31 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         //if(modes.stream().filter((mode) -> {})){}
     }
 
+    public T withCost(String cost) {
+        this.withProvided(Change.create(AttributeKey.COST, cost));
+        return (T) this;
+    }
+
     public T withProvided(Object object) {
         return withProvided(object, false);
     }
 
     public T withProvided(Object object, boolean unique) {
         if(object != null) {
-            if(object instanceof Attribute) {
+            if(object instanceof Change) {
                 if(unique){
                     boolean overwritten = false;
-                    for(Attribute attribute : attributes){
-                        if(attribute.getKey().equals(((Attribute)object).getKey())){
-                            attribute.withValue(((Attribute)object).getValue());
+                    for(Change change : changes){
+                        if(change.getKey().equals(((Change)object).getKey())){
+                            change.withValue(((Change)object).getValue());
                             overwritten = true;
                         }
                     }
                     if(!overwritten){
-                        attributes.add((Attribute)object);
+                        changes.add((Change)object);
                     }
                 } else {
-                    attributes.add((Attribute) object);
+                    changes.add((Change) object);
                 }
             } else if(object instanceof Choice){
                 choices.add((Choice)object);
@@ -246,7 +246,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
 
     public T withDescription(String description)
     {
-        this.description += description;
+        this.description += getDescription(description);;
         return (T) this;
     }
 
@@ -259,9 +259,9 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     public T withDescription(String description, boolean overwrite)
     {
         if(overwrite){
-            this.description = description;
+            this.description = getDescription(description);
         } else {
-            this.description += description;
+            this.description += getDescription(description);;
         }
         return (T) this;
     }
@@ -293,11 +293,20 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         return name;
     }
 
-    public T replaceAttribute(Attribute attribute) {
-        this.attributes.removeAll(attributes.stream().filter( a -> a.getKey().equals(attribute.getKey())).collect(Collectors.toList()));
-        this.attributes.add(attribute);
+    public T replaceAttribute(Change change) {
+        this.changes.removeAll(changes.stream().filter(a -> a.getKey().equals(change.getKey())).collect(Collectors.toList()));
+        this.changes.add(change);
         return (T) this;
     }
 
 
+    public T withPossibleProviders(List<String> providers) {
+        this.providers.addAll(providers);
+        return (T) this;
+    }
+
+    public T withCategories(Set<Category> categories) {
+        this.categories.addAll(categories);
+        return (T) this;
+    }
 }

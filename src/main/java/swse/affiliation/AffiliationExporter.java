@@ -24,7 +24,7 @@ public class AffiliationExporter extends BaseExporter
 
         printUniqueNames(entries);
 
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args,"d"));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args,"d"), "Affiliations");
     }
 
     protected List<JSONy> parseItem(String itemLink, boolean overwrite)

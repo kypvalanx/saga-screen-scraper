@@ -17,14 +17,6 @@ public class Destiny extends FoundryItem<Destiny> implements Copyable<Destiny>
         return new Destiny(itemName);
     }
 
-    @Nonnull
-    public JSONObject toJSON(){
-        JSONObject json = super.toJSON();
-
-        //JSONObject data = json.getJSONObject("data");
-        return json;
-    }
-
     public Destiny copy() {
         return null;
     }

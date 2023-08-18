@@ -1,7 +1,5 @@
 package swse.units;
 
-import org.checkerframework.checker.units.qual.A;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import swse.common.*;
 
@@ -10,8 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     private String size;
@@ -37,27 +33,27 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     @Override
     public JSONObject toJSON() {
         JSONObject json = super.toJSON();
-        JSONObject data = json.getJSONObject("data");
-        data.put("size", size); //size is provided most of the time.  this should be used to double-check that the size has been resolved correctly.
-        data.put("speciesSubType", speciesSubType);
-        data.put("cl", cl);
+        JSONObject system = json.getJSONObject("system");
+        system.put("size", size); //size is provided most of the time.  this should be used to double-check that the size has been resolved correctly.
+        system.put("speciesSubType", speciesSubType);
+        system.put("cl", cl);
         if (age != null) {
-            data.put("age", age);
+            system.put("age", age);
         }
         if (cost != null) {
-            data.put("cost", cost);
+            system.put("cost", cost);
         }
         if (isForSale != null) {
-            data.put("isForSale", isForSale);
+            system.put("isForSale", isForSale);
         }
         if (darkSideScore != null) {
-            data.put("darkSideScore", darkSideScore);
+            system.put("darkSideScore", darkSideScore);
         }
         if (organizationScores != null) {
-            data.put("organizationScores", JSONy.toObject(organizationScores));
+            system.put("organizationScores", JSONy.toObject(organizationScores));
         }
         JSONObject health = new JSONObject();
-        data.put("health", health);
+        system.put("health", health);
         if (hitPoints != null) {
             health.put("hitPointOverride", hitPoints);
         }
@@ -69,7 +65,7 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
             value.put("trained", true);
             skills.put(skill.toLowerCase(), value);
         }
-            data.put("skills", skills);
+            system.put("skills", skills);
 
 
         //json.put("type", "npc-vehicle");
@@ -138,7 +134,7 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     }
 
     public Unit withAttribute(String attribute, String value) {
-        this.attributes.add(Attribute.create(AttributeKey.valueOf(attribute), value));
+        this.changes.add(Change.create(AttributeKey.valueOf(attribute), value));
         return this;
     }
 

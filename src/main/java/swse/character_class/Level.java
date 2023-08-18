@@ -1,42 +1,40 @@
 package swse.character_class;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import org.json.JSONObject;
-import swse.common.Copyable;
-import swse.common.FoundryItem;
 
-public class Level extends FoundryItem<Level>  implements Copyable<Level> {
+import swse.common.AttributeKey;
+import swse.common.Change;
+import swse.common.Copyable;
+import swse.item.Effect;
+import swse.item.FoundryEffect;
+
+public class Level extends FoundryEffect<Level> {
     private final int level;
     private Integer roughBAB;
-    private List<Feature> parseFeatures;
     private Level previousLevel;
 
     public Level(int level) {
-        super(level+"", "level");
+        super("Level " + level);
+        this.flags.put("isLevel", true);
+        this.flags.put("level", level);
         this.level = level;
     }
 
-    public void withBAB(Integer roughBAB) {
-
+    public Level withBAB(Integer roughBAB) {
         this.roughBAB = roughBAB;
+        return this;
     }
 
-    public void withPreviousLevel(Level previousLevel) {
-
+    public Level withPreviousLevel(Level previousLevel) {
         this.previousLevel = previousLevel;
+        return this;
     }
 
 
-    @Nonnull
-    public JSONObject toJSON() {
-        JSONObject json = super.toJSON();
-        json.put("level", level);
-        json.remove("name");
-        JSONObject attr = json.getJSONObject("data").getJSONObject("attributes");
-        attr.put("" + attr.length(), createAttribute("baseAttackBonus",resolveBAB()));
-
-        return json;
+    @Override
+    protected void resolveDynamicValues() {
+        super.resolveDynamicValues();
+        this.changes.add(Change.create(AttributeKey.BASE_ATTACK_BONUS, resolveBAB()));
     }
 
     private int resolveBAB() {
@@ -59,4 +57,5 @@ public class Level extends FoundryItem<Level>  implements Copyable<Level> {
     public Level copy() {
         return null;
     }
+
 }

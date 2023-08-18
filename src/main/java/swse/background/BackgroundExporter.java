@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Choice;
@@ -36,7 +36,7 @@ public class BackgroundExporter extends BaseExporter {
         }
 
 
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Backgrounds");
     }
 
 
@@ -138,7 +138,7 @@ public class BackgroundExporter extends BaseExporter {
         Collection<Object> response = new LinkedList<>();
         switch (itemName) {
             case "Enslaved":
-                response.add(Attribute.create(AttributeKey.GRAPPLE_BONUS, 2));
+                response.add(Change.create(AttributeKey.GRAPPLE_BONUS, 2));
                 break;
             case "Exiled":
                 response.add(ProvidedItem.create("Skill Focus (Knowledge (Galactic Lore))", ItemType.FEAT));
@@ -151,7 +151,7 @@ public class BackgroundExporter extends BaseExporter {
 
         Collection<Object> response = new LinkedList<>();
         if ("event".equals(subtype)) {
-            response.add(Attribute.create(AttributeKey.SPECIAL, secondColumn));
+            response.add(Change.create(AttributeKey.SPECIAL, secondColumn));
         }
         return response;
     }
@@ -166,7 +166,7 @@ public class BackgroundExporter extends BaseExporter {
 
         Choice choice = new Choice("Select an additional class skill");
         for (String skill : skills) {
-            choice.withOption(skill, new Option().withAttribute(Attribute.create(AttributeKey.CLASS_SKILL, skill)));
+            choice.withOption(skill, new Option().withAttribute(Change.create(AttributeKey.CLASS_SKILL, skill)));
         }
 
         if ("planet of origin".equals(subtype)) {
@@ -178,7 +178,7 @@ public class BackgroundExporter extends BaseExporter {
 
         if ("occupation".equals(subtype)) {
             for (String skill : skills) {
-                response.add(Attribute.create(AttributeKey.UNTRAINED_SKILL_BONUS, skill).withModifier("2"));
+                response.add(Change.create(AttributeKey.UNTRAINED_SKILL_BONUS, skill).withModifier("2"));
             }
         }
         return response;

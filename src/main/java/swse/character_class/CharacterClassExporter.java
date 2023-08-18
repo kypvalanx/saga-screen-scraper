@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Choice;
@@ -78,7 +78,7 @@ public class CharacterClassExporter extends BaseExporter {
         List<JSONObject> entries = new ArrayList<>();
         final CharacterClassExporter characterClassExporter = new CharacterClassExporter();
         for (String speciesLink : classLinkList) {
-            List<JSONObject> collect = characterClassExporter.parseItem(speciesLink, false).stream().map(item -> item.toJSON()).collect(Collectors.toList());
+            List<JSONObject> collect = characterClassExporter.parseItem(speciesLink, true).stream().map(item -> item.toJSON()).collect(Collectors.toList());
             for(JSONObject entity: collect){
                 names.add((String) entity.get("name"));
             }
@@ -89,7 +89,7 @@ public class CharacterClassExporter extends BaseExporter {
 
         System.out.println("List.of(\"" + String.join("\", \"", names) + "\")");
         //System.out.println(allClasses.stream().map(feat -> "\""+feat+"\"").collect(Collectors.toList()));
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Classes");
         //writeToCSV(new File(OUTPUT_FILE), entries);
         final long end = timer.end();
         long average = end / entries.size();
@@ -144,7 +144,7 @@ public class CharacterClassExporter extends BaseExporter {
         Collection<Object> items = new ArrayList<>();
 
         if ("Beast".equals(itemName)) {
-            items.add(Attribute.create(AttributeKey.INTELLIGENCE_MAX, 2));
+            items.add(Change.create(AttributeKey.INTELLIGENCE_MAX, 2));
         }
 
         return items;
@@ -152,8 +152,8 @@ public class CharacterClassExporter extends BaseExporter {
 
     private static Collection<?> getClassType(String itemName) {
         List<Object> classTypes = new ArrayList<>();
-        classTypes.add(Attribute.create(AttributeKey.IS_HEROIC, !List.of("Beast", "Nonheroic").contains(itemName)));
-        classTypes.add(Attribute.create(AttributeKey.IS_PRESTIGE, !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
+        classTypes.add(Change.create(AttributeKey.IS_HEROIC, !List.of("Beast", "Nonheroic").contains(itemName)));
+        classTypes.add(Change.create(AttributeKey.IS_PRESTIGE, !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
         return classTypes;
     }
 
@@ -182,22 +182,22 @@ public class CharacterClassExporter extends BaseExporter {
                             new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Tactics)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Tactics))", ItemType.FEAT)))
                     .withOption("Skill Focus (Knowledge (Technology))",
                             new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Technology)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Technology))", ItemType.FEAT))),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Mechanics)"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Treat Injury)"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Use Computer)"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Bureaucracy))"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Galactic Lore))"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Life Sciences))"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Physical Sciences))"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Social Sciences))"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Tactics))"),
-                    Attribute.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Technology))"));
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Mechanics)"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Treat Injury)"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Use Computer)"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Bureaucracy))"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Galactic Lore))"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Life Sciences))"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Physical Sciences))"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Social Sciences))"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Tactics))"),
+                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Technology))"));
         } else if ("Jedi".equals(itemName)) {
 
             return List.of(new Choice("Select a Starting Weapon:")
                     .withShowSelectionInName(false)
                     .isFirstLevel(true).withOneOption("On First level you receive:")
-                    .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.ITEM))));
+                    .withOption("Lightsaber", new Option().withProvidedItem(ProvidedItem.create("Lightsaber", ItemType.WEAPON))));
         }else if ("Beast".equals(itemName)) {
             return List.of(new Choice("Select a Size:")
                     .isFirstLevel(true)

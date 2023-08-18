@@ -10,11 +10,6 @@ import swse.common.FoundryItem;
 
 class Feat extends FoundryItem<Feat> implements Copyable<Feat>
 {
-//    private String fortDefenceBonus;
-//    private String refDefenceBonus;
-    private final Set<String> featProviders = new HashSet<>();
-//    private Map<String, String> attributes = new HashMap<>();
-
     public static Feat create(String name)
     {
         return new Feat(name);
@@ -25,29 +20,14 @@ class Feat extends FoundryItem<Feat> implements Copyable<Feat>
         super(name, "feat");
     }
 
-    @Nonnull
-    public JSONObject toJSON()
-    {
-        JSONObject json = super.toJSON();
-        JSONObject data = json.getJSONObject("data");
-        json.put("type", "feat");
-
-        data.put("possibleProviders", featProviders);
-
-        return json;
-    }
-
     public Feat withCategories(Set<Category> categories)
     {
-        Set<Category> filtered = new HashSet<>();
         for(Category category:categories){
             final String value = category.getValue();
             if(value.endsWith(" Bonus Feats")){
-                featProviders.add(value);
+                providers.add(value);
             }else if (value.equals("Feats")){
-                featProviders.add("General Feats");
-            } else {
-                filtered.add(category);
+                providers.add("General Feats");
             }
         }
         this.categories.addAll(categories);

@@ -4,29 +4,33 @@ import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.prerequisite.Prerequisite;
 
-public class Attribute implements JSONy, Copyable<Attribute> {
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class Change implements JSONy, Copyable<Change> {
     private final String key;
     private Object value;
     private String modifier;
     private Prerequisite prerequisite;
     private Prerequisite parentPrerequisite;
-    private boolean isOverride = false;
+    private ActiveEffectMode mode = ActiveEffectMode.ADD;
 
-    public static  Attribute create(AttributeKey key, Object value) {
+    public static Change create(AttributeKey key, Object value) {
         if(value == null){
             return null;
         }
-        return new Attribute(key.value(), value);
+        return new Change(key.value(), value);
     }
-    public static  Attribute create(AttributeKey key, Object value, String modifier) {
+    public static Change create(AttributeKey key, Object value, String modifier) {
         if(value == null){
             return null;
         }
-        return new Attribute(key.value(), value).withModifier(modifier);
+        return new Change(key.value(), value).withModifier(modifier);
     }
 
 
-    public Attribute(String key, Object value) {
+    public Change(String key, Object value) {
 //
 //        printUnique("Attribute " + key);
 //        if("damage".equals(key)) {
@@ -45,6 +49,11 @@ public class Attribute implements JSONy, Copyable<Attribute> {
         this.key = key;
         this.value = value;
     }
+
+    public static List<JSONObject> constructChangeList(List<Change> changes) {
+        return changes.stream().filter(Objects::nonNull).map(Change::toJSON).collect(Collectors.toList());
+    }
+
     public Object getValue() {
         return value;
     }
@@ -53,16 +62,13 @@ public class Attribute implements JSONy, Copyable<Attribute> {
         return key;
     }
 
-    public Attribute withModifier(String modifier) {
+    public Change withModifier(String modifier) {
         this.modifier = modifier;
         return this;
     }
-    public Attribute isOverride(boolean isOverride) {
-        this.isOverride = isOverride;
-        return this;
-    }
-    public Attribute isOverride() {
-        this.isOverride = true;
+
+    public Change withMode(ActiveEffectMode mode){
+        this.mode = mode;
         return this;
     }
 
@@ -77,7 +83,7 @@ public class Attribute implements JSONy, Copyable<Attribute> {
         jsonObject.put("key", key);
                 jsonObject.put("value", value);
         jsonObject.put("modifier", modifier);
-        jsonObject.put("override", isOverride);
+        jsonObject.put("mode", mode.getValue());
 
 
         if (prerequisite != null) {
@@ -93,21 +99,21 @@ public class Attribute implements JSONy, Copyable<Attribute> {
     }
 
     @Override
-    public Attribute copy() {
-        return new Attribute(key, value).withModifier(modifier);
+    public Change copy() {
+        return new Change(key, value).withModifier(modifier);
     }
 
-    public Attribute withValue(Object value) {
+    public Change withValue(Object value) {
         this.value = value;
         return this;
     }
 
-    public Attribute withParentPrerequisite(Prerequisite parentPrerequisite) {
+    public Change withParentPrerequisite(Prerequisite parentPrerequisite) {
         this.parentPrerequisite = parentPrerequisite;
         return this;
     }
 
-    public Attribute withPrerequisite(Prerequisite prerequisite) {
+    public Change withPrerequisite(Prerequisite prerequisite) {
         this.prerequisite = prerequisite;
         return this;
     }

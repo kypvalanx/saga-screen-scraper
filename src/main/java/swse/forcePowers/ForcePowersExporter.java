@@ -7,7 +7,7 @@ import java.util.Set;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import swse.common.Attribute;
+import swse.common.Change;
 import swse.common.AttributeKey;
 import swse.common.BaseExporter;
 import swse.common.Category;
@@ -26,7 +26,7 @@ public class ForcePowersExporter extends BaseExporter
         List<JSONObject> entries = new ForcePowersExporter().getEntriesFromCategoryPage(talentLinks, true);
         printUniqueNames(entries);
 
-        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Force Powers");
     }
 
 
@@ -58,8 +58,7 @@ public class ForcePowersExporter extends BaseExporter
 //
         List<JSONy> traditions = new ArrayList<>();
 
-        traditions.add(ForcePower.create(itemName).withDescription(content).withCategories(categories).
-                withProvided(Attribute.create(AttributeKey.TAKE_MULTIPLE_TIMES, "true")));
+        traditions.add(ForcePower.create(itemName).withDescription(content).withCategories(categories).withProvided(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, "true")));
 
         return traditions;
     }

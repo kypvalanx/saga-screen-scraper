@@ -13,7 +13,7 @@ import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import swse.common.AttributeKey;
 import swse.common.JSONy;
-import swse.common.Attribute;
+import swse.common.Change;
 
 class ClassSkill implements JSONy
 {
@@ -26,9 +26,9 @@ class ClassSkill implements JSONy
         this.classSkills = classSkills;
     }
 
-    static List<Attribute> getClassSkills(Elements entries)
+    static List<Change> getClassSkills(Elements entries)
     {
-        List<Attribute> attributes = new ArrayList<>();
+        List<Change> changes = new ArrayList<>();
         boolean found = false;
         boolean allowP = true;
         boolean allowUL = true;
@@ -46,15 +46,15 @@ class ClassSkill implements JSONy
 
                     if (m.find())
                     {
-                        attributes.add(Attribute.create(AttributeKey.TRAINED_SKILLS_FIRST_LEVEL, Integer.parseInt(m.group(1))));
+                        changes.add(Change.create(AttributeKey.TRAINED_SKILLS_FIRST_LEVEL, Integer.parseInt(m.group(1))));
                     }
 
                 } else if (allowUL && entry.tag().equals(Tag.valueOf("ul")))
                 {
                     allowUL = false;
-                    attributes.addAll(entry.select("li").stream()
+                    changes.addAll(entry.select("li").stream()
                             .map(e->classSkillCleanup(e.text()))
-                            .map(skill -> Attribute.create(AttributeKey.CLASS_SKILL, skill))
+                            .map(skill -> Change.create(AttributeKey.CLASS_SKILL, skill))
                             .collect(Collectors.toList()));
 
                 }
@@ -64,7 +64,7 @@ class ClassSkill implements JSONy
             }
         }
         //System.out.println(found && !allowP && !allowUL);
-        return attributes;
+        return changes;
     }
 
     private static String classSkillCleanup(String text)

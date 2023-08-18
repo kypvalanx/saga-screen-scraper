@@ -567,7 +567,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
 
         //
         if (text.startsWith("Equipped with ")) {
-            String payload = text.substring(0, 14);
+            String payload = text.substring(14);
             if (payload.contains(" and ")) {
                 String[] tokens = payload.split(" and |, ");
                 return List.of(and(text, Arrays.stream(tokens).map(Prerequisite::cleanItem).map(item -> simple("Equipped with " + item, "EQUIPPED", item)).collect(Collectors.toList())));

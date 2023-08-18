@@ -32,7 +32,7 @@ public class LanguageExporter extends BaseExporter {
 //            entries.addAll(readItemMenuPage(itemLink, true));
 //        }
 
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Languages");
     }
 
 

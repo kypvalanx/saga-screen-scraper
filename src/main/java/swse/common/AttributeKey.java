@@ -245,7 +245,14 @@ public enum AttributeKey {
     CONSTITUTION("con"),
     INTELLIGENCE("int"),
     WISDOM("wis"),
-    CHARISMA("cha"), HOMEBREW("isHomebrew"), DISARMING_ATTACK("disarmingAttack"), MULTICLASS_FEAT("multiclassFeat"), ACTS_AS("actsAs");
+    CHARISMA("cha"),
+    HOMEBREW("isHomebrew"),
+    DISARMING_ATTACK("disarmingAttack"),
+    MULTICLASS_FEAT("multiclassFeat"),
+    ACTS_AS("actsAs"),
+    BONUS_SECOND_WIND("bonusSecondWind"),
+    WEIGHT("weight"),
+    BASE_ATTACK_BONUS("baseAttackBonus");
 
     private final String value;
 
