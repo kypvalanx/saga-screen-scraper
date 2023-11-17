@@ -4,7 +4,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.JSONy;
 import swse.util.Util;
 
@@ -170,14 +170,14 @@ public class Feature implements JSONy
         switch (key){
             case "PROVIDES":
                 //printUnique(payload);
-                return Change.create(AttributeKey.PROVIDES, payload);
+                return Change.create(ChangeKey.PROVIDES, payload);
 
             case "TRAIT":
-                return Change.create(AttributeKey.PROVIDED_TRAIT, payload);
+                return Change.create(ChangeKey.PROVIDED_TRAIT, payload);
 
             case "BONUS":
 //                try {
-                    return Change.create(AttributeKey.valueOf(Util.toEnumCase(payload)), amount);
+                    return Change.create(ChangeKey.valueOf(Util.toEnumCase(payload)), amount);
 //                } catch (IllegalArgumentException e){
 //                    printUnique(toEnumCase(payload) + "(\""+ toCamelCase(payload)+"\"),");
 //                    return Attribute.create(AttributeKey.PROVIDED_TRAIT, payload);

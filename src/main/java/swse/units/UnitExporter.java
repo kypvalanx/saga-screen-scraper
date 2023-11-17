@@ -2,7 +2,9 @@ package swse.units;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,11 +19,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.parseInt;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static swse.talents.TalentExporter.DUPLICATE_TALENT_NAMES;
 import static swse.util.Util.printUnique;
 
 public class UnitExporter extends BaseExporter {
-    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\Units CL ";
+    public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\Units-CL-";
 
     public static final List<String> colossal = Lists.newArrayList("(Frigate)", "(Cruiser)", "(Station)");
     public static final Pattern VARIANT_QUALIFIER = Pattern.compile("(\\(.+\\))$");
@@ -66,8 +70,10 @@ public class UnitExporter extends BaseExporter {
             "Knowledge \\(Bureaucracy\\)|Knowledge \\(Galactic Lore\\)|Knowledge \\(Life Sciences\\)|Knowledge \\(Physical Sciences\\)|" +
             "Knowledge \\(Social Sciences\\)|Knowledge \\(Tactics\\)|Knowledge \\(Technology\\)|Mechanics|Perception|" +
             "Persuasion|Pilot|Ride|Stealth|Survival|Swim|Treat Injury|Use Computer|Use the Force";
-    public static final Pattern VALUE_AND_PAYLOADS = Pattern.compile("(Multiattack Proficiency \\(Advanced Melee Weapons\\)|Multiattack Proficiency \\(Rifles\\)|[\\w\\s'-]+)(?:\\()?("+SKILLS_REGEX+"|[\\s\\w,-;+-]+)?(?:\\))?(?:\\()?([\\s\\w,-;()+-]+)?(?:\\))?");
+    public static final Pattern VALUE_AND_PAYLOADS = Pattern.compile("(Multiattack Proficiency \\(Advanced Melee Weapons\\)|Multiattack Proficiency \\(Rifles\\)|[\\w\\s',-]+)(?:\\()?(" + SKILLS_REGEX + "|[\\s\\w,-;+-]+)?(?:\\))?(?:\\()?([\\s\\w,-;()+-]+)?(?:\\))?");
+   // public static final Pattern VALUE_AND_PAYLOADS_ITEMS = Pattern.compile("(Multiattack Proficiency \\(Advanced Melee Weapons\\)|Multiattack Proficiency \\(Rifles\\)|[\\w\\s,'-]+)(?:\\()?(" + SKILLS_REGEX + "|[\\s\\w,-;+-]+)?(?:\\))?(?:\\()?([\\s\\w,-;()+-]+)?(?:\\))?");
     public static final Pattern SKILL_PATTERN = Pattern.compile("(" + SKILLS_REGEX + ") \\+(\\d+)");
+    private static Map<String,String> ITEMS_BY_ALTERNATE_NAME;
 
     private static Map<String, String> namedCrewPosition = new HashMap<>();
     private static Pattern classPattern;
@@ -80,9 +86,12 @@ public class UnitExporter extends BaseExporter {
     private static Set<Integer> cls = new HashSet<>();
 
     public static void main(String[] args) {
+        setMaps();
 
         List<String> nonHeroicUnits = new ArrayList<>(getAlphaLinks("/wiki/Category:Nonheroic_Units?from="));
+        nonHeroicUnits.add("/wiki/Category:Nonheroic_Units");
         List<String> heroicUnits = new ArrayList<>(getAlphaLinks("/wiki/Category:Heroic_Units?from="));
+        heroicUnits.add("/wiki/Category:Heroic_Units");
 
         classPattern = Pattern.compile("(" + String.join("|", GeneratedLists.CLASSES) + "|" + String.join("|", FOLLOWERS) + ")(?: )?(\\d+)?");
         speciesPattern = Pattern.compile("(" + GeneratedLists.SPECIES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + "|" + String.join("|", DROID_TYPES) + "|Near-Human)");
@@ -102,19 +111,22 @@ public class UnitExporter extends BaseExporter {
         entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false, exclusionByName));
         //entries.addAll(overrides);
 
-        List<Integer> filter = List.of(0, 1, 2, 3, 4);
-        List<String> nameFilter = List.of(); //"B1-Series Battle Droid Squad");
+        List<Integer> filter = List.of();//, 1, 2, 3, 4, 5 );//2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);//0, 1, 2, 3, 4);
+        List<String> nameFilter = List.of();//"A9G-Series Archive Droid"); //"B1-Series Battle Droid Squad");
 
         for (Integer i :
                 cls.stream()
-                        .filter(cl -> filter.size() == 0 ||filter.contains(cl) )
+                        .filter(cl -> filter.size() == 0 || filter.contains(cl))
                         .collect(Collectors.toList())) {
             List<JSONObject> filtered = entries.stream()
                     .filter(entry -> entry.getJSONObject("system").get("cl").equals(i))
-                    .filter(entry -> nameFilter.size() == 0 ||nameFilter.contains(entry.get("name")) )
+                    .filter(entry -> nameFilter.size() == 0 || nameFilter.contains(entry.get("name")))
                     .collect(Collectors.toList());
 
-            writeToJSON(new File(JSON_OUTPUT + i + ".json"), filtered, hasArg(args, "d"), "Units CL " + i);
+            if(filtered.size() > 0){
+
+                writeToJSON(new File(JSON_OUTPUT + i + ".json"), filtered, hasArg(args, "d"), "Units CL " + i, "Actor");
+            }
         }
 
 
@@ -122,12 +134,20 @@ public class UnitExporter extends BaseExporter {
 
     }
 
+    private static void setMaps() {
+        ITEMS_BY_ALTERNATE_NAME = Maps.newHashMap();
+        ITEMS_BY_ALTERNATE_NAME.put("Mandalorian Light Armor", "Neo-Crusader Light Armor");
+    }
 
 
     protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
+
+//        if(!itemLink.endsWith("Replica_Droid")){
+//            return List.of();
+//        }
 
         Matcher variant = VARIANT_QUALIFIER.matcher(itemLink);
         String variantQualifier = "";
@@ -150,7 +170,11 @@ public class UnitExporter extends BaseExporter {
         List<Unit> items = new LinkedList<>();
 
         String itemName = title.text().trim();
+//        if(!itemName.equals("Veteran Imperial Officer")){
+//            return List.of();
+//        }
         Unit current = Unit.create(itemName + variantQualifier);
+        current.withLink(itemLink);
         items.add(current);
 
         Elements select = doc.select("div.mw-parser-output");
@@ -168,11 +192,13 @@ public class UnitExporter extends BaseExporter {
                 isProtocolSection = true;
             }
 
-            if (!isProtocolSection) {
+            if (isProtocolSection) {
+                continue;
+            }
 
                 Matcher clMatcher = CL_PATTERN.matcher(text);
-                if(clMatcher.find()){
-                    int cl = Integer.parseInt(clMatcher.group(1));
+                if (clMatcher.find()) {
+                    int cl = parseInt(clMatcher.group(1));
                     cls.add(cl);
                     current.withCL(cl);
                 }
@@ -182,7 +208,7 @@ public class UnitExporter extends BaseExporter {
                 }
 
                 if (text.startsWith("Possessions: ") && !skipFinished) {
-                    handlePossessions(current, text);
+                    handlePossessions(current, cursor);
                     continue;
                 }
 
@@ -204,8 +230,8 @@ public class UnitExporter extends BaseExporter {
                 if (text.startsWith("Organization Score")) {
                     Matcher organizationScorePattern = ORGANIZATION_SCORE_PATTERN.matcher(text);
 
-                    if(organizationScorePattern.find()){
-                        current.withOrganizationScore(organizationScorePattern.group(1), Integer.parseInt(organizationScorePattern.group(2)));
+                    if (organizationScorePattern.find()) {
+                        current.withOrganizationScore(organizationScorePattern.group(1), parseInt(organizationScorePattern.group(2)));
                         continue;
                     }
 
@@ -245,6 +271,11 @@ public class UnitExporter extends BaseExporter {
                     continue;
                 }
 
+                if(text.startsWith("Archive Processor")){
+                    handleAction(current, cursor);
+                }
+
+
                 if (text.startsWith("Languages:")) {
                     handleLanguages(current, cursor);
                     continue;
@@ -261,7 +292,7 @@ public class UnitExporter extends BaseExporter {
                     Matcher m1 = COST_PATTERN.matcher(text);
 
                     if (m1.find()) {
-                        current.withCost(Integer.parseInt(m1.group(1).replace(",", "")));
+                        current.withCost(parseInt(m1.group(1).replace(",", "")));
                     }
 
                     if (text.toLowerCase().contains("not available") || text.toLowerCase().contains("not availible")) {
@@ -273,7 +304,7 @@ public class UnitExporter extends BaseExporter {
                 if (text.startsWith("Dark Side Score:") || text.startsWith("Faith Points:") || text.startsWith("Destiny Points:") || text.startsWith("Force Points:")) {
                     Matcher m = DARK_SIDE_PATTERN.matcher(text);
                     if (m.find()) {
-                        current.withDarkSideScore(Integer.parseInt(m.group(1)));
+                        current.withDarkSideScore(parseInt(m.group(1)));
                     }
                     continue;
                 }
@@ -282,7 +313,7 @@ public class UnitExporter extends BaseExporter {
 
                     Matcher occupationMatcher = OCCUPATION_PATTERN.matcher(text);
 
-                    if(occupationMatcher.find()){
+                    if (occupationMatcher.find()) {
                         ProvidedItem providedItem = ProvidedItem.create(occupationMatcher.group(1), ItemType.BACKGROUND);
                         Matcher m = CLASS_SKILL_PATTERN.matcher(text);
                         if (m.find()) {
@@ -303,7 +334,7 @@ public class UnitExporter extends BaseExporter {
                     Pattern EVENT_PATTERN = Pattern.compile("Event \\((.*)\\):");
                     Matcher eventMatcher = EVENT_PATTERN.matcher(text);
 
-                    if(eventMatcher.find()){
+                    if (eventMatcher.find()) {
                         ProvidedItem providedItem = ProvidedItem.create(eventMatcher.group(1), ItemType.BACKGROUND);
                         Matcher m = CLASS_SKILL_PATTERN.matcher(text);
                         if (m.find()) {
@@ -324,7 +355,7 @@ public class UnitExporter extends BaseExporter {
                     Matcher planetOfOriginMatcher = PLANET_OF_ORIGIN_PATTERN.matcher(text);
 
 
-                    if(planetOfOriginMatcher.find()) {
+                    if (planetOfOriginMatcher.find()) {
                         ProvidedItem providedItem = ProvidedItem.create(planetOfOriginMatcher.group(1), ItemType.BACKGROUND);
                         Matcher m = CLASS_SKILL_PATTERN.matcher(text);
 
@@ -336,13 +367,12 @@ public class UnitExporter extends BaseExporter {
 
                             providedItem.withPayload(classSkill);
                             providedItem.withPayload("payload2", "");
-                        } else if(m1.find()){
+                        } else if (m1.find()) {
                             providedItem.withPayload(m1.group(1));
                             providedItem.withPayload("payload2", m1.group(2));
-                        }
-                        else {
+                        } else {
                             providedItem.withPayload("");
-                            providedItem.withPayload("payload2","");
+                            providedItem.withPayload("payload2", "");
                         }
                         current.withProvided(providedItem);
 
@@ -355,10 +385,10 @@ public class UnitExporter extends BaseExporter {
                 if (text.startsWith("Destiny")) {
                     Matcher destinyMatcher = DESTINY_PATTERN.matcher(text);
 
-                    if(destinyMatcher.find()) {
+                    if (destinyMatcher.find()) {
                         ProvidedItem providedItem = ProvidedItem.create(destinyMatcher.group(2), ItemType.DESTINY);
 
-                        providedItem.withPayload(String.valueOf(destinyMatcher.group(1)!=null && destinyMatcher.group(1).equals("Fulfilled")));
+                        providedItem.withPayload(String.valueOf(destinyMatcher.group(1) != null && destinyMatcher.group(1).equals("Fulfilled")));
 
                         current.withProvided(providedItem);
 
@@ -371,8 +401,8 @@ public class UnitExporter extends BaseExporter {
                     Pattern HIT_POINT_PATTERN = Pattern.compile("Hit Points: (\\d+)");
                     Matcher hitPointMatcher = HIT_POINT_PATTERN.matcher(text);
 
-                    if(hitPointMatcher.find()){
-                        current.withHitPoints(Integer.parseInt(hitPointMatcher.group(1)));
+                    if (hitPointMatcher.find()) {
+                        current.withHitPoints(parseInt(hitPointMatcher.group(1)));
                         continue;
                     }
 
@@ -382,42 +412,42 @@ public class UnitExporter extends BaseExporter {
                     boolean abilityFound = false;
 
                     Matcher strengthMatcher = STRENGTH_PATTERN.matcher(text);
-                    if(strengthMatcher.find()){
+                    if (strengthMatcher.find()) {
                         current.withAttribute("STRENGTH", strengthMatcher.group(1));
                         abilityFound = true;
                     }
 
                     Matcher dexterityMatcher = DEXTERITY_PATTERN.matcher(text);
-                    if(dexterityMatcher.find()){
+                    if (dexterityMatcher.find()) {
                         current.withAttribute("DEXTERITY", dexterityMatcher.group(1));
                         abilityFound = true;
                     }
 
                     Matcher constitutionMatcher = CONSTITUTION_PATTERN.matcher(text);
-                    if(constitutionMatcher.find()){
+                    if (constitutionMatcher.find()) {
                         current.withAttribute("CONSTITUTION", constitutionMatcher.group(1));
                         abilityFound = true;
                     }
 
                     Matcher intelligenceMatcher = INTELLIGENCE_PATTERN.matcher(text);
-                    if(intelligenceMatcher.find()){
+                    if (intelligenceMatcher.find()) {
                         current.withAttribute("INTELLIGENCE", intelligenceMatcher.group(1));
                         abilityFound = true;
                     }
 
                     Matcher wisdomMatcher = WISDOM_PATTERN.matcher(text);
-                    if(wisdomMatcher.find()){
-                        current.withAttribute("WISDOM", wisdomMatcher.group(1));
+                    if (wisdomMatcher.find()) {
+                        current.withAttribute("WISDOM",  wisdomMatcher.group(1));
                         abilityFound = true;
                     }
 
                     Matcher charismaMatcher = CHARISMA_PATTERN.matcher(text);
-                    if(charismaMatcher.find()){
+                    if (charismaMatcher.find()) {
                         current.withAttribute("CHARISMA", charismaMatcher.group(1));
                         abilityFound = true;
                     }
 
-                    if(!abilityFound) {
+                    if (!abilityFound) {
                         printUnique("MISSING ABILITIES: " + text);
                     }
                     continue;
@@ -428,7 +458,7 @@ public class UnitExporter extends BaseExporter {
 
                     Matcher m = SKILL_PATTERN.matcher(text);
 
-                    while(m.find()){
+                    while (m.find()) {
                         current.withTrainedSkill(m.group(1));
                         //printUnique(m.group(1));
                     }
@@ -437,7 +467,6 @@ public class UnitExporter extends BaseExporter {
 
 
                 //possibly a validator
-
 
 
                 if (text.startsWith("Species Traits:")) {
@@ -500,12 +529,16 @@ public class UnitExporter extends BaseExporter {
                 if (text.contains(":")) {
                     //printUnique(text.split(":")[0] + " : " + itemName);
                 }
-            }
+
 
         }
 
 
         return new ArrayList<>(items);
+    }
+
+    private void handleAction(Unit current, Element cursor) {
+        current.addAction(cursor.text());
     }
 
     private void handleForceSecretsAndPowers(Unit current, Element cursor) {
@@ -538,6 +571,14 @@ public class UnitExporter extends BaseExporter {
         for (Element child : cursor.children()) {
             String talent = child.text();
 
+            String answer = null;
+
+            if ("Stolen Form".equals(talent)) {
+
+                Element next = (Element) child.nextSibling().nextSibling();
+                answer = next.text();
+            }
+
             talent = talent.replace("Talents:", "").trim();
 
 
@@ -546,7 +587,7 @@ public class UnitExporter extends BaseExporter {
             }
 
             if (GeneratedLists.TALENTS.contains(talent)) {
-                current.withProvided(ProvidedItem.create(talent, ItemType.TALENT));
+                addTalent(current, talent, answer);
             } else {
                 Matcher m = VALUE_AND_PAYLOADS.matcher(talent);
                 if (m.find()) {
@@ -581,8 +622,7 @@ public class UnitExporter extends BaseExporter {
 
                         if (resolvedTalent != null && !resolvedTalent.contains("|")) {
                             if (GeneratedLists.TALENTS.contains(resolvedTalent)) {
-                                ProvidedItem providedItem = ProvidedItem.create(resolvedTalent, ItemType.TALENT);
-                                current.withProvided(providedItem);
+                                addTalent(current, resolvedTalent, answer);
                             } else {
                                 printUnique(resolvedTalent);
                             }
@@ -590,8 +630,8 @@ public class UnitExporter extends BaseExporter {
 
                             List<String> possibleTalents = GeneratedLists.TALENTS.stream().filter(t -> t.startsWith(talentName)).collect(Collectors.toList());
 
-                            //printUnique("ITEM_TALENT_MAPPING.put(\"" + itemName + "\", \"" + talent + "\", \"" + String.join("|", possibleTalents) + "\");");
-                            printUnique(++i + " https://swse.fandom.com" + itemLink + "      " + talent);
+                            printUnique("ITEM_TALENT_MAPPING.put(\"" + itemName + "\", \"" + talent + "\", \"" + String.join("|", possibleTalents) + "\");");
+                            printUnique(++i + " https://swse.fandom.com" + itemLink + "      " + talent + " " + String.join("|", possibleTalents));
                         }
                         continue;
                     }
@@ -601,6 +641,20 @@ public class UnitExporter extends BaseExporter {
                 }
             }
         }
+    }
+
+    private void addTalent(Unit current, String talent, String answer) {
+
+        ProvidedItem providedItem = ProvidedItem.create(talent, ItemType.TALENT);
+        if (answer != null) {
+            providedItem.withAnswers(List.of(answer));
+        } else if ("Stolen Form".equals(talent)) {
+            System.out.println(current.getName() + " " + current.getLink());
+        }
+
+        current.withProvided(providedItem);
+
+
     }
 
     private void handleForcePowers(String itemName, Unit current, Element cursor) {
@@ -643,29 +697,168 @@ public class UnitExporter extends BaseExporter {
     private void handleFeats(Unit current, Element cursor) {
         for (Element child : cursor.children()) {
             String feat = child.text();
+            String next = child.nextSibling().toString();
             if ("Feats:".equals(feat)) {
                 continue;
             }
+            next = next.replace(", ","").trim();
 
+            feat = feat + next;
             if (GeneratedLists.FEATS.contains(feat)) {
-                current.withProvided(ProvidedItem.create(feat, ItemType.FEAT));
-            } else {
-                Matcher m = VALUE_AND_PAYLOADS.matcher(feat);
-                if (m.find()) {
-                    String featName = m.group(1).trim();
-                    if (GeneratedLists.FEATS.contains(featName)) {
-                        ProvidedItem providedItem = ProvidedItem.create(featName, ItemType.FEAT);
-                        providedItem.withPayload(m.group(2));
-                        current.withProvided(providedItem);
-                    } else {
-                        //printUnique(current.getName() + " : " + feat + " : " + featName);
-                    }
-                } else {
-                    //TODO there are missing feats
-                    //printUnique(current.getName() + " : " + feat);
+                addFeat(current, feat, null);
+                continue;
+            }
+
+            Matcher m = VALUE_AND_PAYLOADS.matcher(feat);
+            if (!m.find()) {
+                continue;
+            }
+
+            String featName = m.group(1).trim();
+            String payload = m.group(2);
+            if (isNumeric(payload) && GeneratedLists.FEATS.contains(featName)) {
+                int count = Integer.parseInt(payload);
+
+                for (int j = 0; j < count; j++) {
+                    addFeat(current, featName, null);
                 }
+
+            }else if (GeneratedLists.FEATS.contains(featName)) {
+                addFeat(current, featName, payload);
+
+            } else {
+                //printUnique("MISSING FEAT: " + current.getName() + " : " + feat + " : " + featName);
             }
         }
+    }
+
+    private void addFeat(Unit current, String featName, String payload) {
+        ProvidedItem providedItem = ProvidedItem.create(featName, ItemType.FEAT);
+        providedItem.withPayload(payload);
+
+        if (featName.equals("Critical Strike")) {
+            if (current.getName().startsWith("Chirrut")) {
+                providedItem.withAnswers(Lists.newArrayList("Lightsabers"));
+            } else {
+                switch (current.getName()) {
+                    case "Sith Lord (DMF)":
+                    case "Jedi Guardian, Master":
+                    case "Jedi Guardian, Knight":
+                    case "Kirak Infil'a":
+                    case "Meetra Surik, Aide of Revan":
+                    case "Revan, Paragon":
+                        providedItem.withAnswers(Lists.newArrayList("Lightsabers"));
+                        break;
+                    default:
+                        System.out.println(current.getName() + " " + current.getLink());
+                }
+            }
+
+        }
+
+        if (featName.equals("Autofire Assault")) {
+            switch (current.getName()) {
+                case "Johana \"Valkyrie\" Forto":
+                case "Aruk Enforcer":
+                case "Clone Trooper Sergeant":
+                case "Inquisitorius Purge Trooper":
+                case "Bric":
+                case "Dred Priest":
+                case "Llats Ward":
+                    providedItem.withAnswers(Lists.newArrayList("Rifles"));
+                    break;
+                case "Cydon Prax":
+                case "Tobbi Dala":
+                    providedItem.withAnswers(Lists.newArrayList("Heavy Weapons"));
+                    break;
+
+                default:
+                    System.out.println(current.getName() + " " + current.getLink());
+                    System.out.println("case \"" + current.getName() + "\":");
+                    System.out.println("providedItem.withAnswers(Lists.newArrayList(\"Rifles\"));");
+                    System.out.println("break;");
+            }
+
+        }
+
+        if (featName.equals("Halt")) {
+            switch (current.getName()) {
+                case "Matukai Grand Master":
+                    providedItem.withAnswers(Lists.newArrayList("Simple Weapons"));
+                    break;
+                case "Cort Davin":
+                    providedItem.withAnswers(Lists.newArrayList("Pistols"));
+                    break;
+                case "Jastus Farr":
+                    providedItem.withAnswers(Lists.newArrayList("Lightsabers"));
+                    break;
+                default:
+                    System.out.println(current.getName() + " " + current.getLink());
+                    System.out.println("case \"" + current.getName() + "\":");
+                    System.out.println("providedItem.withAnswers(Lists.newArrayList(\"Rifles\"));");
+                    System.out.println("break;");
+            }
+
+        }
+
+        if (featName.equals("Autofire Sweep")) {
+            switch (current.getName()) {
+                case "Aruk Enforcer":
+                case "Trandoshan Mercenary (DMF)":
+                case "Bric":
+                case "Dred Priest":
+                case "Llats Ward":
+                case "Tobbi Dala":
+                    providedItem.withAnswers(Lists.newArrayList("Rifles"));
+                    break;
+                case "Mandalorian Heavy Soldier":
+                case "Resistance Gunner":
+                case "TX-1138 \"Terminax\" Assassin Droid":
+                case "BT-1":
+                    providedItem.withAnswers(Lists.newArrayList("Heavy Weapons"));
+                    break;
+
+
+                default:
+                    System.out.println(current.getName() + " " + current.getLink());
+                    System.out.println("case \"" + current.getName() + "\":");
+                    System.out.println("providedItem.withAnswers(Lists.newArrayList(\"Rifles\"));");
+                    System.out.println("break;");
+            }
+
+        }
+        if (featName.equals("Savage Attack")) {
+            switch (current.getName()) {
+                case "Anzati Master Assassin":
+                    providedItem.withAnswers(Lists.newArrayList("Advanced Melee Weapons"));
+                    break;
+                case "Elite Shadow Guard":
+                case "Trenox":
+                case "Sora Bulq":
+                case "Sai Sircu":
+                case "Kirak Infil'a":
+                    providedItem.withAnswers(Lists.newArrayList("Lightsabers"));
+                    break;
+                case "Bric":
+                case "Mahirkyyr":
+                    providedItem.withAnswers(Lists.newArrayList("Rifles"));
+                    break;
+                case "Jace Malcom":
+                    providedItem.withAnswers(Lists.newArrayList("Heavy Weapons"));
+                    break;
+
+
+                default:
+                    System.out.println(current.getName() + " " + current.getLink());
+                    System.out.println("case \"" + current.getName() + "\":");
+                    System.out.println("providedItem.withAnswers(Lists.newArrayList(\"Rifles\"));");
+                    System.out.println("break;");
+            }
+
+        }
+
+
+        current.withProvided(providedItem);
     }
 
 
@@ -688,9 +881,10 @@ public class UnitExporter extends BaseExporter {
 
     private void handleDroidPart(Unit current, Element cursor) {
         for (String text : cursor.text().split(",(?![^()]*\\))")) {
-            text = text.trim();
 
-            if (text.contains("Droid Systems:")) {
+            text = text.replace("Droid Systems:", "");
+            text = text.trim();
+            if (text.isBlank()) {
                 continue;
             }
 
@@ -740,7 +934,7 @@ public class UnitExporter extends BaseExporter {
                             String modifierCount = m1.group(1);
                             int mCount = -1;
                             if (modifierCount != null && !"".equals(modifierCount)) {
-                                mCount = Integer.parseInt(modifierCount);
+                                mCount = parseInt(modifierCount);
                             }
                             String mType = m1.group(2);
                             String modifierType = null;
@@ -779,17 +973,17 @@ public class UnitExporter extends BaseExporter {
                 }
 
                 if (num != null && !"".equals(num)) {
-                    count = Integer.parseInt(num);
+                    count = parseInt(num);
                 }
 
                 String itemName = m.group(2);
                 for (int i = 0; i < count; i++) {
                     ProvidedItem providedItem = ProvidedItem.create(itemName, ItemType.ITEM).withEquip("equipped");
                     if (suffix != null) {
-                        providedItem.withProvided(Change.create(AttributeKey.SUFFIX, suffix));
+                        providedItem.withProvided(Change.create(ChangeKey.SUFFIX, suffix));
                     }
                     if (special != null) {
-                        providedItem.withProvided(Change.create(AttributeKey.SPECIAL, special));
+                        providedItem.withProvided(Change.create(ChangeKey.SPECIAL, special));
                     }
                     modifiers.forEach((String mn, Integer c) -> {
                         if (c != 0) {
@@ -822,7 +1016,7 @@ public class UnitExporter extends BaseExporter {
 
                 if (GeneratedLists.ITEMS.contains(base)) {
                     ProvidedItem providedItem = ProvidedItem.create(base, ItemType.ITEM);
-                    providedItem.withProvided(Change.create(AttributeKey.PAYLOAD, pm.group(2)));
+                    providedItem.withProvided(Change.create(ChangeKey.PAYLOAD, pm.group(2)));
                     current.withProvided(providedItem);
                     continue;
                 }
@@ -836,7 +1030,7 @@ public class UnitExporter extends BaseExporter {
         for (String text : cursor.text().split(":|,|;|\\.(?![^()]*\\))")) {
             text = text.trim();
 
-            if (text.equals("Languages")) {
+            if (text.equals("Languages")|| text.startsWith("Translator Unit")) {
                 continue;
             }
 
@@ -846,25 +1040,19 @@ public class UnitExporter extends BaseExporter {
 
             if (m.find()) {
                 String countString = m.group(1);
-                int count = Integer.parseInt(countString == null || "".equals(countString) ? "1" : countString);
+                int count = parseInt(countString == null || "".equals(countString) ? "1" : countString);
                 String languageName = m.group(2).trim();
                 String modifier = m.group(3);
 
                 for (int i = 0; i < count; i++) {
+                    ProvidedItem providedItem = ProvidedItem.create(languageName, ItemType.LANGUAGE);
+                    if (modifier != null && !modifier.isBlank()) {
+                        modifier = modifier.trim();
+                        providedItem.withProvided(Change.create(ChangeKey.PAYLOAD, modifier));
 
-                    if (!languageName.equals("Unassigned")) {
-                        ProvidedItem providedItem = ProvidedItem.create(languageName, ItemType.LANGUAGE);
-                        if (modifier != null) {
-                            modifier = modifier.trim();
-                            providedItem.withProvided(Change.create(AttributeKey.PAYLOAD, modifier));
-
-                        }
-
-                        //probably should not add these here
-                        //current.withProvided(providedItem);
-                    } else {
-                        //current.with
                     }
+
+                    current.withProvided(providedItem);
                 }
                 //printUnique(countString + " " + m.group(2));
                 continue;
@@ -1124,74 +1312,191 @@ public class UnitExporter extends BaseExporter {
         ITEM_TALENT_MAPPING.put("Yansu Grjak", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
         ITEM_TALENT_MAPPING.put("Zephata'ru'tor", "Mobile Combatant", "Mobile Combatant (Jedi Guardian Talent Tree)");
 
+
+        ITEM_TALENT_MAPPING.put("ARC Trooper Captain", "Multiattack Proficiency (Rifles)", "Multiattack Proficiency (Rifles) (Weapon Master Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Beastwarden", "Adept Spellcaster", "Adept Spellcaster (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Beastwarden", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Beastwarden", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Beastwarden Clan Mother", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Beastwarden Clan Mother", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Clan Mother", "Adept Spellcaster", "Adept Spellcaster (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Clan Mother", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Dathomiri Clan Mother", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Elite Clone Commando", "Ambush", "Ambush (Republic Commando Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Endorian Chieftain", "Get Into Position", "Get Into Position (Master of Intrigue Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Endorian Chieftain", "Master Manipulator", "Master Manipulator (Master of Intrigue Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Endorian Commander", "Commanding Presence", "Commanding Presence (Mercenary Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Endorian Outcast", "Seize the Moment", "Seize the Moment (Outlaw Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Endorian Steward", "Get Into Position", "Get Into Position (Master of Intrigue Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Nightsister Shaman", "Force Treatment", "Force Treatment (Force Adept Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Order of Shasa Adept", "Charm Beast", "Charm Beast (Beastwarden Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Raining Leaves Clan Mother", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Raining Leaves Clan Mother", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Raining Leaves Warrior", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Singing Mountain Sentry", "Adept Spellcaster", "Adept Spellcaster (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Singing Mountain Sentry", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Singing Mountain Sentry", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Sister of the Voritor", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Sister of the Voritor", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Arligan Zey", "Seize the Moment", "Seize the Moment (Provocateur Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Charal the Witch-Queen", "Adept Spellcaster", "Adept Spellcaster (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Ez Kor Im", "Force Intuition", "Force Intuition (Jedi Guardian Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Gwynanya Djo", "Adept Spellcaster", "Adept Spellcaster (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Gwynanya Djo", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Gwynanya Djo", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Iri Camas", "Mobile Combatant", "Mobile Combatant (Jedi Guardian Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Kyrisa", "Adept Spellcaster", "Adept Spellcaster (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Kyrisa", "Charm Beast", "Charm Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Kyrisa", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Roan Shryne", "Blend In", "Blend In (Spy Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Selkath, Rancor Warden Clan Mother", "Adept Spellcaster", "Adept Spellcaster (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Selkath, Rancor Warden Clan Mother", "Command Beast", "Command Beast (Dathomiri Witch Talent Tree)");
+        ITEM_TALENT_MAPPING.put("Shae Pishifta", "Blend In", "Blend In (Spy Talent Tree)");
+        //Vokara Che : Force Power Mastery
+        ITEM_TALENT_MAPPING.put("Vokara Che", "Force Treatment", "Force Treatment (Force Adept Talent Tree)");
+
     }
 
-    private void handlePossessions(Unit current, String text) {
-        List<String> possessions = List.of(text.substring(13).split(",(?![^()]*+\\))"));
+    private void handlePossessions(Unit current, Element cursor) {
+        String text = cursor.text();
+
+
+StringBuilder buffered = new StringBuilder();
+        List<String> possessions = getPossessions(text);
+        Map<String, String> linkByPosession = getLinksFromElements(cursor.children());
         for (String possession : possessions) {
             String trim = possession.trim();
+            if("Possessions:".equals(trim)){
+                continue;
+            }
+
+            if(buffered.length() > 0){
+                buffered.append(trim);
+                trim = buffered.toString();
+                printUnique("RESOLVED ITEM: "+ trim);
+                buffered = new StringBuilder();
+            }
+
+            String partial = getPartial(possession);
+            if(partial != null){
+                buffered.append(partial);
+                continue;
+            }
 
             Matcher m = VALUE_AND_PAYLOADS.matcher(trim);
 
-            if (m.find()) {
+            if (!m.find()) {
+                continue;
+            }
 
-                String item = m.group(1).trim();
-                String modifier = m.group(2) == null ? "" : m.group(2).trim();
-                String nameOverride = null;
+            String item = mapItemByName(m.group(1).trim());
+            String modifier = m.group(2) == null ? "" : m.group(2).trim();
+            String nameOverride = null;
 
-                if (modifier.toLowerCase().startsWith("as ")) {
-                    nameOverride = item;
-                    item = modifier.substring(3);
-                }
+            if (modifier.toLowerCase().startsWith("as ")) {
+                nameOverride = item;
+                item = modifier.substring(3);
+            }
 
-                if (!GeneratedLists.ITEMS.contains(item)) {
-                    if (item.contains(" with ")) {
-                        possessionWith(current, item, nameOverride);
-                    } else if (item.toLowerCase().contains("credit")) {
-                        Pattern CREDITS = Pattern.compile("(\\d+) (Credits|credits|unmarked Credits)");
+            if (!GeneratedLists.ITEMS.contains(item)) {
+                if (item.contains(" with ")) {
+                    possessionWith(current, item, nameOverride);
+                } else if (item.toLowerCase().contains("credit")) {
+                    Pattern CREDITS = Pattern.compile("(\\d+) (Credits|credits|unmarked Credits)");
 
-                        Matcher m1 = CREDITS.matcher(item);
-                        if (m1.find()) {
-                            ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                            providedItem.withProvided(Change.create(AttributeKey.CREDIT, m1.group(1)));
-                            current.withProvided(providedItem);
-                        } else {
-                            try {
-                                if (!"".equals(modifier) && Integer.parseInt(modifier) > 0) {
-                                    ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                                    providedItem.withProvided(Change.create(AttributeKey.CREDIT, modifier));
-                                    current.withProvided(providedItem);
-                                } else if (item.equals("Multiple Credit Chips") || item.equals("Thousands of Credits")) {
-                                    ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                                    providedItem.withProvided(Change.create(AttributeKey.CREDIT, "8d100"));
-                                    providedItem.withQuantity("1d4");
-                                    current.withProvided(providedItem);
-                                } else if (item.equals("Credits") || item.equals("Credits for Strong Drinks")) {
-                                    ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
-                                    providedItem.withProvided(Change.create(AttributeKey.CREDIT, "8d6"));
-                                    current.withProvided(providedItem);
-                                } else {
-                                    //printUnique("MISSING ITEM: " + item + " : " + modifier + " : " + current.getName());
-                                }
-                            } catch (NumberFormatException e) {
-                                //it wasn't a number
-                            }
-                        }
+                    Matcher m1 = CREDITS.matcher(item);
+                    if (m1.find()) {
+                        ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
+                        providedItem.withProvided(Change.create(ChangeKey.CREDIT, m1.group(1)));
+                        current.withProvided(providedItem);
                     } else {
-                        //TODO There are missing items
-                        //printUnique("MISSING ITEM: " +item + " : " + modifier + " : " + current.getName());
+                        try {
+                            if (!"".equals(modifier) && parseInt(modifier) > 0) {
+                                ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
+                                providedItem.withProvided(Change.create(ChangeKey.CREDIT, modifier));
+                                current.withProvided(providedItem);
+                            } else if (item.equals("Multiple Credit Chips") || item.equals("Thousands of Credits")) {
+                                ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
+                                providedItem.withProvided(Change.create(ChangeKey.CREDIT, "8d100"));
+                                providedItem.withQuantity("1d4");
+                                current.withProvided(providedItem);
+                            } else if (item.equals("Credits") || item.equals("Credits for Strong Drinks")) {
+                                ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
+                                providedItem.withProvided(Change.create(ChangeKey.CREDIT, "8d6"));
+                                current.withProvided(providedItem);
+                            } else {
+                                //printUnique("MISSING ITEM: " + item + " : " + modifier + " : " + current.getName());
+                            }
+                        } catch (NumberFormatException e) {
+                            //it wasn't a number
+                        }
                     }
-
                 } else {
+//                    String link = linkByPosession.get(item);
+//                    if(link != null){
+//                        Document doc = getDoc(link, false);
+//
+//                        String itemName = "";
+//                        try {
+//                            itemName = getItemName(doc);
+//                        } catch (Exception e) {
+//                            //this is fine
+//                        }
+//
+//                        printUnique("LINKED NAME: " + itemName);
+//                    }
 
-                    ProvidedItem providedItem = ProvidedItem.create(item, ItemType.ITEM).withEquip("equipped");
-                    if (nameOverride != null) {
-                        providedItem.withCustomName(nameOverride);
-                    }
-                    current.withProvided(providedItem);
+                    //TODO There are missing items
+                    printUnique("MISSING ITEM: " +item + " : " + modifier + " : " + current.getName());
                 }
+
+            } else {
+
+                ProvidedItem providedItem = ProvidedItem.create(item, ItemType.ITEM).withEquip("equipped");
+                if (nameOverride != null) {
+                    providedItem.withCustomName(nameOverride);
+                }
+                current.withProvided(providedItem);
             }
         }
+    }
+
+    private Map<String, String> getLinksFromElements(Elements children) {
+        Map<String, String> response = Maps.newHashMap();
+
+        for (Element e :
+                children) {
+            if(e.hasAttr("href")){
+                response.put(e.text().trim(), ROOT + e.attr("href"));
+            }
+        }
+        return response;
+    }
+
+    private String getPartial(String possession) {
+
+        List<String> partials = Lists.newArrayList("Clone Trooper Armor");
+        if(partials.contains(possession)){
+            return possession + ", ";
+        }
+
+        return null;
+    }
+
+    private List<String> getPossessions(String text) {
+//        if(text.contains(";")){
+//            printUnique("SEMICOLON FOUND: " + text);
+//            return List.of(text.substring(13).split(";(?![^(),]*+\\))"));
+//        }
+        return List.of(text.substring(13).split("(?:,|;)(?![^()]*+\\))"));
+    }
+
+    private String mapItemByName(String item) {
+        String actual = ITEMS_BY_ALTERNATE_NAME.get(item);
+        if(actual!=null){
+            return actual;
+        }
+        return item;
     }
 
     private void possessionWith(Unit current, String item, String nameOverride) {
@@ -1218,7 +1523,7 @@ public class UnitExporter extends BaseExporter {
                     String two = quantity.group(2);
 
                     if (two.equalsIgnoreCase("credits")) {
-                        provided.withProvided(Change.create(AttributeKey.CREDIT, one));
+                        provided.withProvided(Change.create(ChangeKey.CREDIT, one));
                     } else {
                         if (!GeneratedLists.ITEMS.contains(two) && !GeneratedLists.ITEMS.contains(two.substring(0, two.length() - 1))) {
                             ProvidedItem providedItem;
@@ -1250,14 +1555,19 @@ public class UnitExporter extends BaseExporter {
 
             Matcher m = classPattern.matcher(text);
 
-            HashMap<String, String> classes = new HashMap<>();
+            List<Pair<String,String>> classes = new ArrayList<>();
+
+            boolean isBeast = false;
 
             while (m.find()) {
                 String level = m.group(2);
                 if (level == null) {
                     level = "1";
                 }
-                classes.put(m.group(1).trim(), level);
+                classes.add(Pair.of(m.group(1).trim(), level));
+                if("Beast".equals(m.group(1).trim())){
+                    isBeast = true;
+                }
             }
 
             m = speciesPattern.matcher(text);
@@ -1268,7 +1578,7 @@ public class UnitExporter extends BaseExporter {
             if (m.find()) {
                 species = m.group(1);
 
-                switch(species){
+                switch (species) {
                     case "1st-Degree Droid":
                         species = "1st-Degree Droid Model";
                         break;
@@ -1288,17 +1598,22 @@ public class UnitExporter extends BaseExporter {
                 }
             }
 
-            if (species == null && classes.get("Beast") == null) {
+            if (species == null && !isBeast) {
                 species = "Human";
             }
 
 
-
             if (classes.size() != 0) {
-                for (Map.Entry<String, String> entry : classes.entrySet()) {
-                    int count = Integer.parseInt(entry.getValue());
+                boolean isFirstClass = true;
+                for (Pair<String, String> pair : classes) {
+                    int count = parseInt(pair.getRight());
                     for (int i = 0; i < count; i++) {
-                        current.withProvided(ProvidedItem.create(entry.getKey(), ItemType.CLASS));
+                        ProvidedItem providedItem = ProvidedItem.create(pair.getLeft(), ItemType.CLASS);
+                        if(isFirstClass){
+                            providedItem.isFirstLevel();
+                        }
+                        current.withProvided(providedItem);
+                        isFirstClass = false;
                     }
                 }
             }
@@ -1313,7 +1628,7 @@ public class UnitExporter extends BaseExporter {
                 current.withSpeciesSubType(m.group(1));
             }
 
-            if("Aqualish".equals(species)) {
+            if ("Aqualish".equals(species)) {
                 m = AQUALISH_TYPE_PATTERN.matcher(text);
                 if (m.find()) {
                     current.withSpeciesSubType(m.group(1));
@@ -1322,6 +1637,10 @@ public class UnitExporter extends BaseExporter {
                     current.withSpeciesSubType("None");
                     speciesAnswers.add("None");
                 }
+            }
+
+            if ("Republic Clone".equals(species)) {
+                speciesAnswers.add("Dexterity");
             }
 
 

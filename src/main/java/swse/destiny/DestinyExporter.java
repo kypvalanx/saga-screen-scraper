@@ -12,7 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.JSONy;
 
@@ -104,9 +104,9 @@ public class DestinyExporter extends BaseExporter {
 
     private Collection<?> getDestinyAttributes(Element content) {
         List<Object> response = new LinkedList<>();
-        response.add(Change.create(AttributeKey.DESTINY_BONUS, getAttribute(content, "Destiny Bonus:")));
-        response.add(Change.create(AttributeKey.DESTINY_PENALTY, getAttribute(content, "Destiny Penalty:")));
-        response.add(Change.create(AttributeKey.DESTINY_FULFILLED, getAttribute(content, "Destiny Fulfilled:")));
+        response.add(Change.create(ChangeKey.DESTINY_BONUS, getAttribute(content, "Destiny Bonus:")));
+        response.add(Change.create(ChangeKey.DESTINY_PENALTY, getAttribute(content, "Destiny Penalty:")));
+        response.add(Change.create(ChangeKey.DESTINY_FULFILLED, getAttribute(content, "Destiny Fulfilled:")));
         return response;
     }
 }

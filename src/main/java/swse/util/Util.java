@@ -1,21 +1,17 @@
 package swse.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.*;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.common.Copyable;
 import swse.common.ProvidedItem;
 import swse.prerequisite.OrPrerequisite;
+import swse.prerequisite.Prerequisite;
 
 
 public class Util
@@ -102,13 +98,44 @@ public class Util
             if(categories.size() == 1){
                 merged.add(categories.get(0));
             } else {
+                List<Prerequisite> prerequisites = categories.stream().map(ProvidedItem::getPrerequisite).collect(Collectors.toList());
                 merged.add(ProvidedItem.create(mergeableCategoryEntry.getKey().getName(),
                         mergeableCategoryEntry.getKey().getType(),
-                        new OrPrerequisite(categories.stream().map(ProvidedItem::getPrerequisite).collect(Collectors.toList()))));
+                        mergePrerequisites(prerequisites)));
             }
         }
 
         return merged;
+    }
+
+    private static Prerequisite mergePrerequisites(List<Prerequisite> prerequisites) {
+        prerequisites = unwrapOrs(prerequisites);
+        prerequisites = mergeAnds(prerequisites);
+
+        return new OrPrerequisite(prerequisites);
+    }
+
+    private static List<Prerequisite> mergeAnds(List<Prerequisite> prerequisites) {
+
+        Multimap<Prerequisite, Prerequisite> parentByChild =HashMultimap.create();
+
+        for(Prerequisite p : prerequisites){
+
+        }
+        return prerequisites;
+    }
+
+    private static List<Prerequisite> unwrapOrs(List<Prerequisite> prerequisites) {
+        Set<Prerequisite> response = Sets.newHashSet();
+
+        for(Prerequisite p : prerequisites){
+            if(p instanceof OrPrerequisite && ((OrPrerequisite)p).getCount() == 1){
+                response.addAll(unwrapOrs(((OrPrerequisite)p).getChildren()));
+            } else {
+                response.add(p);
+            }
+        }
+        return Lists.newArrayList(response);
     }
 
     public static List<String> getCategoryLinks(Element content)

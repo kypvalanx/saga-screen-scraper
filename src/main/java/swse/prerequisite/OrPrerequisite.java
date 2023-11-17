@@ -81,4 +81,12 @@ public class OrPrerequisite extends Prerequisite
     public Prerequisite copy() {
         return new OrPrerequisite(plainText, cloneList(children), count);
     }
+
+    public int getCount() {
+        return count;
+    }
+
+    public List<Prerequisite> getChildren() {
+        return children;
+    }
 }

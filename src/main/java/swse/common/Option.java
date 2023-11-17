@@ -112,7 +112,7 @@ public class Option implements JSONy, Copyable<Option> {
             option.withProvidedItem(providedItem.copy());
         }
         for (Change change : changes) {
-            option.withAttribute(change.copy());
+            option.withChange(change.copy());
         }
         return option;
     }
@@ -124,7 +124,7 @@ public class Option implements JSONy, Copyable<Option> {
         return this;
     }
 
-    public Option withAttribute(Change change) {
+    public Option withChange(Change change) {
         changes.add(change);
         return this;
     }

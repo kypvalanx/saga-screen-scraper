@@ -20,6 +20,7 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     private Integer hitPoints = null;
     private int cl = 0;
     private List<String> trainedSkills = new ArrayList<>();
+    private List<Attribute> attributes = new ArrayList<>();
 
     public Unit(String name) {
         super(name, "npc");
@@ -34,7 +35,8 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     public JSONObject toJSON() {
         JSONObject json = super.toJSON();
         JSONObject system = json.getJSONObject("system");
-        system.put("size", size); //size is provided most of the time.  this should be used to double-check that the size has been resolved correctly.
+        system.put("size", size);
+        system.put("sizeOverride", size); //size is provided most of the time.  this should be used to double-check that the size has been resolved correctly.
         system.put("speciesSubType", speciesSubType);
         system.put("cl", cl);
         if (age != null) {
@@ -55,17 +57,14 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
         JSONObject health = new JSONObject();
         system.put("health", health);
         if (hitPoints != null) {
-            health.put("hitPointOverride", hitPoints);
+            health.put("override", hitPoints);
+            health.put("value", hitPoints);
+            health.put("max", hitPoints);
         }
 
-            JSONObject skills = new JSONObject();
-        for (String skill :
-                trainedSkills) {
-            JSONObject value = new JSONObject();
-            value.put("trained", true);
-            skills.put(skill.toLowerCase(), value);
-        }
-            system.put("skills", skills);
+        system.put("skills", getSkills());
+        system.put("attributes", getAttributes());
+        system.put("attributeGenerationType", "Manual");
 
 
         //json.put("type", "npc-vehicle");
@@ -74,6 +73,26 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
 
 
         return json;
+    }
+
+    private JSONObject getSkills() {
+        JSONObject skills = new JSONObject();
+        for (String skill :
+                trainedSkills) {
+            JSONObject value = new JSONObject();
+            value.put("trained", true);
+            skills.put(skill.toLowerCase(), value);
+        }
+        return skills;
+    }
+    private JSONObject getAttributes() {
+        JSONObject attributeObjects = new JSONObject();
+        for (Attribute attribute :
+                attributes) {
+            JSONObject value = attribute.toJSON();
+            attributeObjects.put(attribute.getKey().value(), value);
+        }
+        return attributeObjects;
     }
 
     @Override
@@ -134,7 +153,7 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     }
 
     public Unit withAttribute(String attribute, String value) {
-        this.changes.add(Change.create(AttributeKey.valueOf(attribute), value));
+        this.attributes.add(Attribute.create(ChangeKey.valueOf(attribute), value));
         return this;
     }
 
@@ -155,5 +174,9 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
         flags.add("USE_NAME_IN_KEY");
 
         return flags;
+    }
+
+    public void addAction(String s) {
+        this.changes.add(Change.create(ChangeKey.ACTION, s));
     }
 }

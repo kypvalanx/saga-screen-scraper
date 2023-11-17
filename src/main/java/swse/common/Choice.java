@@ -1,5 +1,6 @@
 package swse.common;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -18,6 +19,7 @@ public class Choice implements JSONy, Copyable<Choice>
     private Type type = Type.SELECT;
     private String payload = "#payload#";
     private boolean showSelectionInName = true;
+    private Boolean uniqueChoices;
 
     public static Choice create(String description){
         return new Choice(description);
@@ -54,6 +56,9 @@ public class Choice implements JSONy, Copyable<Choice>
         json.put("rollOption", rollOption);
         json.put("availableSelections", availableSelections);
         json.put("showSelectionInName", showSelectionInName);
+        if(uniqueChoices != null){
+            json.put("uniqueChoices", uniqueChoices);
+        }
         json.put("type", type);
         if(payload != null){
             json.put("payload", payload);
@@ -84,6 +89,11 @@ public class Choice implements JSONy, Copyable<Choice>
         return this;
     }
 
+    public Choice withOptions(Option... option){
+        options.addAll(List.of(option));
+        return this;
+    }
+
     public Choice withNoOptionsDescription(String noAvailableOptionsDescription){
         this.noAvailableOptionsDescription = noAvailableOptionsDescription;
         return this;
@@ -104,6 +114,11 @@ public class Choice implements JSONy, Copyable<Choice>
     public Choice withOneOption(String oneOption)
     {
         this.oneOption = oneOption;
+        return this;
+    }
+
+    public Choice withUniqueChoices(boolean uniqueChoices) {
+        this.uniqueChoices = uniqueChoices;
         return this;
     }
 
@@ -145,6 +160,7 @@ public class Choice implements JSONy, Copyable<Choice>
         this.payload = payload;
         return this;
     }
+
 
     public enum Type {
         INTEGER, SELECT

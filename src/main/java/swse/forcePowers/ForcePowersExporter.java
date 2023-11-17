@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.Category;
 import swse.common.JSONy;
@@ -58,7 +58,7 @@ public class ForcePowersExporter extends BaseExporter
 //
         List<JSONy> traditions = new ArrayList<>();
 
-        traditions.add(ForcePower.create(itemName).withDescription(content).withCategories(categories).withProvided(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, "true")));
+        traditions.add(ForcePower.create(itemName).withDescription(content).withCategories(categories).withProvided(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, "true")));
 
         return traditions;
     }

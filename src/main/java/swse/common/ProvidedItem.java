@@ -27,6 +27,7 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     private String nameOverride;
     private Map<String, String> payloads = new HashMap<>();
     private List<String> answers = new ArrayList<>();
+    private boolean firstLevel = false;
 
     private ProvidedItem(String name, ItemType type, Prerequisite prerequisite){
 //        Pattern p = Pattern.compile("(Dexterity|Strength|Constitution|Intelligence|Wisdom|Charisma)");
@@ -97,12 +98,16 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
             data.put("answers", answers);
         }
 
-        data.put("attributes", JSONy.toArray(changes));
+        data.put("changes", JSONy.toArray(changes));
         data.put("providedItems", JSONy.toArray(providedItems));
         data.put("modifications", JSONy.toArray(modifications));
         data.put("namedCrew", JSONy.toArray(namedCrewMembers));
         data.put("quantity", quantity);
         data.put("payloads", JSONy.toObject(payloads));
+        if(firstLevel){
+
+            data.put("firstLevel", true);
+        }
         return data;
     }
 
@@ -190,5 +195,9 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     public ProvidedItem withAnswers(List<String> speciesAnswers) {
         this.answers.addAll(speciesAnswers);
         return this;
+    }
+
+    public void isFirstLevel() {
+        this.firstLevel = true;
     }
 }

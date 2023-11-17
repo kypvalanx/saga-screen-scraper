@@ -13,7 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.Category;
 import swse.common.ItemType;
 import swse.common.ProvidedItem;
@@ -52,7 +52,7 @@ public class StartingFeats
                 {
                     allowUL = false;
                     found = false;
-                    changes.add(Change.create(AttributeKey.AVAILABLE_CLASS_FEATS, 3));
+                    changes.add(Change.create(ChangeKey.AVAILABLE_CLASS_FEATS, 3));
                     Arrays.stream(entry.text().split(",")).map(StartingFeats::createAttribute).forEach(changes::add);
                 }
             } else if (entry.tag().equals(Tag.valueOf("h4")) && entry.text().toLowerCase().contains("starting feats"))
@@ -62,7 +62,7 @@ public class StartingFeats
         }
         //System.out.println(found && !allowP && !allowUL);
 
-        //printClassFeatList(attributes, itemName);
+        printClassFeatList(changes, itemName);
 
         return changes;
     }
@@ -72,7 +72,7 @@ public class StartingFeats
         {
             return null;
         }
-        return Change.create(AttributeKey.CLASS_FEAT, cleanStartingFeat(text));
+        return Change.create(ChangeKey.CLASS_FEAT, cleanStartingFeat(text));
     }
 
     private static String cleanStartingFeat(String text) {
@@ -80,7 +80,17 @@ public class StartingFeats
     }
 
     private static void printClassFeatList(List<Change> changes, String itemName) {
-        System.out.println("List<String> " + itemName.toUpperCase()+ "_STARTING_FEATS = List.of(" + changes.stream().filter(attribute -> attribute.getKey().equals("classFeat")).map(attribute -> "\"" + attribute.getValue() + "\"").collect(Collectors.joining(", ")) + ");");
+        if(changes.size() == 0){
+            return;
+        }
+        //System.out.println("classStartingFeats.put(\""+ itemName + "\", List.of(" + changes.stream().filter(attribute -> attribute != null && attribute.getKey().equals("classFeat")).map(attribute -> "\"" + attribute.getValue() + "\"").collect(Collectors.joining(", ")) + ");");
+
+        List<String> feats = changes.stream().filter(attribute -> attribute != null && attribute.getKey().equals("classFeat")).map(attribute -> "\"" + attribute.getValue() + "\"").collect(Collectors.toList());
+
+        for(String feat : feats){
+            System.out.println("startingFeats.put(" + feat + ", \"" + itemName + "\");");
+        }
+
     }
 
     public static List<Object> getStartingFeatsFromCategories(Set<Category> categories)

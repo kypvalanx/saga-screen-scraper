@@ -1,6 +1,6 @@
 package swse.common;
 
-public enum AttributeKey {
+public enum ChangeKey {
     ACTION("action"),
     AID_ANOTHER_BONUS("aidAnotherBonus"),
     AMMO("ammo"),
@@ -252,11 +252,12 @@ public enum AttributeKey {
     ACTS_AS("actsAs"),
     BONUS_SECOND_WIND("bonusSecondWind"),
     WEIGHT("weight"),
-    BASE_ATTACK_BONUS("baseAttackBonus");
+    BASE_ATTACK_BONUS("baseAttackBonus"),
+    AUTOMATIC_TRAINED_SKILL("automaticTrainedSkill"), CONSUMES("consumes");
 
     private final String value;
 
-    AttributeKey(String string) {
+    ChangeKey(String string) {
         this.value = string;
     }
 
@@ -268,14 +269,14 @@ public enum AttributeKey {
 
 
     public static void main(String[] args){
-        AttributeKey[] keys = AttributeKey.values();
+        ChangeKey[] keys = ChangeKey.values();
 
         System.out.println("# Attribute Key Documentation");
         System.out.println("below lists all currently used attributes.  coming soon a description of what they do and examples");
 
         System.out.println();
         System.out.println();
-        for(AttributeKey key : keys){
+        for(ChangeKey key : keys){
             System.out.println(key.value());
         }
     }

@@ -8,7 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 
 class ForcePoints
 {
@@ -38,7 +38,7 @@ class ForcePoints
 
                     if (m.find())
                     {
-                        changes.add(Change.create(AttributeKey.CLASS_FORCE_POINTS, Integer.parseInt(m.group(1))));
+                        changes.add(Change.create(ChangeKey.CLASS_FORCE_POINTS, Integer.parseInt(m.group(1))));
                     }
                 }
             } else if ((entry.tag().equals(Tag.valueOf("h4")) || entry.tag().equals(Tag.valueOf("h3"))) && entry.text().toLowerCase().contains("force points"))

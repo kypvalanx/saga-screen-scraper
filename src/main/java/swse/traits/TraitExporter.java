@@ -16,7 +16,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.BonusFeat;
 import swse.common.Choice;
@@ -35,6 +35,12 @@ import static swse.util.Util.toEnumCase;
 public class TraitExporter extends BaseExporter {
 
     public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\traits.json";
+    private static final Option[] ATTRIBUTE_BONUS_OPTIONS = {new Option("Strength").withChange(Change.create(ChangeKey.STRENGTH_BONUS, 1)),
+            new Option("Dexterity").withChange(Change.create(ChangeKey.DEXTERITY_BONUS, 1)),
+            new Option("Constitution").withChange(Change.create(ChangeKey.CONSTITUTION_BONUS, 1)),
+            new Option("Intelligence").withChange(Change.create(ChangeKey.INITIATIVE_BONUS, 1)),
+            new Option("Wisdom").withChange(Change.create(ChangeKey.WISDOM_BONUS, 1)),
+            new Option("Charisma").withChange(Change.create(ChangeKey.CHARISMA_BONUS, 1))};
 
     public static void main(String[] args) {
         Timer timer = new Timer();
@@ -81,7 +87,7 @@ public class TraitExporter extends BaseExporter {
         for (String size : sizes) {
             response.add(Trait
                     .create(size)
-                            .withProvided(Change.create(AttributeKey.SIZE_INDEX, i++))
+                            .withProvided(Change.create(ChangeKey.SIZE_INDEX, i++))
                     .withProvided(getSizeModifiers(size))
                     .toJSON());
 
@@ -103,13 +109,13 @@ public class TraitExporter extends BaseExporter {
 
     private static Set<JSONObject> getSpeedTraits() {
         Set<JSONObject> response = new HashSet<>();
-        response.add(Trait.create("Base Speed").withDescription("A being has a base speed of #payload#.").withProvided(Change.create(AttributeKey.SPEED, "Base Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
-        response.add(Trait.create("Swim Speed").withDescription("A being has a swim speed of #payload#.").withProvided(Change.create(AttributeKey.SPEED, "Swim Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
-        response.add(Trait.create("Fly Speed").withDescription("A being has a fly speed of #payload#.").withProvided(Change.create(AttributeKey.SPEED, "Fly Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
-        response.add(Trait.create("Wheeled Speed").withDescription("A being has a wheeled speed of #payload#.").withProvided(Change.create(AttributeKey.SPEED, "Wheeled Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
-        response.add(Trait.create("Walking Speed").withDescription("A being has a walking speed of #payload#.").withProvided(Change.create(AttributeKey.SPEED, "Walking Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
-        response.add(Trait.create("Tracked Speed").withDescription("A being has a tracked speed of #payload#.").withProvided(Change.create(AttributeKey.SPEED, "Tracked Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
-        response.add(Trait.create("Hover Speed").withDescription("A being has a hover speed of #payload#.").withProvided(Change.create(AttributeKey.SPEED, "Hover Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Base Speed").withDescription("A being has a base speed of #payload#.").withProvided(Change.create(ChangeKey.SPEED, "Base Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Swim Speed").withDescription("A being has a swim speed of #payload#.").withProvided(Change.create(ChangeKey.SPEED, "Swim Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Fly Speed").withDescription("A being has a fly speed of #payload#.").withProvided(Change.create(ChangeKey.SPEED, "Fly Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Wheeled Speed").withDescription("A being has a wheeled speed of #payload#.").withProvided(Change.create(ChangeKey.SPEED, "Wheeled Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Walking Speed").withDescription("A being has a walking speed of #payload#.").withProvided(Change.create(ChangeKey.SPEED, "Walking Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Tracked Speed").withDescription("A being has a tracked speed of #payload#.").withProvided(Change.create(ChangeKey.SPEED, "Tracked Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
+        response.add(Trait.create("Hover Speed").withDescription("A being has a hover speed of #payload#.").withProvided(Change.create(ChangeKey.SPEED, "Hover Speed #payload#")).withProvided(Choice.create("Enter numeric speed:").withType(Choice.Type.INTEGER)).toJSON());
 
         response.add(Trait.create("Stationary Speed").withDescription("A being cannot move.").toJSON());
         return response;
@@ -118,7 +124,7 @@ public class TraitExporter extends BaseExporter {
     private static Set<JSONObject> getDroidUnarmedDamageTraits() {
         Set<JSONObject> response = new HashSet<>();
         //response.add(Trait.create("Droid Unarmed Damage").withDescription("A droid has a limb that grants it #payload# damage when used in an unarmed attack.").withProvided(Attribute.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "#payload#")).toJSON());
-        response.add(Trait.create("Droid Default Appendage Offset").withDescription("A droid has no appendages until appendage items are added.").withProvided(Change.create(AttributeKey.APPENDAGES, "-2")).toJSON());
+        response.add(Trait.create("Droid Default Appendage Offset").withDescription("A droid has no appendages until appendage items are added.").withProvided(Change.create(ChangeKey.APPENDAGES, "-2")).toJSON());
 
         return response;
     }
@@ -129,7 +135,7 @@ public class TraitExporter extends BaseExporter {
 
         for (String attribute : attributes) {
             response.add(Trait.create(attribute)
-                    .withProvided(Change.create(AttributeKey.valueOf(toEnumCase(attribute.toLowerCase() + " Bonus")), "#payload#"))
+                    .withProvided(Change.create(ChangeKey.valueOf(toEnumCase(attribute.toLowerCase() + " Bonus")), "#payload#"))
                     .withDescription("This trait grants #payload# to " + attribute).toJSON());
         }
 
@@ -143,26 +149,26 @@ public class TraitExporter extends BaseExporter {
         response.add(Trait.create("Telekinetic Prodigy Bonus Force Power").withPrerequisite(and("The Force Training Feat and the Move Object Force Power", List.of(
                 SimplePrerequisite.simple("The Force Training Feat", "FEAT", "Force Training"),
                 SimplePrerequisite.simple("The Move Object Force Power", "FORCE POWER", "Move Object")
-        ))).withProvided(Change.create(AttributeKey.PROVIDES, "Telekinetic Force Powers:1")).toJSON());
+        ))).withProvided(Change.create(ChangeKey.PROVIDES, "Telekinetic Force Powers:1")).toJSON());
 
-        response.add(Trait.create("Homebew Content").withDescription("This trait notes that this is homebrew and not official content.").withProvided(Change.create(AttributeKey.HOMEBREW, true)).toJSON());
+        response.add(Trait.create("Homebew Content").withDescription("This trait notes that this is homebrew and not official content.").withProvided(Change.create(ChangeKey.HOMEBREW, true)).toJSON());
         response.add(Trait.create("Untested").withDescription("This trait notes that at the time of generation, this actor or item has not been play tested.").toJSON());
 
         response.add(Trait.create("Squad").withDescription("Squads are collections of lower-CL enemies that work together as a single creature on the battlefield. Squads are ideal for encounters in which the Gamemaster wants to include a large number of weaker enemies and allies, and can help replicate the chaos of a battlefield in a more manageable fashion. Similarly, Squads provide the Gamemaster with ways to transform low-CL enemies into a more significant threat. By the time the heroes hit 10th level, those CL 1 Battle Droids have ceased to be a challenge, but transforming those Droids into Squads raises their CL to the point where they can be sufficiently dangerous.\n" +
                 "\n" +
                 "A Squad represents a small number of creatures (Usually three to four) of the same type that come together into a single unit. They occupy the same space and have only one turn's worth of Actions. The Squad is an abstract concept that allows the Gamemaster to populate an encounter with low-level troopers and still maintain the speed and ease of combat they need. Squads are by no means necessary, but they do streamline the game experience. For example, a Gamemaster could create an encounter with 15 Battle Droids, or the same encounter could be created using only 5 Squads, which is more manageable.")
-                .withProvided(Change.create(AttributeKey.SIZE_BONUS, 1))
-                .withProvided(Change.create(AttributeKey.DAMAGE_THRESHOLD_EFFECTIVE_SIZE, -1))
-                .withProvided(Change.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, 10))
-                .withProvided(Change.create(AttributeKey.TO_HIT_MODIFIER, 4))
-                .withProvided(Change.create(AttributeKey.CHALLENGE_LEVEL, 2))
-                .withProvided(Change.create(AttributeKey.HIT_POINT_EQ, "*2"))
-                .withProvided(Change.create(AttributeKey.SPECIAL, "All melee attacks made by a Squad are considered melee Area Attacks that affect all squares within the Squad's Reach (Although a Squad can choose not to affect a target with its attacks)."))
-                .withProvided(Change.create(AttributeKey.SPECIAL, "All ranged attacks made by a Squad are considered to have a 1-square Splash. If the Squad's weapon already has a Splash effect, increase the Splash radius by 1 square."))
-                .withProvided(Change.create(AttributeKey.SPECIAL, "A Squad can choose not to affect allies with its attacks."))
-                .withProvided(Change.create(AttributeKey.SPECIAL, "Area Attacks deal +2 dice of damage against a Squad."))
-                .withProvided(Change.create(AttributeKey.SPECIAL, "A Squad cannot be Grabbed or Grappled."))
-                .withProvided(Change.create(AttributeKey.SPECIAL, "A Squad can make Attacks of Opportunity against creatures that provoke them, though these Attacks of Opportunity are not considered Area Attacks."))
+                .withProvided(Change.create(ChangeKey.SIZE_BONUS, 1))
+                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_EFFECTIVE_SIZE, -1))
+                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_BONUS, 10))
+                .withProvided(Change.create(ChangeKey.TO_HIT_MODIFIER, 4))
+                .withProvided(Change.create(ChangeKey.CHALLENGE_LEVEL, 2))
+                .withProvided(Change.create(ChangeKey.HIT_POINT_EQ, "*2"))
+                .withProvided(Change.create(ChangeKey.SPECIAL, "All melee attacks made by a Squad are considered melee Area Attacks that affect all squares within the Squad's Reach (Although a Squad can choose not to affect a target with its attacks)."))
+                .withProvided(Change.create(ChangeKey.SPECIAL, "All ranged attacks made by a Squad are considered to have a 1-square Splash. If the Squad's weapon already has a Splash effect, increase the Splash radius by 1 square."))
+                .withProvided(Change.create(ChangeKey.SPECIAL, "A Squad can choose not to affect allies with its attacks."))
+                .withProvided(Change.create(ChangeKey.SPECIAL, "Area Attacks deal +2 dice of damage against a Squad."))
+                .withProvided(Change.create(ChangeKey.SPECIAL, "A Squad cannot be Grabbed or Grappled."))
+                .withProvided(Change.create(ChangeKey.SPECIAL, "A Squad can make Attacks of Opportunity against creatures that provoke them, though these Attacks of Opportunity are not considered Area Attacks."))
                 .toJSON());
 
         response.add(Trait.create("GM Bonus").withDescription("Grants a bonus outside the usual character building mechanics")
@@ -170,23 +176,23 @@ public class TraitExporter extends BaseExporter {
                         .withOption("AVAILABLE_GM_BONUSES", new Option().withPayload("AVAILABLE_GM_BONUSES")))
                 .withProvided(Choice.create("Bonus Size:").withType(Choice.Type.INTEGER).withPayload("#integer#")).toJSON());
 
-        response.add(Trait.create("Starship Armor").withDescription("").withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, "#payload#")).toJSON());
+        response.add(Trait.create("Starship Armor").withDescription("").withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, "#payload#")).toJSON());
 
-        response.add(Trait.create("Maximum Hit Points").withDescription("").withProvided(Change.create(AttributeKey.HIT_POINT_EQ, "#payload#")).toJSON());
+        response.add(Trait.create("Maximum Hit Points").withDescription("").withProvided(Change.create(ChangeKey.HIT_POINT_EQ, "#payload#")).toJSON());
 
-        response.add(Trait.create("Shield Rating").withDescription("").withProvided(Change.create(AttributeKey.SHIELD_RATING, "#payload#")).toJSON());
+        response.add(Trait.create("Shield Rating").withDescription("").withProvided(Change.create(ChangeKey.SHIELD_RATING, "#payload#")).toJSON());
 
-        response.add(Trait.create("Starship Scale Speed").withDescription("").withProvided(Change.create(AttributeKey.SPEED_STARSHIP_SCALE, "#payload#")).toJSON());
+        response.add(Trait.create("Starship Scale Speed").withDescription("").withProvided(Change.create(ChangeKey.SPEED_STARSHIP_SCALE, "#payload#")).toJSON());
 
-        response.add(Trait.create("Required Crew").withDescription("").withProvided(Change.create(AttributeKey.CREW, "#payload#")).toJSON());
+        response.add(Trait.create("Required Crew").withDescription("").withProvided(Change.create(ChangeKey.CREW, "#payload#")).toJSON());
 
-        response.add(Trait.create("Maximum Passengers").withDescription("").withProvided(Change.create(AttributeKey.PASSENGERS, "#payload#")).toJSON());
+        response.add(Trait.create("Maximum Passengers").withDescription("").withProvided(Change.create(ChangeKey.PASSENGERS, "#payload#")).toJSON());
 
-        response.add(Trait.create("Cargo Capacity").withDescription("").withProvided(Change.create(AttributeKey.CARGO_CAPACITY, "#payload#")).toJSON());
+        response.add(Trait.create("Cargo Capacity").withDescription("").withProvided(Change.create(ChangeKey.CARGO_CAPACITY, "#payload#")).toJSON());
 
-        response.add(Trait.create("Carried Craft").withDescription("").withProvided(Change.create(AttributeKey.CARRIED_CRAFT, "#payload#")).toJSON());
+        response.add(Trait.create("Carried Craft").withDescription("").withProvided(Change.create(ChangeKey.CARRIED_CRAFT, "#payload#")).toJSON());
 
-        response.add(Trait.create("Weapon System").withDescription("").withProvided(Change.create(AttributeKey.WEAPON_SYSTEMS, "#payload#")).toJSON());
+        response.add(Trait.create("Weapon System").withDescription("").withProvided(Change.create(ChangeKey.WEAPON_SYSTEMS, "#payload#")).toJSON());
 
         response.add(Trait.create("Maintenance Requirement").withDescription("A Prototype Vehicle manages to maintain " +
                 "its high precision tuning only if it is regularly given good maintenance. A Prototype Vehicle requires" +
@@ -214,15 +220,15 @@ public class TraitExporter extends BaseExporter {
 
         response.add(Trait.create("Damage Threshold")
                 .withDescription("<p>This Actor's Damage Threshold is modified.</p>")
-                .withProvided(Lists.newArrayList(Change.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, "#payload#"))).toJSON());
+                .withProvided(Lists.newArrayList(Change.create(ChangeKey.DAMAGE_THRESHOLD_BONUS, "#payload#"))).toJSON());
 
         response.add(Trait.create("Weapon Familiarity")
                 .withDescription("<p>This Species treats an Exotic Weapon as another type of weapon.</p>")
-                .withProvided(Lists.newArrayList(Change.create(AttributeKey.WEAPON_FAMILIARITY, "#payload#"))).toJSON());
+                .withProvided(Lists.newArrayList(Change.create(ChangeKey.WEAPON_FAMILIARITY, "#payload#"))).toJSON());
 
         response.add(Trait.create("Advanced Shields")
                 .withDescription("A shield Bonus Added to the existing shield.  if no shield exists it is doubled and add 10.")
-                .withProvided(Lists.newArrayList(Change.create(AttributeKey.SHIELD_RATING_ADVANCED, "#payload#"))).toJSON());
+                .withProvided(Lists.newArrayList(Change.create(ChangeKey.SHIELD_RATING_ADVANCED, "#payload#"))).toJSON());
 
         response.add(Trait.create("Lightsaber").withDescription("<p>A Jedi begins play with a <a href=\"/wiki/Lightsaber\" class=\"mw-redirect\" title=\"Lightsaber\">Lightsaber</a> provided by their Master. Later, they can build their own <a href=\"/wiki/Lightsaber\" class=\"mw-redirect\" title=\"Lightsaber\">Lightsaber</a>.</p>").toJSON());
 
@@ -320,13 +326,13 @@ public class TraitExporter extends BaseExporter {
 
         response.add(Trait.create("Surprise Attack").withDescription("<p>Whenever a Vanguard attacks a target that is unaware of them or otherwise is otherwise <a href=\"/wiki/Flat-Footed\" class=\"mw-redirect\" title=\"Flat-Footed\">Flat-Footed</a>, they gain a bonus on their first attack roll in a round against that target equal to one-half their Class Level.</p>").toJSON());
 
-        response.add(Trait.create("Disable Attribute Modification").withDescription("<p>Some Species have set Attribute Arrays</p>").withProvided(Change.create(AttributeKey.DISABLE_ATTRIBUTE_MODIFICATION, true))
-                .withProvided(Change.create(AttributeKey.BASE_STRENGTH, 10))
-                .withProvided(Change.create(AttributeKey.BASE_DEXTERITY, 10))
-                .withProvided(Change.create(AttributeKey.BASE_CONSTITUTION, 10))
-                .withProvided(Change.create(AttributeKey.BASE_INTELLIGENCE, 10))
-                .withProvided(Change.create(AttributeKey.BASE_WISDOM, 10))
-                .withProvided(Change.create(AttributeKey.BASE_CHARISMA, 10))
+        response.add(Trait.create("Disable Attribute Modification").withDescription("<p>Some Species have set Attribute Arrays</p>").withProvided(Change.create(ChangeKey.DISABLE_ATTRIBUTE_MODIFICATION, true))
+                .withProvided(Change.create(ChangeKey.BASE_STRENGTH, 10))
+                .withProvided(Change.create(ChangeKey.BASE_DEXTERITY, 10))
+                .withProvided(Change.create(ChangeKey.BASE_CONSTITUTION, 10))
+                .withProvided(Change.create(ChangeKey.BASE_INTELLIGENCE, 10))
+                .withProvided(Change.create(ChangeKey.BASE_WISDOM, 10))
+                .withProvided(Change.create(ChangeKey.BASE_CHARISMA, 10))
                 .toJSON());
 
         response.add(Trait.create("Aquala").withDescription("<p>Aquala Aqualish have finned hands, making them the strongest swimmers of all Aqualish.</p>").toJSON());
@@ -339,23 +345,38 @@ public class TraitExporter extends BaseExporter {
 
         response.add(Trait.create("Intimidating").withDescription("<p>Aqualish can use their Strength modifier instead of their Charisma modifier for Persuasion checks made to Intimidate others.</p>").toJSON());
 
-        response.add(Trait.create("Extra Arms 2").withDescription("<p>Beings can hold up to four items or Weapons at a time (Or six, depending on the Species). This ability does not grant extra attacks; however, it does mean a being can wield two two-handed weapons at a time (Or three, depending on the Species).</p>").withProvided(Change.create(AttributeKey.APPENDAGES, "2")).toJSON());
+        response.add(Trait.create("Extra Arms 2").withDescription("<p>Beings can hold up to four items or Weapons at a time (Or six, depending on the Species). This ability does not grant extra attacks; however, it does mean a being can wield two two-handed weapons at a time (Or three, depending on the Species).</p>").withProvided(Change.create(ChangeKey.APPENDAGES, "2")).toJSON());
 
-        response.add(Trait.create("Extra Arms 4").withDescription("<p>Beings can hold up to four items or Weapons at a time (Or six, depending on the Species). This ability does not grant extra attacks; however, it does mean a being can wield two two-handed weapons at a time (Or three, depending on the Species).</p>").withProvided(Change.create(AttributeKey.APPENDAGES, "4")).toJSON());
+        response.add(Trait.create("Extra Arms 4").withDescription("<p>Beings can hold up to four items or Weapons at a time (Or six, depending on the Species). This ability does not grant extra attacks; however, it does mean a being can wield two two-handed weapons at a time (Or three, depending on the Species).</p>").withProvided(Change.create(ChangeKey.APPENDAGES, "4")).toJSON());
 
-        response.add(Trait.create("Extra Arms 6").withDescription("<p>Beings can hold up to four items or Weapons at a time (Or six, depending on the Species). This ability does not grant extra attacks; however, it does mean a being can wield two two-handed weapons at a time (Or three, depending on the Species).2</p>").withProvided(Change.create(AttributeKey.APPENDAGES, "6")).toJSON());
+        response.add(Trait.create("Extra Arms 6").withDescription("<p>Beings can hold up to four items or Weapons at a time (Or six, depending on the Species). This ability does not grant extra attacks; however, it does mean a being can wield two two-handed weapons at a time (Or three, depending on the Species).2</p>").withProvided(Change.create(ChangeKey.APPENDAGES, "6")).toJSON());
 
         response.add(Trait.create("Jar'Kai")
                 .withDescription("When you use the Lightsaber Defense Talent, you gain twice the normal deflection bonus to your Reflex Defense when you are wielding two Lightsabers.")
-                .withProvided(Change.create(AttributeKey.LIGHTSABER_DEFENSE, "*2")).toJSON());
+                .withProvided(Change.create(ChangeKey.LIGHTSABER_DEFENSE, "*2")).toJSON());
 
         response.add(Trait.create("Makashi")
                 .withDescription("When wielding a single Lightsaber in one hand, the deflection bonus you gain from the Lightsaber Defense Talent increases by 2 (To a maximum of +5).")
-                .withProvided(Change.create(AttributeKey.LIGHTSABER_DEFENSE, "2")).toJSON());
+                .withProvided(Change.create(ChangeKey.LIGHTSABER_DEFENSE, "2")).toJSON());
 
         response.add(Trait.create("Niman")
                 .withDescription("When wielding a Lightsaber, you gain a +1 bonus to your Reflex Defense and Will Defense.")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, "1")).withProvided(Change.create(AttributeKey.WILL_DEFENSE_BONUS, "1")).toJSON());
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, "1")).withProvided(Change.create(ChangeKey.WILL_DEFENSE_BONUS, "1")).toJSON());
+
+        response.add(Trait.create("Heroic Ability Score Level Bonus")
+                        .withProvided(Change.create(ChangeKey.CONSUMES, "Ability Score Level Bonus"))
+                .withProvided(Choice.create("Select an attribute to add a bonus:")
+                        .withShowSelectionInName(true)
+                        .withAvailableSelections(2)
+                        .withUniqueChoices(true)
+                        .withOptions(ATTRIBUTE_BONUS_OPTIONS))
+                .toJSON());
+        response.add(Trait.create("Nonheroic Ability Score Level Bonus")
+                .withProvided(Change.create(ChangeKey.CONSUMES, "Ability Score Level Bonus"))
+                .withProvided(Choice.create("Select an attribute to add a bonus:")
+                        .withShowSelectionInName(true)
+                        .withOptions(ATTRIBUTE_BONUS_OPTIONS))
+                .toJSON());
         //response.add(Trait.create("Stormtrooper Perception Bonus").withProvided(Attribute.create("perceptionModifier", 2)).toJSON());
         //response.add(Trait.create("Low-Light Vision").withProvided(Attribute.create("lowLightVision", true)).toJSON());
         //response.add(Trait.create("4 Arm Option").toJSON());
@@ -482,7 +503,7 @@ public class TraitExporter extends BaseExporter {
                     if(skill.equals("Strength-based Ability")) {
                         skill = "Strength";
                     }
-                    attributes.add(Change.create(AttributeKey.SKILL_RE_ROLL, skill));
+                    attributes.add(Change.create(ChangeKey.SKILL_RE_ROLL, skill));
                 }
             }
         }
@@ -497,12 +518,12 @@ public class TraitExporter extends BaseExporter {
 
         switch(itemName){
             case "Superior Defenses":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, "1"));
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, "1"));
-                attributes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, "1"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, "1"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, "1"));
+                attributes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, "1"));
                 break;
             case "Strength of Conviction":
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, "MAX(@WISMOD, @CHAMOD) - @WISMOD"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, "MAX(@WISMOD, @CHAMOD) - @WISMOD"));
                 break;
         }
 
@@ -516,33 +537,33 @@ public class TraitExporter extends BaseExporter {
             Optional<Matcher> m = Regex.find("Beings gain a ([+-]\\d*) Species bonus to their Fortitude Defense\\.", content.text());
             if (m.isPresent()) {
                 Integer bonus = Integer.parseInt(m.get().group(1));
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, bonus));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, bonus));
             }
         }
 
         switch (itemName) {
             case "Cold Resistance":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Extreme Cold"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Extreme Cold"));
                 break;
             case "Cold-Blooded":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, -5).withModifier("Extreme Cold"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, -5).withModifier("Extreme Cold"));
                 break;
             case "Toxic Resistance":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Poisons"));
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Toxic Atmospheres"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Poisons"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Toxic Atmospheres"));
                 break;
             case "Radiation Resistance":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Radiation"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Radiation"));
                 break;
             case "Environmental Adaptation":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Extreme Temperatures"));
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Radiation"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Extreme Temperatures"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Radiation"));
                 break;
             case "Climate Sensitivity":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, -5).withModifier("Extreme Temperatures"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, -5).withModifier("Extreme Temperatures"));
                 break;
             case "Heat Resistance":
-                attributes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Extreme Heat"));
+                attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, 5).withModifier("Extreme Heat"));
                 break;
         }
         return attributes;
@@ -555,33 +576,33 @@ public class TraitExporter extends BaseExporter {
             Optional<Matcher> m = Regex.find("Beings gain a ([+-]\\d*) Species bonus to their Will Defense\\.", content.text());
             if (m.isPresent()) {
                 Integer bonus = Integer.parseInt(m.get().group(1));
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, bonus));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, bonus));
             }
         }
 
         switch (itemName) {
             case "Fearless":
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, 5).withModifier("Fear Effects"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, 5).withModifier("Fear Effects"));
                 break;
             case "Fearful":
 
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, -5).withModifier("Fear Effects"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, -5).withModifier("Fear Effects"));
                 break;
             case "Xenophobia":
 
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, 2).withModifier("Persuasion checks made to improve their Attitude by any creature of a different Species"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, 2).withModifier("Persuasion checks made to improve their Attitude by any creature of a different Species"));
                 break;
             case "Force Resistance":
 
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, 5).withModifier("any use of the Use the Force Skill"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, 5).withModifier("any use of the Use the Force Skill"));
                 break;
             case "Driven":
 
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, 5).withModifier("Mind-Affecting Effects"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, 5).withModifier("Mind-Affecting Effects"));
                 break;
             case "Mental Fortitude":
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, 2).withModifier("Deception Checks"));
-                attributes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, 2).withModifier("Persuasion Checks"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, 2).withModifier("Deception Checks"));
+                attributes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, 2).withModifier("Persuasion Checks"));
                 break;
         }
 
@@ -608,7 +629,7 @@ public class TraitExporter extends BaseExporter {
             Optional<Matcher> m = Regex.find("Beings gain a ([+-]\\d*) Species bonus to their Reflex Defense\\.", content.text());
             if (m.isPresent()) {
                 Integer bonus = Integer.parseInt(m.get().group(1));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, bonus));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, bonus));
             }
         }
         return changes;
@@ -629,88 +650,88 @@ public class TraitExporter extends BaseExporter {
             case "Tiny":
             case "Diminutive":
             case "Fine":
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +100).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +25).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +200).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +30).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +500).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +35).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(AttributeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +50).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "16 squares").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "2d6").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:-15").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +15).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "9 squares").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "1d8").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:-10").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "1d6").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:-5").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(AttributeKey.GRAPPLE_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "1d4").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:0").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "1d3").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:5").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +100).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +25).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +200).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +30).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +500).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +35).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +50).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "16 squares").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d6").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-15").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +15).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "9 squares").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d8").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-10").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d6").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-5").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d4").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:0").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d3").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:5").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
 
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "1d2").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:10").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d2").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:10").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
 
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:15").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:15").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
 
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(AttributeKey.SHIP_SKILL_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(AttributeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(AttributeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(AttributeKey.SKILL_BONUS, "stealth:20").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:20").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
                 break;
         }
 
@@ -723,7 +744,7 @@ public class TraitExporter extends BaseExporter {
             Pattern damageReductionPattern = Pattern.compile("Damage Reduction (\\d*)");
             Matcher m = damageReductionPattern.matcher(itemName);
             if (m.find()) {
-                return Change.create(AttributeKey.DAMAGE_REDUCTION, Integer.parseInt(m.group(1)));
+                return Change.create(ChangeKey.DAMAGE_REDUCTION, Integer.parseInt(m.group(1)));
             }
         }
         return null;
@@ -733,7 +754,7 @@ public class TraitExporter extends BaseExporter {
 
         List<Object> attributes = new ArrayList<>();
         if (itemName.equals("Natural Armor")) {
-            attributes.add(Change.create(AttributeKey.NATURAL_ARMOR_REFLEX_DEFENSE_BONUS, "#payload#"));
+            attributes.add(Change.create(ChangeKey.NATURAL_ARMOR_REFLEX_DEFENSE_BONUS, "#payload#"));
             attributes.add(new Choice("Choose amount of Natural Armor to add").withType(Choice.Type.INTEGER));
         }
         return attributes;
@@ -745,12 +766,17 @@ public class TraitExporter extends BaseExporter {
             Pattern classSkillPattern = Pattern.compile("Bonus Class Skill \\(([\\w\\s()-]*)\\)");
             Matcher m = classSkillPattern.matcher(itemName);
             if (m.find()) {
-                attributes.add(Change.create(AttributeKey.CLASS_SKILL, m.group(1).toLowerCase()));
+                attributes.add(Change.create(ChangeKey.CLASS_SKILL, m.group(1).toLowerCase()));
             }
         }
         if ("Bonus Trained Skill".equals(itemName)) {
 
-            attributes.add(Change.create(AttributeKey.TRAINED_SKILLS, "1"));
+//            attributes.add(Change.create(ChangeKey.TRAINED_SKILLS, "1"));
+//        }
+//        if ("Automatic Trained Skill".equals(itemName)) {
+
+            attributes.add(Change.create(ChangeKey.AUTOMATIC_TRAINED_SKILL, "#payload#"));
+            attributes.add(new Choice("Choose an automatically trained skill").withOption("AVAILABLE_UNTRAINED_SKILLS", new Option().withPayload("AVAILABLE_UNTRAINED_SKILLS")));
         }
         return attributes;
     }
@@ -759,9 +785,9 @@ public class TraitExporter extends BaseExporter {
         if (content == null) {
             return null;
         }
-        if (itemName.equals("Bonus Feat")) {
-            return Change.create(AttributeKey.PROVIDES, "General Feats");
-        }
+//        if (itemName.equals("Bonus Feat")) {
+//            return Change.create(ChangeKey.PROVIDES, "General Feats");
+//        }
 
         BonusFeat bonusFeat = null;
 
@@ -801,7 +827,7 @@ public class TraitExporter extends BaseExporter {
         if (bonusFeat == null) {
             return null;
         }
-        return Change.create(AttributeKey.BONUS_FEAT, bonusFeat);
+        return Change.create(ChangeKey.BONUS_FEAT, bonusFeat);
     }
 
 }

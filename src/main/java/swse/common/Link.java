@@ -1,6 +1,10 @@
 package swse.common;
 
-public class Link implements Copyable<Link> {
+import org.json.JSONObject;
+
+import javax.annotation.Nonnull;
+
+public class Link implements Copyable<Link>, JSONy {
     private final LinkType type;
     private final String group;
 
@@ -24,5 +28,14 @@ public class Link implements Copyable<Link> {
 
     public LinkType getType() {
         return type;
+    }
+
+    @Nonnull
+    @Override
+    public JSONObject toJSON() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("group", group);
+        jsonObject.put("type", type);
+        return jsonObject;
     }
 }

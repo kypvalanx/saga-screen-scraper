@@ -12,7 +12,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.JSONy;
 
@@ -70,7 +70,7 @@ public class VehicleBaseTypeExporter extends BaseExporter {
                 }
                 List<String> rowValues = row.select("td").stream().map(element -> element.text().trim()).collect(Collectors.toList());
                 String templateName = rowValues.get(templateNameIndex);
-                VehicleBaseType template = (VehicleBaseType) templates.computeIfAbsent(templateName, tn -> VehicleBaseType.create(tn).withProvided(Change.create(AttributeKey.VEHICLE_SUB_TYPE, mapSubtype(tn))));
+                VehicleBaseType template = (VehicleBaseType) templates.computeIfAbsent(templateName, tn -> VehicleBaseType.create(tn).withProvided(Change.create(ChangeKey.VEHICLE_SUB_TYPE, mapSubtype(tn))));
 
                 for (int i = 0; i < headers.size(); i++) {
                     if (i == templateNameIndex) {
@@ -84,37 +84,37 @@ public class VehicleBaseTypeExporter extends BaseExporter {
                             template.withProvided(getProvidedItemOrChoiceOfProvidedItemsInList(value, "/", "Select an available size"));
                             break;
                         case "STRENGTH":
-                            template.withProvided(Change.create(AttributeKey.BASE_STRENGTH, value));
+                            template.withProvided(Change.create(ChangeKey.BASE_STRENGTH, value));
                             break;
                         case "DEXTERITY":
-                            template.withProvided(Change.create(AttributeKey.BASE_DEXTERITY, value));
+                            template.withProvided(Change.create(ChangeKey.BASE_DEXTERITY, value));
                             break;
                         case "INTELLIGENCE":
-                            template.withProvided(Change.create(AttributeKey.BASE_INTELLIGENCE, value));
+                            template.withProvided(Change.create(ChangeKey.BASE_INTELLIGENCE, value));
                             break;
                         case "SPEED CHARACTER SCALE":
-                            template.withProvided(Change.create(AttributeKey.SPEED_CHARACTER_SCALE, value));
+                            template.withProvided(Change.create(ChangeKey.SPEED_CHARACTER_SCALE, value));
                             break;
                         case "SPEED STARSHIP SCALE":
-                            template.withProvided(Change.create(AttributeKey.SPEED_STARSHIP_SCALE, value));
+                            template.withProvided(Change.create(ChangeKey.SPEED_STARSHIP_SCALE, value));
                             break;
                         case "HIT POINTS":
-                            template.withProvided(Change.create(AttributeKey.HIT_POINT_EQ, value));
+                            template.withProvided(Change.create(ChangeKey.HIT_POINT_EQ, value));
                             break;
                         case "DR":
-                            template.withProvided(Change.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, value));
+                            template.withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_BONUS, value));
                             break;
                         case "ARMOR":
-                            template.withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, value));
+                            template.withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, value));
                             break;
                         case "COST":
                             template.withCost(value);
                             break;
                         case "CREW":
-                            template.withProvided(Change.create(AttributeKey.CREW, value));
+                            template.withProvided(Change.create(ChangeKey.CREW, value));
                             break;
                         case "PASSENGERS":
-                            template.withProvided(Change.create(AttributeKey.PASSENGERS, value));
+                            template.withProvided(Change.create(ChangeKey.PASSENGERS, value));
                             break;
                         case "CARGO CAPACITY":
                             String[] toks = value.split(" ");
@@ -123,14 +123,14 @@ public class VehicleBaseTypeExporter extends BaseExporter {
                             if(toks.length > 1) {
                                 unit = toks[1];
                             }
-                            template.withProvided(Change.create(AttributeKey.CARGO_CAPACITY, toString(getKilograms(toks[0], unit))));
+                            template.withProvided(Change.create(ChangeKey.CARGO_CAPACITY, toString(getKilograms(toks[0], unit))));
                             break;
                         case "CONSUMABLES":
-                            template.withProvided(Change.create(AttributeKey.CONSUMABLES, value));
+                            template.withProvided(Change.create(ChangeKey.CONSUMABLES, value));
                             break;
                         case "EMPLACEMENT POINTS":
                         case "UNUSED EMPLACEMENT POINTS":
-                            template.withProvided(Change.create(AttributeKey.EMPLACEMENT_POINTS, value));
+                            template.withProvided(Change.create(ChangeKey.EMPLACEMENT_POINTS, value));
                             break;
                     }
                 }

@@ -1,11 +1,7 @@
 package swse.character_class;
 
-import java.util.List;
-
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.Change;
-import swse.common.Copyable;
-import swse.item.Effect;
 import swse.item.FoundryEffect;
 
 public class Level extends FoundryEffect<Level> {
@@ -34,7 +30,7 @@ public class Level extends FoundryEffect<Level> {
     @Override
     protected void resolveDynamicValues() {
         super.resolveDynamicValues();
-        this.changes.add(Change.create(AttributeKey.BASE_ATTACK_BONUS, resolveBAB()));
+        this.changes.add(Change.create(ChangeKey.BASE_ATTACK_BONUS, resolveBAB()));
     }
 
     private int resolveBAB() {

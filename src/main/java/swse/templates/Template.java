@@ -1,7 +1,7 @@
 package swse.templates;
 
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.Copyable;
 import swse.common.FoundryItem;
 
@@ -22,20 +22,20 @@ public class Template extends FoundryItem<Template> implements Copyable<Template
 
     public Template withApplication(String application)
     {
-        this.changes.add(Change.create(AttributeKey.APPLICATION, application));
+        this.changes.add(Change.create(ChangeKey.APPLICATION, application));
         return this;
     }
 
 
     public Template withPrefix(String prefix)
     {
-        this.changes.add(Change.create(AttributeKey.PREFIX, prefix));
+        this.changes.add(Change.create(ChangeKey.PREFIX, prefix));
         return this;
     }
 
     public Template withSuffix(String suffix)
     {
-        this.changes.add(Change.create(AttributeKey.SUFFIX, suffix));
+        this.changes.add(Change.create(ChangeKey.SUFFIX, suffix));
         return this;
     }
 

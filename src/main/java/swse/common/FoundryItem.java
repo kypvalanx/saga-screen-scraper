@@ -8,7 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import static swse.common.BaseExporter.getDescription;
-import swse.item.Effect;
+
 import swse.item.FoundryEffect;
 import swse.prerequisite.Prerequisite;
 
@@ -28,6 +28,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     protected List<FoundryEffect<?>> effects = new LinkedList<>();
     private final List<Modification> modifications;
     private String id;
+    private String link;
 
     public FoundryItem(String name, String type) {
         this.name = name;
@@ -116,10 +117,10 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     private void universalChangesFromCategories() {
         List<String> categoryStrings = categories.stream().map(Category::getValue).collect(Collectors.toList());
         if (categoryStrings.contains("Homebrew Content")){
-            changes.add(Change.create(AttributeKey.HOMEBREW, true));
+            changes.add(Change.create(ChangeKey.HOMEBREW, true));
         }
         if (categoryStrings.contains("Untested")){
-            changes.add(Change.create(AttributeKey.HOMEBREW, true));
+            changes.add(Change.create(ChangeKey.HOMEBREW, true));
         }
     }
 
@@ -191,7 +192,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     }
 
     public T withAvailability(String availability) {
-        this.withProvided(Change.create(AttributeKey.AVAILABILITY, availability));
+        this.withProvided(Change.create(ChangeKey.AVAILABILITY, availability));
         return (T) this;
     }
 
@@ -206,7 +207,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     }
 
     public T withCost(String cost) {
-        this.withProvided(Change.create(AttributeKey.COST, cost));
+        this.withProvided(Change.create(ChangeKey.COST, cost));
         return (T) this;
     }
 
@@ -308,5 +309,14 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     public T withCategories(Set<Category> categories) {
         this.categories.addAll(categories);
         return (T) this;
+    }
+
+    public T withLink(String link) {
+        this.link = link;
+        return (T) this;
+    }
+
+    public String getLink(){
+        return "https://swse.fandom.com" + this.link;
     }
 }

@@ -25,7 +25,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.character_class.StartingFeats;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.Category;
 import swse.common.Choice;
@@ -33,6 +33,9 @@ import swse.common.ItemType;
 import swse.common.JSONy;
 import swse.common.Option;
 import swse.common.ProvidedItem;
+
+import static swse.common.ItemType.FEAT;
+import static swse.common.ItemType.TRAIT;
 
 public class SpeciesExporter extends BaseExporter {
     public static final String IMAGE_FOLDER = "systems/swse/icon/species";
@@ -122,6 +125,12 @@ public class SpeciesExporter extends BaseExporter {
             return new ArrayList<>();
         }
 
+
+
+//        if (!speciesName.equals("Replica Droid")) {
+//            return new ArrayList<>();
+//        }
+
         if (speciesName.contains("Droid Models")) {
             speciesName = speciesName.replace("Droid Models", "Droid Model");
         }
@@ -172,7 +181,7 @@ public class SpeciesExporter extends BaseExporter {
             if ("Extra Arms".equals(category.getValue())) {
                 provided.addAll(getExtraArms(speciesName));
             } else if(!"Weapon Familiarity".equals(category.getValue()) && !"Bonus Feat".equals(category.getValue())){
-                provided.add(ProvidedItem.create(category.getValue(), ItemType.TRAIT));
+                provided.add(ProvidedItem.create(category.getValue(), TRAIT));
                 //printUnique(category.getValue());
             }
 
@@ -183,16 +192,16 @@ public class SpeciesExporter extends BaseExporter {
     private static List<Object> getExtraArms(String speciesName) {
         List<Object> extraArms = new ArrayList<>();
         if ("Besalisk".equals(speciesName)) {
-            extraArms.add(ProvidedItem.create("Extra Arms 2", ItemType.TRAIT, "GENDER:Male"));
-            extraArms.add(ProvidedItem.create("Extra Arms 4", ItemType.TRAIT, "GENDER:Female"));
+            extraArms.add(ProvidedItem.create("Extra Arms 2", TRAIT, "GENDER:Male"));
+            extraArms.add(ProvidedItem.create("Extra Arms 4", TRAIT, "GENDER:Female"));
 
 //            extraArms.add(ProvidedItem.create("Extra Arms 4", ItemType.TRAIT, "GENDER:Female", "TRAIT:4 Arm Option"));
 //            extraArms.add(ProvidedItem.create("Extra Arms 6", ItemType.TRAIT, "GENDER:Female", "TRAIT:6 Arm Option"));
 //            extraArms.add(new Choice("Female Besalisks most commonly have 6 arms but can have as many as 8"));
         } else if ("Ebranite".equals(speciesName) || "Harch".equals(speciesName)) {
-            extraArms.add(ProvidedItem.create("Extra Arms 4", ItemType.TRAIT));
+            extraArms.add(ProvidedItem.create("Extra Arms 4", TRAIT));
         } else {
-            extraArms.add(ProvidedItem.create("Extra Arms 2", ItemType.TRAIT));
+            extraArms.add(ProvidedItem.create("Extra Arms 2", TRAIT));
             //printUnique(speciesName);
 
         }
@@ -217,7 +226,7 @@ public class SpeciesExporter extends BaseExporter {
         List<Object> provided = new ArrayList<>();
         Matcher bonusFeat = BONUS_FEAT_PATTERN.matcher(child.text());
         if (bonusFeat.find()) {
-            provided.add(ProvidedItem.create("Bonus Feat", ItemType.TRAIT));
+            provided.add(ProvidedItem.create("Bonus Feat", TRAIT));
         }
         if(false && child.text().startsWith("Automatic Language")){
             languages++;
@@ -232,9 +241,9 @@ public class SpeciesExporter extends BaseExporter {
                         provided.add(new Choice("After the fall of the Empire, Dressellese are also fluent in Bothese.")
                                 .withOption("Before the fall of the Empire", new Option())
                                 .withOption("After the fall of the Empire", new Option()
-                                        .withAttribute(Change.create(AttributeKey.SPEAKS, "Bothese"))
-                                        .withAttribute(Change.create(AttributeKey.READS, "Bothese"))
-                                        .withAttribute(Change.create(AttributeKey.WRITES, "Bothese")))
+                                        .withChange(Change.create(ChangeKey.SPEAKS, "Bothese"))
+                                        .withChange(Change.create(ChangeKey.READS, "Bothese"))
+                                        .withChange(Change.create(ChangeKey.WRITES, "Bothese")))
                         );
                     }
 
@@ -243,40 +252,40 @@ public class SpeciesExporter extends BaseExporter {
                     Set<String> langs = Arrays.stream(m.group(1).split(" and ")).filter(lang -> null != lang && !lang.isBlank()).map(String::trim).collect(Collectors.toSet());
                     for(String s : langs){
                         if("Basic, Chev,".equals(s)){
-                            provided.add(Change.create(AttributeKey.SPEAKS, "Basic"));
-                            provided.add(Change.create(AttributeKey.READS, "Basic"));
-                            provided.add(Change.create(AttributeKey.WRITES, "Basic"));
+                            provided.add(Change.create(ChangeKey.SPEAKS, "Basic"));
+                            provided.add(Change.create(ChangeKey.READS, "Basic"));
+                            provided.add(Change.create(ChangeKey.WRITES, "Basic"));
 
-                            provided.add(Change.create(AttributeKey.SPEAKS, "Chev"));
-                            provided.add(Change.create(AttributeKey.READS, "Chev"));
-                            provided.add(Change.create(AttributeKey.WRITES, "Chev"));
+                            provided.add(Change.create(ChangeKey.SPEAKS, "Chev"));
+                            provided.add(Change.create(ChangeKey.READS, "Chev"));
+                            provided.add(Change.create(ChangeKey.WRITES, "Chev"));
                         } else if("Basic, Huttese,".equals(s)){
-                            provided.add(Change.create(AttributeKey.SPEAKS, "Basic"));
-                            provided.add(Change.create(AttributeKey.READS, "Basic"));
-                            provided.add(Change.create(AttributeKey.WRITES, "Basic"));
+                            provided.add(Change.create(ChangeKey.SPEAKS, "Basic"));
+                            provided.add(Change.create(ChangeKey.READS, "Basic"));
+                            provided.add(Change.create(ChangeKey.WRITES, "Basic"));
 
-                            provided.add(Change.create(AttributeKey.SPEAKS, "Huttese"));
-                            provided.add(Change.create(AttributeKey.READS, "Huttese"));
-                            provided.add(Change.create(AttributeKey.WRITES, "Huttese"));
+                            provided.add(Change.create(ChangeKey.SPEAKS, "Huttese"));
+                            provided.add(Change.create(ChangeKey.READS, "Huttese"));
+                            provided.add(Change.create(ChangeKey.WRITES, "Huttese"));
                         } else if("Nikto, as well as either Basic or Huttese".equals(s)){
-                            provided.add(Change.create(AttributeKey.SPEAKS, "Nikto"));
-                            provided.add(Change.create(AttributeKey.READS, "Nikto"));
-                            provided.add(Change.create(AttributeKey.WRITES, "Nikto"));
+                            provided.add(Change.create(ChangeKey.SPEAKS, "Nikto"));
+                            provided.add(Change.create(ChangeKey.READS, "Nikto"));
+                            provided.add(Change.create(ChangeKey.WRITES, "Nikto"));
 
                             provided.add(new Choice("Select an available language")
                                     .withOption("Basic", new Option()
-                                            .withAttribute(Change.create(AttributeKey.SPEAKS, "Basic"))
-                                            .withAttribute(Change.create(AttributeKey.READS, "Basic"))
-                                            .withAttribute(Change.create(AttributeKey.WRITES, "Basic")))
+                                            .withChange(Change.create(ChangeKey.SPEAKS, "Basic"))
+                                            .withChange(Change.create(ChangeKey.READS, "Basic"))
+                                            .withChange(Change.create(ChangeKey.WRITES, "Basic")))
                                     .withOption("Huttese", new Option()
-                                            .withAttribute(Change.create(AttributeKey.SPEAKS, "Huttese"))
-                                            .withAttribute(Change.create(AttributeKey.READS, "Huttese"))
-                                            .withAttribute(Change.create(AttributeKey.WRITES, "Huttese")))
+                                            .withChange(Change.create(ChangeKey.SPEAKS, "Huttese"))
+                                            .withChange(Change.create(ChangeKey.READS, "Huttese"))
+                                            .withChange(Change.create(ChangeKey.WRITES, "Huttese")))
                             );
                         } else {
-                            provided.add(Change.create(AttributeKey.SPEAKS, s));
-                            provided.add(Change.create(AttributeKey.READS, s));
-                            provided.add(Change.create(AttributeKey.WRITES, s));
+                            provided.add(Change.create(ChangeKey.SPEAKS, s));
+                            provided.add(Change.create(ChangeKey.READS, s));
+                            provided.add(Change.create(ChangeKey.WRITES, s));
                         }
                         //printUnique(s);
                         //do i want 3 systems?
@@ -307,7 +316,7 @@ public class SpeciesExporter extends BaseExporter {
                 String speciesCategory = toks[0].trim();
                 if (speciesCategory.endsWith("Size")) {
                     String category = speciesCategory.split(" ")[0];
-                    size.add(ProvidedItem.create(category, ItemType.TRAIT));
+                    size.add(ProvidedItem.create(category, TRAIT));
                 }
             }
         }
@@ -320,33 +329,33 @@ public class SpeciesExporter extends BaseExporter {
         switch (speciesName) {
             case "Medical Droid":
             case "1st-Degree Droid Model":
-                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "1st-Degree Droid Talent Tree"));
+                attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "1st-Degree Droid Talent Tree"));
                 break;
             case "Astromech Droid":
             case "Mechanic Droid":
             case "2nd-Degree Droid Model":
-                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "2nd-Degree Droid Talent Tree"));
+                attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "2nd-Degree Droid Talent Tree"));
                 break;
             case "Protocol Droid":
             case "Service Droid":
             case "3rd-Degree Droid Model":
-                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "3rd-Degree Droid Talent Tree"));
+                attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "3rd-Degree Droid Talent Tree"));
                 break;
             case "Battle Droid":
             case "Probe Droid":
             case "4th-Degree Droid Model":
-                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "4th-Degree Droid Talent Tree"));
+                attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "4th-Degree Droid Talent Tree"));
                 break;
             case "Labor Droid":
             case "5th-Degree Droid Model":
-                attributes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "5th-Degree Droid Talent Tree"));
+                attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "5th-Degree Droid Talent Tree"));
                 break;
 
         }
 
         if (speciesName.contains(" Droid")) {
-            attributes.add(Change.create(AttributeKey.IS_DROID, "true"));
-            attributes.add(ProvidedItem.create("Droid Default Appendage Offset", ItemType.TRAIT));
+            attributes.add(Change.create(ChangeKey.IS_DROID, "true"));
+            attributes.add(ProvidedItem.create("Droid Default Appendage Offset", TRAIT));
         }
 
         return attributes;
@@ -355,37 +364,37 @@ public class SpeciesExporter extends BaseExporter {
     private static Set<ProvidedItem> getWeaponFamiliarity(String speciesName) {
         switch (speciesName) {
             case "Chazrach":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Amphistaff(Quarterstaff,Spear):Simple Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Amphistaff(Quarterstaff,Spear):Simple Melee Weapons)", TRAIT));
             case "Felucian":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Felucian Skullblade:Simple Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Felucian Skullblade:Simple Melee Weapons)", TRAIT));
             case "Gamorrean":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Arg'garok:Advanced Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Arg'garok:Advanced Melee Weapons)", TRAIT));
             case "Gand":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Gand Weapon Template:Analogous Simple Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Gand Weapon Template:Analogous Simple Weapons)", TRAIT));
             case "Gungan":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Atlatl:Simple Melee Weapons)", ItemType.TRAIT), ProvidedItem.create("Weapon Familiarity (Cesta:Simple Melee Weapon)", ItemType.TRAIT), ProvidedItem.create("Weapon Familiarity (Electropole:Simple Melee Weapon)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Atlatl:Simple Melee Weapons)", TRAIT), ProvidedItem.create("Weapon Familiarity (Cesta:Simple Melee Weapon)", TRAIT), ProvidedItem.create("Weapon Familiarity (Electropole:Simple Melee Weapon)", TRAIT));
             case "Kerestian":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Darkstick:Simple Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Darkstick:Simple Melee Weapons)", TRAIT));
             case "Kissai":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Massassi Lanvarok:Simple Ranged Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Massassi Lanvarok:Simple Ranged Weapons)", TRAIT));
             case "Kyuzo":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Kyuzo Battle Helmet:Simple Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Kyuzo Battle Helmet:Simple Melee Weapons)", TRAIT));
             case "Lasat":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Bo-Rifle:Rifles)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Bo-Rifle:Rifles)", TRAIT));
             case "Massassi":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Massassi Lanvarok:Simple Ranged Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Massassi Lanvarok:Simple Ranged Weapons)", TRAIT));
             case "Nagai":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Tehk'la Blade:Simple Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Tehk'la Blade:Simple Melee Weapons)", TRAIT));
             case "Rakata":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Rakatan Weapon Template:Analogous Simple Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Rakatan Weapon Template:Analogous Simple Weapons)", TRAIT));
             case "Squib":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Squib Tensor Rifle:Rifless)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Squib Tensor Rifle:Rifless)", TRAIT));
             case "Verpine":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Verpine Shattergun:Pistols)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Verpine Shattergun:Pistols)", TRAIT));
             case "Wookiee":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Bowcaster:Rifles)", ItemType.TRAIT), ProvidedItem.create("Weapon Familiarity (Ryyk Blade:Advanced Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Bowcaster:Rifles)", TRAIT), ProvidedItem.create("Weapon Familiarity (Ryyk Blade:Advanced Melee Weapons)", TRAIT));
             case "Yuuzhan Vong":
-                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Amphistaff:Simple Melee Weapons)", ItemType.TRAIT));
+                return Sets.newHashSet(ProvidedItem.create("Weapon Familiarity (Amphistaff:Simple Melee Weapons)", TRAIT));
         }
 
         return null;
@@ -396,32 +405,84 @@ public class SpeciesExporter extends BaseExporter {
         if ("Arkanian Offshoot".equals(speciesName)) {
             Choice choice = new Choice("Select a Bonus Feat:")
                     .withShowSelectionInName(false);
-            choice.withOption("Skill Focus (Endurance)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Endurance))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Endurance)", ItemType.FEAT)));
-            choice.withOption("Skill Focus (Mechanics)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Mechanics))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Mechanics)", ItemType.FEAT)));
-            choice.withOption("Skill Focus (Pilot)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Pilot))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Pilot)", ItemType.FEAT)));
-            choice.withOption("Skill Focus (Survival)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Survival))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Survival)", ItemType.FEAT)));
+            choice.withOption("Skill Focus (Endurance)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Endurance))", TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Endurance)", FEAT)));
+            choice.withOption("Skill Focus (Mechanics)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Mechanics))", TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Mechanics)", FEAT)));
+            choice.withOption("Skill Focus (Pilot)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Pilot))", TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Pilot)", FEAT)));
+            choice.withOption("Skill Focus (Survival)", new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Survival))", TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Survival)", FEAT)));
             choices.add(choice);
         } else if ("Aqualish".equals(speciesName)) {
             Choice choice = new Choice("Select a Subspecies:");
             choice.withOption("None", new Option());
-            choice.withOption("Aquala", new Option().withProvidedItem(ProvidedItem.create("Aquala", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Swim Speed (2)", ItemType.TRAIT)));
-            choice.withOption("Kyuzo", new Option().withProvidedItem(ProvidedItem.create("Kyuzo", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Heightened Agility", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Bonus Trained Skill (Acrobatics)", ItemType.TRAIT)));
-            choice.withOption("Quara", new Option().withProvidedItem(ProvidedItem.create("Quara", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Intimidating", ItemType.TRAIT)));
-            choice.withOption("Ualaq", new Option().withProvidedItem(ProvidedItem.create("Ualaq", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Darkvision", ItemType.TRAIT)));
+            choice.withOption("Aquala", new Option().withProvidedItem(ProvidedItem.create("Aquala", TRAIT)).withProvidedItem(ProvidedItem.create("Swim Speed (2)", TRAIT)));
+            choice.withOption("Kyuzo", new Option().withProvidedItem(ProvidedItem.create("Kyuzo", TRAIT)).withProvidedItem(ProvidedItem.create("Heightened Agility", TRAIT)).withProvidedItem(ProvidedItem.create("Bonus Trained Skill (Acrobatics)", TRAIT)));
+            choice.withOption("Quara", new Option().withProvidedItem(ProvidedItem.create("Quara", TRAIT)).withProvidedItem(ProvidedItem.create("Intimidating", TRAIT)));
+            choice.withOption("Ualaq", new Option().withProvidedItem(ProvidedItem.create("Ualaq", TRAIT)).withProvidedItem(ProvidedItem.create("Darkvision", TRAIT)));
             choices.add(choice);
         } else if ("Killik".equals(speciesName)) {
             Choice choice = new Choice("Select a Size:")
                     .withShowSelectionInName(false);
-            choice.withOption("Tiny", new Option().withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d3)", ItemType.ITEM)));
-            choice.withOption("Small", new Option().withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d4)", ItemType.ITEM)));
-            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
-            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
-            choice.withOption("Large", new Option().withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+8)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+8)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-2)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d8)", ItemType.ITEM)));
-            choice.withOption("Huge", new Option().withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+16)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+16)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (2d6)", ItemType.ITEM)));
-            choice.withOption("Gargantuan", new Option().withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+24)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+24)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (3d6)", ItemType.ITEM)));
-            Option option = new Option().withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+32)", ItemType.TRAIT));
-            option.withProvidedItem(ProvidedItem.create("Constitution (+32)", ItemType.TRAIT));
-            choice.withOption("Colossal", option.withProvidedItem(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Claw (4d6)", ItemType.ITEM)));
+            choice.withOption("Tiny", new Option().withProvidedItem(ProvidedItem.create("Tiny", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+4)", TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-4)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d3)", ItemType.ITEM)));
+            choice.withOption("Small", new Option().withProvidedItem(ProvidedItem.create("Small", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (+2)", TRAIT)).withProvidedItem(ProvidedItem.create("Strength (-2)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d4)", ItemType.ITEM)));
+            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
+            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Medium", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d6)", ItemType.ITEM)));
+            choice.withOption("Large", new Option().withProvidedItem(ProvidedItem.create("Large", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (6)", TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+8)", TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+8)", TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-2)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (1d8)", ItemType.ITEM)));
+            choice.withOption("Huge", new Option().withProvidedItem(ProvidedItem.create("Huge", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+16)", TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+16)", TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-4)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (2d6)", ItemType.ITEM)));
+            choice.withOption("Gargantuan", new Option().withProvidedItem(ProvidedItem.create("Gargantuan", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+24)", TRAIT)).withProvidedItem(ProvidedItem.create("Constitution (+24)", TRAIT)).withProvidedItem(ProvidedItem.create("Dexterity (-4)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (3d6)", ItemType.ITEM)));
+            Option option = new Option().withProvidedItem(ProvidedItem.create("Colossal", TRAIT)).withProvidedItem(ProvidedItem.create("Base Speed (4)", TRAIT)).withProvidedItem(ProvidedItem.create("Strength (+32)", TRAIT));
+            option.withProvidedItem(ProvidedItem.create("Constitution (+32)", TRAIT));
+            choice.withOption("Colossal", option.withProvidedItem(ProvidedItem.create("Dexterity (-4)", TRAIT)).withProvidedItem(ProvidedItem.create("Claw (4d6)", ItemType.ITEM)));
+            choices.add(choice);
+        } else if ("Battle Droid".equals(speciesName)) {
+            choices.add(ProvidedItem.create("Weapon Proficiency", FEAT));
+            Choice choice = new Choice("Select an Armor Proficiency:")
+                    .withShowSelectionInName(false);
+            choice.withOption("Light", new Option().withProvidedItem(ProvidedItem.create("Armor Proficiency (Light)", FEAT)));
+            choice.withOption("Medium", new Option().withProvidedItem(ProvidedItem.create("Armor Proficiency (Medium)", FEAT)));
+            choice.withOption("Heavy", new Option().withProvidedItem(ProvidedItem.create("Armor Proficiency (Heavy)", FEAT)));
+            choices.add(choice);
+        } else if ("Astromech Droid".equals(speciesName)) {
+            Choice choice = new Choice("Select a Bonus Feat:")
+                    .withShowSelectionInName(false);
+            choice.withOption("Skill Focus (Mechanics)", new Option().withProvidedItem(ProvidedItem.create("Skill Focus (Mechanics)", FEAT)));
+            choice.withOption("Skill Focus (Use Computer)", new Option().withProvidedItem(ProvidedItem.create("Skill Focus (Use Computer)", FEAT)));
+            choices.add(choice);
+            choices.add(ProvidedItem.create("Bonus Trained Skill (Mechanics)", TRAIT));
+        } else if ("Labor Droid".equals(speciesName)) {
+            choices.add(Change.create(ChangeKey.SKILL_RE_ROLL, "Strength:kh"));
+        } else if ("Mechanic Droid".equals(speciesName)) {
+            choices.add(Change.create(ChangeKey.SKILL_RE_ROLL, "Mechanics"));
+            choices.add(ProvidedItem.create("Bonus Trained Skill (Mechanics)", TRAIT));
+        } else if ("Medical Droid".equals(speciesName)) {
+            Choice choice = new Choice("Select a Bonus Feat:")
+                    .withShowSelectionInName(false);
+            choice.withOption("Skill Focus (Knowledge (Life Sciences))", new Option().withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Life Sciences))", FEAT)));
+            choice.withOption("Skill Focus (Treat Injury)", new Option().withProvidedItem(ProvidedItem.create("Skill Focus (Treat Injury)", FEAT)));
+            choices.add(choice);
+
+            choices.add(ProvidedItem.create("Bonus Trained Skill (Treat Injury)", TRAIT));
+        } else if ("Probe Droid".equals(speciesName)) {
+            Choice choice = new Choice("Select a Bonus Feat:")
+                    .withShowSelectionInName(false);
+            choice.withOption("Skill Focus (Perception)", new Option().withProvidedItem(ProvidedItem.create("Skill Focus (Perception)", FEAT)));
+            choice.withOption("Skill Focus (Stealth)", new Option().withProvidedItem(ProvidedItem.create("Skill Focus (Stealth)", FEAT)));
+            choices.add(choice);
+
+            choices.add(ProvidedItem.create("Bonus Trained Skill (Perception)", TRAIT));
+        } else if ("Protocol Droid".equals(speciesName)) {
+            Choice choice = new Choice("Select a Bonus Feat:")
+                    .withShowSelectionInName(false);
+            choice.withOption("Skill Training (Knowledge (Bureaucracy))", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Knowledge (Bureaucracy))", FEAT)));
+            choice.withOption("Skill Training (Knowledge (Galactic Lore))", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Knowledge (Galactic Lore))", FEAT)));
+            choice.withOption("Skill Training (Knowledge (Social Sciences))", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Knowledge (Social Sciences))", FEAT)));
+            choices.add(choice);
+
+            choices.add(ProvidedItem.create("Bonus Trained Skill (Persuasion)", TRAIT));
+        } else if ("Service Droid".equals(speciesName)) {
+            Choice choice = new Choice("Select a Bonus Feat:")
+                    .withShowSelectionInName(false);
+            choice.withOption("Skill Training (Perception)", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Perception)", FEAT)));
+            choice.withOption("Skill Training (Knowledge (Bureaucracy))", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Knowledge (Bureaucracy))", FEAT)));
+            choice.withOption("Skill Training (Knowledge (Galactic Lore))", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Knowledge (Galactic Lore))", FEAT)));
             choices.add(choice);
         }
 
@@ -487,15 +548,15 @@ public class SpeciesExporter extends BaseExporter {
         Choice droidChoice = new Choice("Select the size of your droid's chassis:")
                 .withShowSelectionInName(false);
 
-        droidChoice.withOption(new Option("Fine (GM Only)", "Fine").withProvidedItem(ProvidedItem.create("Fine", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Diminutive (GM Only)", "Diminutive").withProvidedItem(ProvidedItem.create("Diminutive", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Tiny (GM Only)", "Tiny").withProvidedItem(ProvidedItem.create("Tiny", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Small").withProvidedItem(ProvidedItem.create("Small", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Medium").withProvidedItem(ProvidedItem.create("Medium", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Large (GM Only)", "Large").withProvidedItem(ProvidedItem.create("Large", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Huge (GM Only)", "Huge").withProvidedItem(ProvidedItem.create("Huge", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Gargantuan (GM Only)", "Gargantuan").withProvidedItem(ProvidedItem.create("Gargantuan", ItemType.TRAIT)));
-        droidChoice.withOption(new Option("Colossal (GM Only)", "Colossal").withProvidedItem(ProvidedItem.create("Colossal", ItemType.TRAIT)));
+        droidChoice.withOption(new Option("Fine (GM Only)", "Fine").withProvidedItem(ProvidedItem.create("Fine", TRAIT)));
+        droidChoice.withOption(new Option("Diminutive (GM Only)", "Diminutive").withProvidedItem(ProvidedItem.create("Diminutive", TRAIT)));
+        droidChoice.withOption(new Option("Tiny (GM Only)", "Tiny").withProvidedItem(ProvidedItem.create("Tiny", TRAIT)));
+        droidChoice.withOption(new Option("Small").withProvidedItem(ProvidedItem.create("Small", TRAIT)));
+        droidChoice.withOption(new Option("Medium").withProvidedItem(ProvidedItem.create("Medium", TRAIT)));
+        droidChoice.withOption(new Option("Large (GM Only)", "Large").withProvidedItem(ProvidedItem.create("Large", TRAIT)));
+        droidChoice.withOption(new Option("Huge (GM Only)", "Huge").withProvidedItem(ProvidedItem.create("Huge", TRAIT)));
+        droidChoice.withOption(new Option("Gargantuan (GM Only)", "Gargantuan").withProvidedItem(ProvidedItem.create("Gargantuan", TRAIT)));
+        droidChoice.withOption(new Option("Colossal (GM Only)", "Colossal").withProvidedItem(ProvidedItem.create("Colossal", TRAIT)));
         choices.add(droidChoice);
         return choices;
     }

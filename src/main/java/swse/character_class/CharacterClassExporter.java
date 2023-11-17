@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.Choice;
 import swse.common.ItemType;
@@ -144,7 +144,7 @@ public class CharacterClassExporter extends BaseExporter {
         Collection<Object> items = new ArrayList<>();
 
         if ("Beast".equals(itemName)) {
-            items.add(Change.create(AttributeKey.INTELLIGENCE_MAX, 2));
+            items.add(Change.create(ChangeKey.INTELLIGENCE_MAX, 2));
         }
 
         return items;
@@ -152,8 +152,8 @@ public class CharacterClassExporter extends BaseExporter {
 
     private static Collection<?> getClassType(String itemName) {
         List<Object> classTypes = new ArrayList<>();
-        classTypes.add(Change.create(AttributeKey.IS_HEROIC, !List.of("Beast", "Nonheroic").contains(itemName)));
-        classTypes.add(Change.create(AttributeKey.IS_PRESTIGE, !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
+        classTypes.add(Change.create(ChangeKey.IS_HEROIC, !List.of("Beast", "Nonheroic").contains(itemName)));
+        classTypes.add(Change.create(ChangeKey.IS_PRESTIGE, !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
         return classTypes;
     }
 
@@ -182,16 +182,16 @@ public class CharacterClassExporter extends BaseExporter {
                             new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Tactics)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Tactics))", ItemType.FEAT)))
                     .withOption("Skill Focus (Knowledge (Technology))",
                             new Option().withProvidedItem(ProvidedItem.create("Conditional Bonus Feat (Skill Focus (Knowledge (Technology)))", ItemType.TRAIT)).withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Technology))", ItemType.FEAT))),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Mechanics)"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Treat Injury)"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Use Computer)"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Bureaucracy))"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Galactic Lore))"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Life Sciences))"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Physical Sciences))"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Social Sciences))"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Tactics))"),
-                    Change.create(AttributeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Technology))"));
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Mechanics)"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Treat Injury)"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Use Computer)"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Bureaucracy))"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Galactic Lore))"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Life Sciences))"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Physical Sciences))"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Social Sciences))"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Tactics))"),
+                    Change.create(ChangeKey.MULTICLASS_FEAT, "Skill Focus (Knowledge (Technology))"));
         } else if ("Jedi".equals(itemName)) {
 
             return List.of(new Choice("Select a Starting Weapon:")

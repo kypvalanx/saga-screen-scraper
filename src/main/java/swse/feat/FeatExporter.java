@@ -2,17 +2,19 @@ package swse.feat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import org.apache.commons.collections.MapUtils;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import swse.common.Change;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.Category;
 import swse.common.Choice;
@@ -23,6 +25,65 @@ import swse.util.Context;
 
 
 public class FeatExporter extends BaseExporter {
+
+    //static Map<String, List<String>> classStartingFeats = Maps.newHashMap();
+
+    static Multimap<String, String> startingFeats = ArrayListMultimap.create();
+    static {
+//        classStartingFeats.put("Jedi", List.of("Force Sensitivity", "Weapon Proficiency (Lightsabers)", "Weapon Proficiency (Simple Weapons)");
+//classStartingFeats.put("Noble", List.of("Linguist", "Weapon Proficiency (Pistols)", "Weapon Proficiency (Simple Weapons)");
+//classStartingFeats.put("Scoundrel", List.of("Point-Blank Shot", "Weapon Proficiency (Pistols)", "Weapon Proficiency (Simple Weapons)");
+//classStartingFeats.put("Scout", List.of("Shake It Off", "Weapon Proficiency (Pistols)", "Weapon Proficiency (Rifles)", "Weapon Proficiency (Simple Weapons)");
+//classStartingFeats.put("Soldier", List.of("Armor Proficiency (Light)", "Armor Proficiency (Medium)", "Weapon Proficiency (Pistols)", "Weapon Proficiency (Rifles)", "Weapon Proficiency (Simple Weapons)");
+//classStartingFeats.put("Technician", List.of("Tech Specialist", "Weapon Proficiency (Simple Weapons)");
+//classStartingFeats.put("Force Prodigy", List.of("Force Sensitivity", "Force Training", "Weapon Proficiency (Simple Weapons)");
+//classStartingFeats.put("Nonheroic", List.of("Armor Proficiency (Light)", "Armor Proficiency (Medium)", "Skill Focus", "Skill Training", "Weapon Proficiency (Advanced Melee Weapons)", "Weapon Proficiency (Heavy Weapons)", "Weapon Proficiency (Pistols)", "Weapon Proficiency (Rifles)", "Weapon Proficiency (Simple Weapons)");
+
+        startingFeats.put("Force Sensitivity", "Jedi");
+        startingFeats.put("Weapon Proficiency (Lightsabers)", "Jedi");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Jedi");
+        startingFeats.put("Linguist", "Noble");
+        startingFeats.put("Weapon Proficiency (Pistols)", "Noble");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Noble");
+        startingFeats.put("Point-Blank Shot", "Scoundrel");
+        startingFeats.put("Weapon Proficiency (Pistols)", "Scoundrel");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Scoundrel");
+        startingFeats.put("Shake It Off", "Scout");
+        startingFeats.put("Weapon Proficiency (Pistols)", "Scout");
+        startingFeats.put("Weapon Proficiency (Rifles)", "Scout");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Scout");
+        startingFeats.put("Armor Proficiency (Light)", "Soldier");
+        startingFeats.put("Armor Proficiency (Medium)", "Soldier");
+        startingFeats.put("Weapon Proficiency (Pistols)", "Soldier");
+        startingFeats.put("Weapon Proficiency (Rifles)", "Soldier");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Soldier");
+        startingFeats.put("Tech Specialist", "Technician");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Technician");
+        startingFeats.put("Force Sensitivity", "Force Prodigy");
+        startingFeats.put("Force Training", "Force Prodigy");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Force Prodigy");
+        startingFeats.put("Armor Proficiency (Light)", "Nonheroic");
+        startingFeats.put("Armor Proficiency (Medium)", "Nonheroic");
+        startingFeats.put("Skill Focus", "Nonheroic");
+        startingFeats.put("Skill Training", "Nonheroic");
+        startingFeats.put("Weapon Proficiency (Advanced Melee Weapons)", "Nonheroic");
+        startingFeats.put("Weapon Proficiency (Heavy Weapons)", "Nonheroic");
+        startingFeats.put("Weapon Proficiency (Pistols)", "Nonheroic");
+        startingFeats.put("Weapon Proficiency (Rifles)", "Nonheroic");
+        startingFeats.put("Weapon Proficiency (Simple Weapons)", "Nonheroic");
+
+        System.out.println(startingFeats);
+
+        JSONObject startingFeatLookup = new JSONObject();
+        for (String key :
+                startingFeats.keySet()) {
+            Collection<String> classes = startingFeats.get(key);
+            startingFeatLookup.put(key, classes);
+        }
+        System.out.println(startingFeatLookup);
+    }
+
+
     public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\feats.json";
     public static final String DB_FILE = SYSTEM_LOCATION + "/packs/feats";
     public static final String OUTPUT = "G:\\FoundryVTT\\Data\\feats.csv";
@@ -81,6 +142,14 @@ public class FeatExporter extends BaseExporter {
 
         Set<Category> categories = Category.getCategories(doc);
 
+//        Collection<String> startingClasses = startingFeats.get(itemName);
+//        if(startingClasses != null){
+//            for (String startingClass :
+//                    startingClasses) {
+//                categories.add(Category.create(startingClass + " Starting Feats"));
+//            }
+//        }
+
         List<JSONy> feats = new ArrayList<>();
 
         feats.add(Feat.create(itemName)
@@ -113,7 +182,7 @@ public class FeatExporter extends BaseExporter {
                                     payload.startsWith("You can take this Feat multiple times") ||
                                     payload.startsWith("You may take this Feat more than once") ||
                                     payload.startsWith("This Feat may be selected multiple times")) {
-                                provided.add(Change.create(AttributeKey.TAKE_MULTIPLE_TIMES, "true"));
+                                provided.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, "true"));
                             }
 //                        case "Effect":
 //                            printUnique(payload);
@@ -137,125 +206,128 @@ public class FeatExporter extends BaseExporter {
         return Prerequisite.merge(prerequisite, added);
     }
 
-    private static List<Change> getManualAttributes(String itemName) {
-        List<Change> changes = new ArrayList<>();
+    private static List<Object> getManualAttributes(String itemName) {
+        List<Object> changes = new ArrayList<>();
         if (itemName == null) {
             return changes;
         }
 
         switch (itemName) {
             case "Improved Damage Threshold":
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, 5));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_BONUS, 5));
                 break;
             case "Toughness":
-                changes.add(Change.create(AttributeKey.HIT_POINT_EQ, "@charLevel"));
+                changes.add(Change.create(ChangeKey.HIT_POINT_EQ, "@charLevel"));
                 break;
             case "Weapon Proficiency":
             case "Exotic Weapon Proficiency":
-                changes.add(Change.create(AttributeKey.WEAPON_PROFICIENCY, "#payload#"));
+                changes.add(Change.create(ChangeKey.WEAPON_PROFICIENCY, "#payload#"));
                 break;
             case "Armor Proficiency":
-                changes.add(Change.create(AttributeKey.ARMOR_PROFICIENCY, "#payload#"));
+                changes.add(Change.create(ChangeKey.ARMOR_PROFICIENCY, "#payload#"));
                 break;
             case "Weapon Focus":
-                changes.add(Change.create(AttributeKey.WEAPON_FOCUS, "#payload#"));
+                changes.add(Change.create(ChangeKey.WEAPON_FOCUS, "#payload#"));
                 break;
             case "Skill Focus":
-                changes.add(Change.create(AttributeKey.SKILL_FOCUS, "#payload#"));
+                changes.add(Change.create(ChangeKey.SKILL_FOCUS, "#payload#"));
                 break;
             case "Skill Mastery":
-                changes.add(Change.create(AttributeKey.SKILL_MASTERY, "#payload#"));
+                changes.add(Change.create(ChangeKey.SKILL_MASTERY, "#payload#"));
                 break;
             case "Double Attack":
-                changes.add(Change.create(AttributeKey.DOUBLE_ATTACK, "#payload#"));
+                changes.add(Change.create(ChangeKey.DOUBLE_ATTACK, "#payload#"));
                 break;
             case "Triple Attack":
-                changes.add(Change.create(AttributeKey.TRIPLE_ATTACK, "#payload#"));
+                changes.add(Change.create(ChangeKey.TRIPLE_ATTACK, "#payload#"));
                 break;
             case "Savage Attack":
-                changes.add(Change.create(AttributeKey.SAVAGE_ATTACK, "#payload#"));
+                changes.add(Change.create(ChangeKey.SAVAGE_ATTACK, "#payload#"));
             case "Relentless Attack":
-                changes.add(Change.create(AttributeKey.RELENTLESS_ATTACK, "#payload#"));
+                changes.add(Change.create(ChangeKey.RELENTLESS_ATTACK, "#payload#"));
                 break;
             case "Autofire Sweep":
-                changes.add(Change.create(AttributeKey.AUTOFIRE_SWEEP, "#payload#"));
+                changes.add(Change.create(ChangeKey.AUTOFIRE_SWEEP, "#payload#"));
                 break;
             case "Autofire Assault":
-                changes.add(Change.create(AttributeKey.AUTOFIRE_ASSAULT, "#payload#"));
+                changes.add(Change.create(ChangeKey.AUTOFIRE_ASSAULT, "#payload#"));
                 break;
             case "Halt":
-                changes.add(Change.create(AttributeKey.HALT, "#payload#"));
+                changes.add(Change.create(ChangeKey.HALT, "#payload#"));
                 break;
             case "Return Fire":
-                changes.add(Change.create(AttributeKey.RETURN_FIRE, "#payload#"));
+                changes.add(Change.create(ChangeKey.RETURN_FIRE, "#payload#"));
                 break;
             case "Critical Strike":
-                changes.add(Change.create(AttributeKey.CRITICAL_STRIKE, "#payload#"));
+                changes.add(Change.create(ChangeKey.CRITICAL_STRIKE, "#payload#"));
                 break;
             case "Force Sensitivity":
-                changes.add(Change.create(AttributeKey.FORCE_SENSITIVITY, "true"));
-                changes.add(Change.create(AttributeKey.BONUS_TALENT_TREE, "Force Talent Trees"));
+                changes.add(Change.create(ChangeKey.FORCE_SENSITIVITY, "true"));
+                changes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "Force Talent Trees"));
                 break;
             case "Weapon Finesse":
-                changes.add(Change.create(AttributeKey.FINESSE_STAT, "DEX"));
+                changes.add(Change.create(ChangeKey.FINESSE_STAT, "DEX"));
                 break;
             case "Force Training":
-                changes.add(Change.create(AttributeKey.FORCE_TRAINING, "true"));
-                changes.add(Change.create(AttributeKey.PROVIDES, "Force Powers:MAX(1 + @WISMOD,1)"));
+                changes.add(Change.create(ChangeKey.FORCE_TRAINING, "true"));
+                changes.add(Change.create(ChangeKey.PROVIDES, "Force Powers:MAX(1 + @WISMOD,1)"));
                 break;
             case "Dual Weapon Mastery I":
-                changes.add(Change.create(AttributeKey.DUAL_WEAPON_MODIFIER, "-5"));
+                changes.add(Change.create(ChangeKey.DUAL_WEAPON_MODIFIER, "-5"));
                 break;
             case "Dual Weapon Mastery II":
-                changes.add(Change.create(AttributeKey.DUAL_WEAPON_MODIFIER, "-2"));
+                changes.add(Change.create(ChangeKey.DUAL_WEAPON_MODIFIER, "-2"));
                 break;
             case "Dual Weapon Mastery III":
-                changes.add(Change.create(AttributeKey.DUAL_WEAPON_MODIFIER, "0"));
+                changes.add(Change.create(ChangeKey.DUAL_WEAPON_MODIFIER, "0"));
                 break;
             case "Skill Training":
-                changes.add(Change.create(AttributeKey.TRAINED_SKILLS, "1"));
+                //changes.add(Change.create(ChangeKey.TRAINED_SKILLS, "1"));
+
+                changes.add(Change.create(ChangeKey.AUTOMATIC_TRAINED_SKILL, "#payload#"));
+                changes.add(new Choice("Choose an automatically trained skill").withOption("AVAILABLE_UNTRAINED_SKILLS", new Option().withPayload("AVAILABLE_UNTRAINED_SKILLS")));
                 break;
             case "Improved Defenses":
-                changes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, "1"));
-                changes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, "1"));
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, "1"));
+                changes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, "1"));
+                changes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, "1"));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, "1"));
                 break;
             case "Armor Proficiency (Light)":
-                changes.add(Change.create(AttributeKey.ARMOR_PROFICIENCY, "light"));
+                changes.add(Change.create(ChangeKey.ARMOR_PROFICIENCY, "light"));
                 break;
             case "Armor Proficiency (Medium)":
-                changes.add(Change.create(AttributeKey.ARMOR_PROFICIENCY, "medium"));
+                changes.add(Change.create(ChangeKey.ARMOR_PROFICIENCY, "medium"));
                 break;
             case "Armor Proficiency (Heavy)":
-                changes.add(Change.create(AttributeKey.ARMOR_PROFICIENCY, "heavy"));
+                changes.add(Change.create(ChangeKey.ARMOR_PROFICIENCY, "heavy"));
                 break;
             case "Grand Army of the Republic Training":
                 //TODO this requires some very specific code...  maybe generalize this
-                changes.add(Change.create(AttributeKey.APPLY_BONUS_TO, AttributeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT + ":will"));
+                changes.add(Change.create(ChangeKey.APPLY_BONUS_TO, ChangeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT + ":will"));
                 break;
             case "Force Regimen Mastery":
-                changes.add(Change.create(AttributeKey.PROVIDES, "Force Regimen:MAX(1 + @WISMOD,1)"));
+                changes.add(Change.create(ChangeKey.PROVIDES, "Force Regimen:MAX(1 + @WISMOD,1)"));
                 break;
             case "Fight Through Pain":
-                changes.add(Change.create(AttributeKey.DAMAGE_THRESHOLD_BONUS, "MAX(@FortDef, @WillDef) - @FortDef"));
+                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_BONUS, "MAX(@FortDef, @WillDef) - @FortDef"));
                 break;
             case "Force of Personality":
-                changes.add(Change.create(AttributeKey.WILL_DEFENSE_BONUS, "MAX(@WISMOD, @CHAMOD) - @WISMOD"));
+                changes.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, "MAX(@WISMOD, @CHAMOD) - @WISMOD"));
                 break;
             case "Predictive Defense":
-                changes.add(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS, "MAX(@DEXMOD, @INTMOD) - @DEXMOD"));
+                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, "MAX(@DEXMOD, @INTMOD) - @DEXMOD"));
                 break;
             case "Resilient Strength":
-                changes.add(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS, "MAX(@STRMOD, @CONMOD) - @CONMOD"));
+                changes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, "MAX(@STRMOD, @CONMOD) - @CONMOD"));
                 break;
             case "Extra Second Wind":
-                changes.add(Change.create(AttributeKey.BONUS_SECOND_WIND, "1"));
+                changes.add(Change.create(ChangeKey.BONUS_SECOND_WIND, "1"));
                 break;
             default:
         }
         if (itemName.startsWith("Martial Arts ")) {
-            changes.add(Change.create(AttributeKey.BONUS_UNARMED_DAMAGE_DIE_SIZE, "1"));
-            changes.add(Change.create(AttributeKey.BONUS_DODGE_REFLEX_DEFENSE, "1"));
+            changes.add(Change.create(ChangeKey.BONUS_UNARMED_DAMAGE_DIE_SIZE, "1"));
+            changes.add(Change.create(ChangeKey.BONUS_DODGE_REFLEX_DEFENSE, "1"));
         }
         return changes;
     }

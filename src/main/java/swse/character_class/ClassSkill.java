@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
-import swse.common.AttributeKey;
+import swse.common.ChangeKey;
 import swse.common.JSONy;
 import swse.common.Change;
 
@@ -46,7 +46,7 @@ class ClassSkill implements JSONy
 
                     if (m.find())
                     {
-                        changes.add(Change.create(AttributeKey.TRAINED_SKILLS_FIRST_LEVEL, Integer.parseInt(m.group(1))));
+                        changes.add(Change.create(ChangeKey.TRAINED_SKILLS_FIRST_LEVEL, Integer.parseInt(m.group(1))));
                     }
 
                 } else if (allowUL && entry.tag().equals(Tag.valueOf("ul")))
@@ -54,7 +54,7 @@ class ClassSkill implements JSONy
                     allowUL = false;
                     changes.addAll(entry.select("li").stream()
                             .map(e->classSkillCleanup(e.text()))
-                            .map(skill -> Change.create(AttributeKey.CLASS_SKILL, skill))
+                            .map(skill -> Change.create(ChangeKey.CLASS_SKILL, skill))
                             .collect(Collectors.toList()));
 
                 }

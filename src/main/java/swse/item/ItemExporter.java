@@ -37,7 +37,7 @@ import static swse.util.Util.*;
 public class ItemExporter extends BaseExporter {
     public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\items.json";
     public static final String JSON_TEMP_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\";
-    public static final Effect EFFECT_AUTOFIRE = Effect.create("Autofire", "ROF", List.of(Change.create(AttributeKey.TO_HIT_MODIFIER, "-5"), Change.create(AttributeKey.SKIP_CRITICAL_MULTIPLY, "true")));
+    public static final Effect EFFECT_AUTOFIRE = Effect.create("Autofire", "ROF", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, "-5"), Change.create(ChangeKey.SKIP_CRITICAL_MULTIPLY, "true")));
     public static final Effect EFFECT_SINGLE_SHOT = Effect.create("Single-Shot", "ROF", List.of());
     public static final Effect EFFECT_BARRAGE = Effect.create("Barrage", "ROF", List.of());
     public static final String IMAGE_FOLDER = "systems/swse/icon/item";
@@ -129,14 +129,15 @@ public class ItemExporter extends BaseExporter {
             entryMaps.put(entry.getString("type"), entry);
         }
 
-        //printUniqueNames(entries);
+        printUniqueNames(entries);
 
         //System.out.println("DROID SYSTEMS:");
 
         //printUniqueNames(entries.stream().filter(entry -> ((String)((JSONObject)entry.get("system")).get("subtype")).toLowerCase().contains("droid")).collect(Collectors.toList()));
 
-        System.out.println(entryMaps.keySet());
-        System.out.println(entryMaps.size());
+        //System.out.println(entryMaps.keySet());
+        //System.out.println(entryMaps.size());
+
 
         for(String key : entryMaps.keySet()){
 
@@ -521,7 +522,7 @@ public class ItemExporter extends BaseExporter {
         String damageDie = getDamageDie(itemName, damage);
 
         if(itemType.equals("upgrade")){
-            attributes.add(Change.create(AttributeKey.ITEM_MOD, true));
+            attributes.add(Change.create(ChangeKey.ITEM_MOD, true));
         }
 
         if (damageDie == null && damage != null) {
@@ -582,10 +583,10 @@ public class ItemExporter extends BaseExporter {
                 .withWeight(weight)
                 .withSource(book)
                 .withAvailability(availability)
-                .withProvided(Change.create(AttributeKey.BASE_ITEM, baseItem))
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, bonusToReflexDefense))
-                .withProvided(Change.create(AttributeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, bonusToFortitudeDefense))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, maximumDexterityBonus))
+                .withProvided(Change.create(ChangeKey.BASE_ITEM, baseItem))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, bonusToReflexDefense))
+                .withProvided(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, bonusToFortitudeDefense))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, maximumDexterityBonus))
                 .withSplash(splash)
                 .withHeirloomBonus(heirloomBonus)
                 .withSeeAlso(seeAlso)
@@ -602,14 +603,14 @@ public class ItemExporter extends BaseExporter {
                 .withKeywords(keywords)
                 .withUnarmedDamage(unarmedDamage)
                 .withUnarmedModifier(unarmedModifier)
-                .withProvided(Change.create(AttributeKey.PREFIX, getPrefix(itemName)))
-                .withProvided(Change.create(AttributeKey.SUFFIX, getSuffix(itemName)));
+                .withProvided(Change.create(ChangeKey.PREFIX, getPrefix(itemName)))
+                .withProvided(Change.create(ChangeKey.SUFFIX, getSuffix(itemName)));
 
         if (isDroid) {
-            item.withProvided(Change.create(AttributeKey.DROID_PART, true));
+            item.withProvided(Change.create(ChangeKey.DROID_PART, true));
         }
         if (armorType != null) {
-            item.withProvided(Change.create(AttributeKey.ARMOR_TYPE, armorType));
+            item.withProvided(Change.create(ChangeKey.ARMOR_TYPE, armorType));
         }
         if (List.of("Probe", "Instrument", "Tool", "Claw", "Hand").contains(itemName)) {
             item.withProvided(getDroidAppendageAttributes(itemName));
@@ -627,26 +628,26 @@ public class ItemExporter extends BaseExporter {
 
     private List<Object> getDroidAppendageAttributes(String itemName) {
         List<Object> provided = new LinkedList<>();
-        provided.add(Change.create(AttributeKey.APPENDAGES, "1"));
-        provided.add(Change.create(AttributeKey.APPENDAGE_TYPE, itemName));
+        provided.add(Change.create(ChangeKey.APPENDAGES, "1"));
+        provided.add(Change.create(ChangeKey.APPENDAGE_TYPE, itemName));
 
         switch(itemName){
             case "Probe":
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
                         .withParentPrerequisite(OrPrerequisite.or(
                                 new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
                                 new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"),
                                 new SimplePrerequisite("Tiny Size", "SIZE", "Tiny"),
                                 new SimplePrerequisite("Small Size", "SIZE", "Small"))));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
                         .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
                         .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
                         .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
                         .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
                         .withParentPrerequisite(OrPrerequisite.or(
                                 new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
                                 new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
@@ -654,22 +655,22 @@ public class ItemExporter extends BaseExporter {
                                 new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
                 break;
             case "Instrument":
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
                         .withParentPrerequisite(OrPrerequisite.or(
                                 new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
                                 new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"),
                                 new SimplePrerequisite("Tiny Size", "SIZE", "Tiny"))));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
                         .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
                         .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
                         .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
                         .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
                         .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
                         .withParentPrerequisite(OrPrerequisite.or(
                                 new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
                                 new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
@@ -678,23 +679,23 @@ public class ItemExporter extends BaseExporter {
                 break;
             case "Tool":
             case "Hand":
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
                         .withParentPrerequisite(OrPrerequisite.or(
                                 new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
                                 new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"))));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
                         .withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
                         .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
                         .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
                         .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
                         .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
                         .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
                         .withParentPrerequisite(OrPrerequisite.or(
                                 new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
                                 new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
@@ -702,23 +703,23 @@ public class ItemExporter extends BaseExporter {
                                 new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
                 break;
             case "Claw":
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 0)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
                         .withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, 1)
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
                         .withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
                         .withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
                         .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
                         .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
                         .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
                         .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
                         .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(AttributeKey.DROID_UNARMED_DAMAGE_DIE, "2d8")
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "2d8")
                         .withParentPrerequisite(OrPrerequisite.or(
                                 new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
                                 new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
@@ -746,11 +747,11 @@ public class ItemExporter extends BaseExporter {
             variant.withName(variantName);
 
             if ("Snowtrooper Armor".equals(variantName)) {
-                variant.withProvided(Change.create(AttributeKey.IMMUNITY, "Extreme Cold"));
+                variant.withProvided(Change.create(ChangeKey.IMMUNITY, "Extreme Cold"));
                 variant.withCost("18,000");
             }
             if ("Sandtrooper Armor".equals(variantName)) {
-                variant.withProvided(Change.create(AttributeKey.IMMUNITY, "Extreme Heat"));
+                variant.withProvided(Change.create(ChangeKey.IMMUNITY, "Extreme Heat"));
                 variant.withCost("18,000");
             }
             if ("Sith Trooper Armor".equals(variantName)) {
@@ -786,7 +787,7 @@ public class ItemExporter extends BaseExporter {
             Pattern TREATED_AS_FOR_RANGE = Pattern.compile("treated as(?: a)? (Rifle|Rifles|Pistol|Simple Weapon \\(Ranged\\)|Simple Weapons \\(Ranged\\))(?:, not a Thrown Weapon,)? for");
             Matcher m = TREATED_AS_FOR_RANGE.matcher(text);
             if (m.find()) {
-                attributes.add(Change.create(AttributeKey.TREATED_AS, standardizeTypes(m.group(1))));
+                attributes.add(Change.create(ChangeKey.TREATED_AS, standardizeTypes(m.group(1))));
             }
         }
 
@@ -798,7 +799,7 @@ public class ItemExporter extends BaseExporter {
                 if (group.equals("one")) {
                     group = "1";
                 }
-                attributes.add(Change.create(AttributeKey.AMMO, group + ":" + m.group(1)));
+                attributes.add(Change.create(ChangeKey.AMMO, group + ":" + m.group(1)));
                 //printUnique(m.group(0));
             }
             if (attributes.isEmpty() && attributes.isEmpty()) {
@@ -813,141 +814,141 @@ public class ItemExporter extends BaseExporter {
         List<Object> attributes = new LinkedList<>();
 
         if("Lightsabers".equals(itemSubType)){
-            attributes.add(Effect.create("Self-Built", List.of(Change.create(AttributeKey.TO_HIT_MODIFIER, 1))));
+            attributes.add(Effect.create("Self-Built", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, 1))));
         }
         else if ("Energy Lance".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:50"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:50"));
         }
         else if ("E-5s Blaster Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:5"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:5"));
         }
         else if ("SG-4 Blaster Rifle".equals(itemName)) {
-            attributes.add(Effect.create("Blaster", "POWER", List.of(Change.create(AttributeKey.AMMO, "Power Pack:50"))));
-            attributes.add(Effect.create("Harpoon", "POWER", List.of(Change.create(AttributeKey.AMMO, "Harpoon:1"))));
+            attributes.add(Effect.create("Blaster", "POWER", List.of(Change.create(ChangeKey.AMMO, "Power Pack:50"))));
+            attributes.add(Effect.create("Harpoon", "POWER", List.of(Change.create(ChangeKey.AMMO, "Harpoon:1"))));
         }
         else if ("HB-9 Blaster Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:25"));
-            attributes.add(Change.create(AttributeKey.AMMO, "Gas Canister:200"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:25"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Gas Canister:200"));
         }
         else if ("Commando Special Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:25"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:25"));
         }
         else if ("Variable Blaster Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:500"));
-            attributes.add(Effect.create("3d4", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d4"))));
-            attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d6"), Change.create(AttributeKey.AMMO_USE_MULTIPLIER, "5"))));
-            attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d8"), Change.create(AttributeKey.AMMO_USE_MULTIPLIER, "10"))));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:500"));
+            attributes.add(Effect.create("3d4", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d4"))));
+            attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d6"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "5"))));
+            attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"))));
         }
         else if ("Heavy Variable Blaster Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:500"));
-            attributes.add(Effect.create("Ascension gun", "POWER", List.of(Change.create(AttributeKey.AMMO, "Syntherope:2"))));
-            attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d6"))));
-            attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d8"), Change.create(AttributeKey.AMMO_USE_MULTIPLIER, "10"))));
-            attributes.add(Effect.create("3d10", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d10"), Change.create(AttributeKey.AMMO_USE_MULTIPLIER, "20"))));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:500"));
+            attributes.add(Effect.create("Ascension gun", "POWER", List.of(Change.create(ChangeKey.AMMO, "Syntherope:2"))));
+            attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d6"))));
+            attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"))));
+            attributes.add(Effect.create("3d10", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d10"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "20"))));
         }
         else if ("Sonic Blaster".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Proprietary Power Pack:15:11:0.2"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Proprietary Power Pack:15:11:0.2"));
         }
         else if ("Heavy Blaster Pistol".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:50"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:50"));
         }
         else if ("Snap-Shot Blaster Pistol".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:1"));
-            attributes.add(Change.create(AttributeKey.CONCEALMENT_BONUS, "5"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:1"));
+            attributes.add(Change.create(ChangeKey.CONCEALMENT_BONUS, "5"));
         }
         else if ("Sidearm Blaster Pistol".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:250"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:250"));
         }
         else if ("Gee-Tech 12 Defender".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:2"));
-            attributes.add(Change.create(AttributeKey.CONCEALMENT_BONUS, "5"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:2"));
+            attributes.add(Change.create(ChangeKey.CONCEALMENT_BONUS, "5"));
         }
         else if ("Thunderbolt Repeater Blaster".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.TO_HIT_MODIFIER, "-5"));
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:20"));
-            attributes.add(Effect.create("Braced", List.of(Change.create(AttributeKey.TO_HIT_MODIFIER, "0"))));
+            attributes.add(Change.create(ChangeKey.TO_HIT_MODIFIER, "-5"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:20"));
+            attributes.add(Effect.create("Braced", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, "0"))));
         }
         else if ("Z-6 Rotary Blaster".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:1"));
-            attributes.add(Change.create(AttributeKey.TO_HIT_MODIFIER, "-5"));
-            attributes.add(Effect.create("Braced", List.of(Change.create(AttributeKey.TO_HIT_MODIFIER, "0"))));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:1"));
+            attributes.add(Change.create(ChangeKey.TO_HIT_MODIFIER, "-5"));
+            attributes.add(Effect.create("Braced", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, "0"))));
         }
         else if ("Retrosaber".equals(itemName)) {
-            attributes.add(Effect.create("Overcharge", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "2d10"))));
-            attributes.add(Effect.create("Burnout", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "2d4"))));
+            attributes.add(Effect.create("Overcharge", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "2d10"))));
+            attributes.add(Effect.create("Burnout", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "2d4"))));
         }
         else if ("Slugthrower Pistol".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Slug Clip:10:40:0.2"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Slug Clip:10:40:0.2"));
         }
         else if ("Slugthrower Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Slug Clip:20:40:0.2"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Slug Clip:20:40:0.2"));
         }
         else if ("WESTAR-M5 Blaster Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:100"));
-            attributes.add(Change.create(AttributeKey.AMMO, "Gas Canister:500"));
-            attributes.add(Effect.create("Anti-Personnel", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d8"))));
-            attributes.add(Effect.create("Anti-Vehicle", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d10"),
-                    Change.create(AttributeKey.AMMO_USE_MULTIPLIER, "10"), Change.create(AttributeKey.PENETRATION, "5"))));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:100"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Gas Canister:500"));
+            attributes.add(Effect.create("Anti-Personnel", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"))));
+            attributes.add(Effect.create("Anti-Vehicle", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d10"),
+                    Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"), Change.create(ChangeKey.PENETRATION, "5"))));
         }
         else if ("DC-19 \"Stealth\" Carbine".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:10"));
-            attributes.add(Change.create(AttributeKey.AMMO, "Stealth Mixture Gas Canister:500:500:0.25"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:10"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Stealth Mixture Gas Canister:500:500:0.25"));
         }
         else if ("Amban Phase-Pulse Blaster".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:1"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:1"));
         }
         else if ("Scatter Gun".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "10 Shells:10:20:1"));
-            attributes.add(Effect.create("Point-Blank Range", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "3d8"))));
-            attributes.add(Effect.create("Short Range", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "2d8"))));
-            attributes.add(Effect.create("Medium Range", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "0"))));
-            attributes.add(Effect.create("Long Range", "POWER", List.of(Change.create(AttributeKey.DAMAGE, "0"))));
+            attributes.add(Change.create(ChangeKey.AMMO, "10 Shells:10:20:1"));
+            attributes.add(Effect.create("Point-Blank Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"))));
+            attributes.add(Effect.create("Short Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "2d8"))));
+            attributes.add(Effect.create("Medium Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "0"))));
+            attributes.add(Effect.create("Long Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "0"))));
         }
         else if ("DC-15x Sniper Rifle".equals(itemName)) {
-            attributes.add(Change.create(AttributeKey.AMMO, "Power Pack:5"));
+            attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:5"));
         }
         else if ("DC-17m IWS".equals(itemName)) {
             attributes.add(Effect.create("Blaster Rifle", "POWER", List.of(
-                    Change.create(AttributeKey.DAMAGE, "3d8"),
-                    Change.create(AttributeKey.DAMAGE_TYPE, "Energy"),
-                    Change.create(AttributeKey.AMMO, "Power Pack:60"),
-                    Change.create(AttributeKey.AMMO, "Gas Canister:300")
+                    Change.create(ChangeKey.DAMAGE, "3d8"),
+                    Change.create(ChangeKey.DAMAGE_TYPE, "Energy"),
+                    Change.create(ChangeKey.AMMO, "Power Pack:60"),
+                    Change.create(ChangeKey.AMMO, "Gas Canister:300")
             ), List.of(Link.create("POWER", LinkType.EXCLUSIVE), Link.create("Blaster Rifle", LinkType.PARENT)))); //, List.of(EFFECT_SINGLE_SHOT, EFFECT_AUTOFIRE, Effect.create("Stun", List.of( change1, change)))
 
             attributes.add(Effect.create("Sniper Rifle", "POWER", List.of(
-                    Change.create(AttributeKey.DAMAGE, "3d8"),
-                    Change.create(AttributeKey.AMMO, "Sniper Power Pack:5:100:0.5")
+                    Change.create(ChangeKey.DAMAGE, "3d8"),
+                    Change.create(ChangeKey.AMMO, "Sniper Power Pack:5:100:0.5")
             ), List.of(Link.create("POWER", LinkType.EXCLUSIVE)))); //, List.of(EFFECT_SINGLE_SHOT)
 
             attributes.add(Effect.create("Anti-Armor", "POWER", List.of(
-                    Change.create(AttributeKey.DAMAGE, "4d10"),
-                    Change.create(AttributeKey.AMMO, "Explosive Shell:1:300:1")
+                    Change.create(ChangeKey.DAMAGE, "4d10"),
+                    Change.create(ChangeKey.AMMO, "Explosive Shell:1:300:1")
 
             ), List.of(Link.create("POWER", LinkType.EXCLUSIVE))));//, List.of(EFFECT_SINGLE_SHOT)
 
             attributes.add(Effect.create("PEP Laser", "POWER", List.of(
-                    Change.create(AttributeKey.DAMAGE, "3d6"),
-                    Change.create(AttributeKey.DAMAGE_TYPE, "Stun"),
-                    Change.create(AttributeKey.AMMO, "PEP Cartridge:15:100:0.5")
+                    Change.create(ChangeKey.DAMAGE, "3d6"),
+                    Change.create(ChangeKey.DAMAGE_TYPE, "Stun"),
+                    Change.create(ChangeKey.AMMO, "PEP Cartridge:15:100:0.5")
             ), List.of(Link.create("POWER", LinkType.EXCLUSIVE))));//, List.of(EFFECT_SINGLE_SHOT)
 
             attributes.add(EFFECT_SINGLE_SHOT.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE)));
             attributes.add(EFFECT_AUTOFIRE.copy().withLinks(Link.create("Blaster Rifle", LinkType.CHILD), Link.create("Fire Mode", LinkType.EXCLUSIVE)));
             attributes.add(Effect.create("Stun", List.of(
-                    Change.create(AttributeKey.DAMAGE, "3d8").withMode(ActiveEffectMode.OVERRIDE),
-                    Change.create(AttributeKey.DAMAGE_TYPE, "Stun").withMode(ActiveEffectMode.OVERRIDE))).withLinks(Link.create("Blaster Rifle", LinkType.CHILD), Link.create("Fire Mode", LinkType.EXCLUSIVE)));
+                    Change.create(ChangeKey.DAMAGE, "3d8").withMode(ActiveEffectMode.OVERRIDE),
+                    Change.create(ChangeKey.DAMAGE_TYPE, "Stun").withMode(ActiveEffectMode.OVERRIDE))).withLinks(Link.create("Blaster Rifle", LinkType.CHILD), Link.create("Fire Mode", LinkType.EXCLUSIVE)));
         }
         else if ("Credit Chip".equals(itemName)){
-            attributes.add(Change.create(AttributeKey.CREDIT, 0));
-            attributes.add(Change.create(AttributeKey.CREDIT_TYPE, "CREDIT"));
-            attributes.add(Change.create(AttributeKey.CREDIT_ENTITY_TYPE, "CONTAINER"));
+            attributes.add(Change.create(ChangeKey.CREDIT, 0));
+            attributes.add(Change.create(ChangeKey.CREDIT_TYPE, "CREDIT"));
+            attributes.add(Change.create(ChangeKey.CREDIT_ENTITY_TYPE, "CONTAINER"));
         }
         else if ("Heuristic Processor".equals(itemName)){
-            attributes.add(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Basic Processor"));
+            attributes.add(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Basic Processor"));
         }
         else if ("Helmet Package".equals(itemName)){
-            attributes.add(Change.create(AttributeKey.SKILL_BONUS, "perception:+2"));
-            attributes.add(Change.create(AttributeKey.LOW_LIGHT_VISION, "true"));
+            attributes.add(Change.create(ChangeKey.SKILL_BONUS, "perception:+2"));
+            attributes.add(Change.create(ChangeKey.LOW_LIGHT_VISION, "true"));
             attributes.add(Modification.create(ProvidedItem.create("Hands-Free Comlink", ItemType.ITEM)));
         }
 
@@ -984,30 +985,30 @@ public class ItemExporter extends BaseExporter {
 
         if ("Amphistaff".equalsIgnoreCase(itemName)) {
             effects.add(Effect.create("Quarterstaff", "AMPHISTAFF_FORM", List.of(
-                    Change.create(AttributeKey.DAMAGE, "1d6/1d6"),
-                    Change.create(AttributeKey.DAMAGE_TYPE, "Bludgeoning"),
-                    Change.create(AttributeKey.SPECIAL, List.of("An Amphistaff may be coaxed by its wielder to spit venom up to 10 squares away " +
+                    Change.create(ChangeKey.DAMAGE, "1d6/1d6"),
+                    Change.create(ChangeKey.DAMAGE_TYPE, "Bludgeoning"),
+                    Change.create(ChangeKey.SPECIAL, List.of("An Amphistaff may be coaxed by its wielder to spit venom up to 10 squares away " +
                             "(As a Standard Action). If this ranged attack hits both the target's Reflex Defense " +
                             "and Fortitude Defense, the target moves -1 Persistent step on the Condition Track. " +
                             "An Amphistaff can only spit venom once every 24 standard hours."
                     ))
             )));
             effects.add(Effect.create("Spear", "AMPHISTAFF_FORM", List.of(
-                    Change.create(AttributeKey.DAMAGE, "1d8"),
-                    Change.create(AttributeKey.DAMAGE_TYPE, "Piercing"),
-                    Change.create(AttributeKey.SPECIAL, List.of("An Amphistaff may be coaxed by its wielder to spit venom up to 10 squares away " +
+                    Change.create(ChangeKey.DAMAGE, "1d8"),
+                    Change.create(ChangeKey.DAMAGE_TYPE, "Piercing"),
+                    Change.create(ChangeKey.SPECIAL, List.of("An Amphistaff may be coaxed by its wielder to spit venom up to 10 squares away " +
                                     "(As a Standard Action). If this ranged attack hits both the target's Reflex Defense " +
                                     "and Fortitude Defense, the target moves -1 Persistent step on the Condition Track. " +
                                     "An Amphistaff can only spit venom once every 24 standard hours."
                             )
                     ))));
             effects.add(Effect.create("Whip", "AMPHISTAFF_FORM", List.of(
-                    Change.create(AttributeKey.DAMAGE, "1d4"),
-                    Change.create(AttributeKey.DAMAGE_TYPE, "Piercing"),
-                    Change.create(AttributeKey.IS_REACH, "2"),
-                    Change.create(AttributeKey.PROVIDED_ACTION, "Pin"),
-                    Change.create(AttributeKey.PROVIDED_ACTION, "Trip"),
-                    Change.create(AttributeKey.SPECIAL, List.of("An Amphistaff may be coaxed by its wielder to spit venom up to 10 squares away " +
+                    Change.create(ChangeKey.DAMAGE, "1d4"),
+                    Change.create(ChangeKey.DAMAGE_TYPE, "Piercing"),
+                    Change.create(ChangeKey.IS_REACH, "2"),
+                    Change.create(ChangeKey.PROVIDED_ACTION, "Pin"),
+                    Change.create(ChangeKey.PROVIDED_ACTION, "Trip"),
+                    Change.create(ChangeKey.SPECIAL, List.of("An Amphistaff may be coaxed by its wielder to spit venom up to 10 squares away " +
                                     "(As a Standard Action). If this ranged attack hits both the target's Reflex Defense " +
                                     "and Fortitude Defense, the target moves -1 Persistent step on the Condition Track. " +
                                     "An Amphistaff can only spit venom once every 24 standard hours.",
@@ -1158,65 +1159,65 @@ public class ItemExporter extends BaseExporter {
                 "\n" +
                 "An Energy Shield can be added to a suit of armor as an Armor Accessory. An Energy Shield can be modified by Armor Templates only if the Template specifically states that it can be used on Energy Shields, and the Energy Shield confers that benefit only when it is activated.";
         items.add(Item.create("Energy Shield (SR 5)", "armor")
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 5))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 4))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 5))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 4))
                 .withCost("500")
                 .withSubtype("Light Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 10)", "armor")
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 10))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 4))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 10))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 4))
                 .withCost("2000")
                 .withSubtype("Light Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 15)", "armor")
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 15))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 3))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 15))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 3))
                 .withCost("4500")
                 .withSubtype("Medium Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 20)", "armor")
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 20))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 3))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 20))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 3))
                 .withCost("8000")
                 .withSubtype("Medium Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 25)", "armor")
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 25))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 2))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 25))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 2))
                 .withCost("12500")
                 .withSubtype("Heavy Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 30)", "armor")
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 30))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, 2))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 30))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 2))
                 .withCost("18000")
                 .withSubtype("Heavy Armor")
                 .toJSON());
 
         String shieldGeneratorDescription = "The Droid is fitted with a deflector Shield Generator- the same type mounted on Starships. Whenever the Droid would take damage, reduce the damage by the Droid's Shield Rating (SR). If the damage is equal to or greater than the Droid's Shield Rating, the Droid's Shield Rating is reduced by 5. By spending three Swift Actions on the same or consecutive rounds, the Droid may make a DC 20 Endurance check to restore lost shield power. If the check succeeds, the Droid's Shield Rating increases by 5 points (up to its normal Shield Rating).";
         items.add(Item.create("Shield Generator (SR 5)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 5))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 5))
                 .withCost("2500 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1224,10 +1225,10 @@ public class ItemExporter extends BaseExporter {
 
         final String SR10Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
         items.add(Item.create("Shield Generator (SR 10)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 10))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 10))
                 .withCost("5000 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1244,10 +1245,10 @@ public class ItemExporter extends BaseExporter {
 
         final String SR15Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
         items.add(Item.create("Shield Generator (SR 15)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 15))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 15))
                 .withCost("7500 x Cost Factor")
                 .withWeight("(30 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1263,10 +1264,10 @@ public class ItemExporter extends BaseExporter {
 
         final String SR20Prerequisite = "Only Droids of Large or bigger size can be equipped with a SR 20 generator.";
         items.add(Item.create("Shield Generator (SR 20)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 20))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 20))
                 .withCost("10000 x Cost Factor")
                 .withWeight("(40 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1280,20 +1281,20 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
        items.add(Item.create("Ion Shield Generator (SR 5)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 5).withModifier("Ion"))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 5).withModifier("Ion"))
                 .withCost("1250 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
                 .toJSON());
 
         items.add(Item.create("Ion Shield Generator (SR 10)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 10).withModifier("Ion"))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 10).withModifier("Ion"))
                 .withCost("2500 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1309,10 +1310,10 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Ion Shield Generator (SR 15)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 15).withModifier("Ion"))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 15).withModifier("Ion"))
                 .withCost("3750 x Cost Factor")
                 .withWeight("c")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1327,10 +1328,10 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Ion Shield Generator (SR 20)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(AttributeKey.SHIELD_RATING, 20).withModifier("Ion"))
+                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 20).withModifier("Ion"))
                 .withCost("5000 x Cost Factor")
                 .withWeight("(40 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1345,43 +1346,43 @@ public class ItemExporter extends BaseExporter {
 
 
         items.add(Item.create("Translator Unit (DC 20)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("200")
                 .withWeight("1 kg")
-                .withProvided(Change.create(AttributeKey.TRANSLATE_DC, 20)).toJSON());
+                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 20)).toJSON());
 
         items.add(Item.create("Translator Unit (DC 15)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("500")
                 .withWeight("2 kg")
-                .withProvided(Change.create(AttributeKey.TRANSLATE_DC, 15)).toJSON());
+                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 15)).toJSON());
 
         items.add(Item.create("Translator Unit (DC 10)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("1000")
                 .withWeight("4 kg")
-                .withProvided(Change.create(AttributeKey.TRANSLATE_DC, 10)).toJSON());
+                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 10)).toJSON());
 
         items.add(Item.create("Translator Unit (DC 5)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("2000")
                 .withWeight("8 kg")
-                .withProvided(Change.create(AttributeKey.TRANSLATE_DC, 5)).toJSON());
+                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 5)).toJSON());
 
 
         final String hardenedSystem = "Droids of Large or greater size can be designed to have internal armor and redundant systems that enable it to continue functioning despite heavy damage";
         items.add(Item.create("Hardened Systems (x2)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("1000 x Cost Factor")
                 .withWeight("(100 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(AttributeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 2))
-                .withProvided(Change.create(AttributeKey.HEALTH_HARDENED_MULTIPLIER, 2))
+                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 2))
+                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 2))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1392,13 +1393,13 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Hardened Systems (x3)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("2500 x Cost Factor")
                 .withWeight("(250 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(AttributeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 3))
-                .withProvided(Change.create(AttributeKey.HEALTH_HARDENED_MULTIPLIER, 3))
+                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 3))
+                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 3))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1409,13 +1410,13 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Hardened Systems (x4)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("4000 x Cost Factor")
                 .withWeight("(400 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(AttributeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 4))
-                .withProvided(Change.create(AttributeKey.HEALTH_HARDENED_MULTIPLIER, 4))
+                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 4))
+                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 4))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1426,13 +1427,13 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Hardened Systems (x5)", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("6250 x Cost Factor")
                 .withWeight("(650 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(AttributeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 5))
-                .withProvided(Change.create(AttributeKey.HEALTH_HARDENED_MULTIPLIER, 5))
+                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 5))
+                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 5))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1443,143 +1444,143 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Repulsor-Assisted Lifting System", "equipment")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("200 x Cost Factor")
                 .withWeight("(200 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(AttributeKey.CARGO_CAPACITY, "x3"))
+                .withProvided(Change.create(ChangeKey.CARGO_CAPACITY, "x3"))
                 .toJSON());
 
         items.add(Item.create("Plasteel Shell", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("400 x Cost Factor")
                 .withWeight("(2 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "2"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "5"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "2"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "5"))
                 .toJSON());
 
         items.add(Item.create("Stealth Shell", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("400 x Cost Factor")
                 .withWeight("(2 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(AttributeKey.SKILL_BONUS, "stealth:2"))
+                .withProvided(Change.create(ChangeKey.SKILL_BONUS, "stealth:2"))
                 .toJSON());
 
         items.add(Item.create("Quadanium Shell", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("900 x Cost Factor")
                 .withWeight("(3 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "3"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "3"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
                 .toJSON());
 
         items.add(Item.create("Durasteel Shell", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("1600 x Cost Factor")
                 .withWeight("(8 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "4"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "4"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
                 .toJSON());
 
         items.add(Item.create("Quadanium Plating", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("2500 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withAvailability("Licensed")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "5"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "5"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Durasteel Plating", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Light Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("3600 x Cost Factor")
                 .withWeight("(12 x Cost Factor) kg")
                 .withAvailability("Licensed")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "6"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "6"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Quadanium Battle Armor", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Medium Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("4900 x Cost Factor")
                 .withWeight("(7 x Cost Factor) kg")
                 .withAvailability("Restricted")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "7"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "7"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Duranium Plating", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Medium Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("6400 x Cost Factor")
                 .withWeight("(16 x Cost Factor) kg")
                 .withAvailability("Restricted")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
                 .toJSON());
 
         items.add(Item.create("Durasteel Battle Armor", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Medium Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("9600 x Cost Factor")
                 .withWeight("(8 x Cost Factor) kg")
                 .withAvailability("Restricted")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Mandalorian Steel Shell", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Heavy Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("8100 x Cost Factor")
                 .withWeight("(9 x Cost Factor) kg")
                 .withAvailability("Military, Rare")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "9"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "9"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Duranium Battle Armor", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Heavy Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("10000 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "10"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "10"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
                 .toJSON());
 
         items.add(Item.create("Neutronium Plating", "armor")
-                .withProvided(Change.create(AttributeKey.DROID_PART, true))
-                .withProvided(Change.create(AttributeKey.ARMOR_TYPE, "Heavy Armor"))
+                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("12100 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(AttributeKey.REFLEX_DEFENSE_BONUS_ARMOR, "11"))
-                .withProvided(Change.create(AttributeKey.MAXIMUM_DEXTERITY_BONUS, "1"))
+                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "11"))
+                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "1"))
                 .toJSON());
         return items;
     }

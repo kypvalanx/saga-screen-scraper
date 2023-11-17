@@ -96,7 +96,7 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         data.put("type", type);
 
         data.put("entries", jsonArray);
-        data.write(writer);
+        data.write(writer, 4, 0);
 
         try {
             jsonOutputFile.getParentFile().mkdirs();
@@ -531,7 +531,7 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
             names.add((String) entry.get("name"));
         }
 
-        System.out.println("List.of(\"" + names.stream().map(s -> s.replaceAll("\"", "\\\"")).collect(Collectors.joining("\", \"")) + "\")");
+        System.out.println("List.of(\"" + names.stream().map(s -> s.replaceAll("\"", "\\\\\"")).collect(Collectors.joining("\", \"")) + "\")");
     }
 
     abstract protected Collection<JSONy> parseItem(String itemLink, boolean overwrite);

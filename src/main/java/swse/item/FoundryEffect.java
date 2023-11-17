@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import swse.common.Change;
 import swse.common.Copyable;
+import swse.common.JSONy;
 import swse.common.Link;
 
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
     public JSONObject toJSON() {
         resolveDynamicValues();
         JSONObject effect = new JSONObject();
+        effect.put("disables", true);
         effect.put("name", name);
         effect.put("changes", Change.constructChangeList(changes));
         effect.put("flags", getJsonFlags());
@@ -94,6 +96,9 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
                 case "class java.lang.String":
                     swse.put(flag.getKey(), flag.getValue());
                     break;
+                case "class java.util.ArrayList":
+                    swse.put(flag.getKey(), toJSONArray((List<? extends JSONy>) flag.getValue()));
+                    break;
                 default:
                     System.err.println(flag.getValue().getClass());
             }
@@ -101,6 +106,15 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
 
         JSONFlags.put("swse", swse);
         return JSONFlags;
+    }
+
+    private JSONArray toJSONArray(List<? extends JSONy> values) {
+        JSONArray array = new JSONArray();
+        for (JSONy value:
+             values) {
+            array.put(value.toJSON());
+        }
+        return array;
     }
 
     private Map<String, Object> getFlags() {

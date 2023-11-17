@@ -120,6 +120,10 @@ class StatBonuses
                         bonuses.add(ProvidedItem.create("Intelligence (+2)", ItemType.TRAIT));
                         bonuses.add(ProvidedItem.create("Strength (+2)", ItemType.TRAIT));
                         bonuses.add(ProvidedItem.create("Dexterity (-6)", ItemType.TRAIT));
+                    } else if ("Replica Droid".equals(speciesName)) {
+                        bonuses.add(ProvidedItem.create("Strength (+2)", ItemType.TRAIT));
+                        bonuses.add(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT));
+                        bonuses.add(ProvidedItem.create("Charisma (-2)", ItemType.TRAIT));
                     }
 
                     //System.out.println(speciesName);
@@ -173,10 +177,10 @@ class StatBonuses
                 }
             }
         }
-        bonuses = Util.mergeBonuses(bonuses);
 
         bonuses.addAll(getAgeStatMods(!speciesName.toLowerCase().contains("droid")));
         bonuses.addAll(getDroidSizeMods(speciesName.toLowerCase().contains("droid")));
+        bonuses = Util.mergeBonuses(bonuses);
         //
         //keys.addAll(bonusMap.keySet().stream().map(key -> key + " : " + ));
         //final List<Object> objects = Util.mergeBonuses(bonuses);

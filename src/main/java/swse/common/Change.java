@@ -16,13 +16,13 @@ public class Change implements JSONy, Copyable<Change> {
     private Prerequisite parentPrerequisite;
     private ActiveEffectMode mode = ActiveEffectMode.ADD;
 
-    public static Change create(AttributeKey key, Object value) {
+    public static Change create(ChangeKey key, Object value) {
         if(value == null){
             return null;
         }
         return new Change(key.value(), value);
     }
-    public static Change create(AttributeKey key, Object value, String modifier) {
+    public static Change create(ChangeKey key, Object value, String modifier) {
         if(value == null){
             return null;
         }
