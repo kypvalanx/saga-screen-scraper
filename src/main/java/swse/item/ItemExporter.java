@@ -1086,6 +1086,9 @@ public class ItemExporter extends BaseExporter {
         if ("implant".equalsIgnoreCase(trim)) {
             return "Implants";
         }
+        if ("pistol".equalsIgnoreCase(trim)) {
+            return "Pistols";
+        }
         return trim.replace("Weapon ", "Weapons ")
                 .replace("Weapons (Ranged)", "Ranged Weapons")
                 .replace("Weapons (Melee)", "Melee Weapons").trim();

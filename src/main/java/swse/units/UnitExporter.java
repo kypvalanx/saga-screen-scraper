@@ -125,7 +125,7 @@ public class UnitExporter extends BaseExporter {
 
             if(filtered.size() > 0){
 
-                writeToJSON(new File(JSON_OUTPUT + i + ".json"), filtered, hasArg(args, "d"), "Units CL " + i, "Actor");
+                writeToJSON(new File(JSON_OUTPUT + i + ".json"), filtered, hasArg(args, "d"), "Units-CL-" + i, "Actor");
             }
         }
 

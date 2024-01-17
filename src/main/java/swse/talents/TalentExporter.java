@@ -352,6 +352,11 @@ public class TalentExporter extends BaseExporter
             case "Improved Armored Defense":
                 attributes.add(Change.create(ChangeKey.IMPROVED_ARMORED_DEFENSE, true));
                 break;
+            case "Sneak Attack":
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES_MAX, 10));
+                attributes.add(Change.create(ChangeKey.SNEAK_ATTACK, "1d6"));
+                break;
 
         }
 

@@ -253,7 +253,7 @@ public enum ChangeKey {
     BONUS_SECOND_WIND("bonusSecondWind"),
     WEIGHT("weight"),
     BASE_ATTACK_BONUS("baseAttackBonus"),
-    AUTOMATIC_TRAINED_SKILL("automaticTrainedSkill"), CONSUMES("consumes");
+    AUTOMATIC_TRAINED_SKILL("automaticTrainedSkill"), CONSUMES("consumes"), TAKE_MULTIPLE_TIMES_MAX("takeMultipleTimesMax");
 
     private final String value;
 
