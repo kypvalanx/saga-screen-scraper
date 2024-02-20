@@ -46,7 +46,8 @@ public enum ItemSubtype {
     SITH_ARTIFACTS("Sith Artifacts", "sith artifacts"),
     LOCOMOTION_SYSTEMS("Locomotion Systems", "locomotion systems"),
     PROCESSOR_SYSTEMS("Processor Systems","processor systems"),
-    APPENDAGES("Appendages", "appendages");
+    APPENDAGES("Appendages", "appendages"),
+    UNIVERSAL_UPGRADE("Universal Upgrade", "universal upgrade");
 
 
     private final List<String> mapping;

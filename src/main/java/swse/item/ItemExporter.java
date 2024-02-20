@@ -44,6 +44,7 @@ public class ItemExporter extends BaseExporter {
     public static final String ROOT = "G:/FoundryVTT/Data";
     private static final Set<String> unique = new HashSet<>();
     public static final Pattern SHOTS_PER_PACK = Pattern.compile("After (\\d*|one) \\w*, the ([\\w\\s]*) must be \\w*\\.");
+    private Set<String> duplicates = new HashSet<>();
 
 
     public static void main(String[] args) {
@@ -98,6 +99,9 @@ public class ItemExporter extends BaseExporter {
         itemLinks.add("/wiki/Tools");
         itemLinks.add("/wiki/Weapon_and_Armor_Accessories");
         itemLinks.add("/wiki/Equipment_Upgrades");
+        itemLinks.add("/wiki/Armor_Upgrades");
+        itemLinks.add("/wiki/Weapon_Upgrades");
+        itemLinks.add("/wiki/Universal_Upgrades");
 
         itemLinks.add("/wiki/Advanced_Cybernetics");
         itemLinks.add("/wiki/Heirloom_Items");
@@ -191,8 +195,13 @@ public class ItemExporter extends BaseExporter {
             return s;
         })
                 .filter(Objects::nonNull)
+                .filter(ItemExporter::filterByLink)
                 .flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite).stream()).map(item -> item.toJSON())
                 .collect(Collectors.toList());
+    }
+
+    public static boolean filterByLink(String s){
+        return !List.of("/wiki/Illegal", "/wiki/Military", "/wiki/Rare", "/wiki/Restricted", "/wiki/Power_Pack_Bomb", "/wiki/The_Madness_of_Knowledge").contains(s);
     }
 
     protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
@@ -213,7 +222,14 @@ public class ItemExporter extends BaseExporter {
 
         itemName = filterName(itemName);
 
+        if(duplicates.contains(itemName) && !List.of("Chain", "Holoshroud", "Jump Servos").contains(itemName)){
+            System.out.println("https://swse.fandom.com/"+itemLink + " " + itemName);
+            return new ArrayList<>();
+        }
+        duplicates.add(itemName);
+
         Context.setValue("name", itemName);
+        Context.setValue("link", "https://swse.fandom.com/"+itemLink);
 
         Element content = doc.getElementsByClass("mw-parser-output").first();
 
@@ -259,6 +275,7 @@ public class ItemExporter extends BaseExporter {
         String inaccurate;
         String accurate;
         String armorType = null;
+        String itemUpgradeType = null;
 
         for (Element child : content.children()) {
             if (child.text().contains(":")) {
@@ -445,6 +462,7 @@ public class ItemExporter extends BaseExporter {
                             itemSubType = payload;
                             break;
                         case "Upgrade Type":
+                            itemUpgradeType = payload;
                         case "Equipment Type":
                         case "Weapon Type":
                             itemSubType = payload;
@@ -515,7 +533,7 @@ public class ItemExporter extends BaseExporter {
             }
         }
 
-        itemSubType = standardizeTypes(itemSubType);
+        itemSubType = standardizeTypes(itemUpgradeType != null ? itemUpgradeType : itemSubType);
         String itemType = getFoundryType(itemSubType);
         attributes.addAll(getManualAttributes(itemName, itemSubType));
         attributes.addAll(getModes(rateOfFire, itemName));
@@ -1055,7 +1073,7 @@ public class ItemExporter extends BaseExporter {
             return "weapon";
         } else if (List.of("light armor", "medium armor", "heavy armor", "droid accessories (droid armor)").contains(subType.toLowerCase())) {
             return "armor";
-        } else if (List.of("weapons upgrade", "armor upgrade", "weapons and armor accessories").contains(subType.toLowerCase())) {
+        } else if (List.of("weapon upgrade", "armor upgrade", "universal upgrade").contains(subType.toLowerCase())) {
             return "upgrade";
         } else if (List.of("hazard").contains(subType.toLowerCase())) {
             return "hazard";
@@ -1071,9 +1089,18 @@ public class ItemExporter extends BaseExporter {
                 "droid accessories (droid stations)",
                 "droid accessories (shield generator systems)").contains(subType.toLowerCase())) {
             return "droid system";
+        } else if (List.of("equipment",
+                "medical gear",
+                "tools",
+                "life support",
+                "survival gear",
+                "detection and surveillance devices", "weapon and armor accessories",
+                "computers and storage devices",
+                "communications devices", "sith artifacts").contains(subType.toLowerCase())) {
+            return "equipment";
         }
 
-        //printUnique("\"" + subType.toLowerCase()+"\"");
+        printUnique("\"" + subType.toLowerCase()+"\"");
         return "equipment";
     }
 
