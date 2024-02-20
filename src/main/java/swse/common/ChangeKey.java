@@ -246,6 +246,12 @@ public enum ChangeKey {
     INTELLIGENCE("int"),
     WISDOM("wis"),
     CHARISMA("cha"),
+    STR("str"),
+    DEX("dex"),
+    CON("con"),
+    INT("int"),
+    WIS("wis"),
+    CHA("cha"),
     HOMEBREW("isHomebrew"),
     DISARMING_ATTACK("disarmingAttack"),
     MULTICLASS_FEAT("multiclassFeat"),
@@ -253,7 +259,7 @@ public enum ChangeKey {
     BONUS_SECOND_WIND("bonusSecondWind"),
     WEIGHT("weight"),
     BASE_ATTACK_BONUS("baseAttackBonus"),
-    AUTOMATIC_TRAINED_SKILL("automaticTrainedSkill"), CONSUMES("consumes"), TAKE_MULTIPLE_TIMES_MAX("takeMultipleTimesMax");
+    AUTOMATIC_TRAINED_SKILL("automaticTrainedSkill"), CONSUMES("consumes"), TAKE_MULTIPLE_TIMES_MAX("takeMultipleTimesMax"), BACTA("bacta");
 
     private final String value;
 

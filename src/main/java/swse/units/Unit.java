@@ -21,6 +21,7 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     private int cl = 0;
     private List<String> trainedSkills = new ArrayList<>();
     private List<Attribute> attributes = new ArrayList<>();
+    private JSONObject data;
 
     public Unit(String name) {
         super(name, "npc");
@@ -157,6 +158,11 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
         return this;
     }
 
+    public Unit withAttribute(Attribute attribute) {
+        this.attributes.add(attribute);
+        return this;
+    }
+
     public Unit withCL(int cl) {
         this.cl = cl;
         return this;
@@ -178,5 +184,15 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
 
     public void addAction(String s) {
         this.changes.add(Change.create(ChangeKey.ACTION, s));
+    }
+
+    public Unit withType(String type) {
+        this.type = type;
+        return this;
+    }
+
+    public Unit withSystem(JSONObject system) {
+        this.system = system;
+        return this;
     }
 }

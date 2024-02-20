@@ -207,7 +207,7 @@ public class ItemExporter extends BaseExporter {
             return new ArrayList<>();
         }
 
-        if ("home".equalsIgnoreCase(itemName)) {
+        if ("home".equalsIgnoreCase(itemName) || "datapad".equalsIgnoreCase(itemName) || "bacta tank".equalsIgnoreCase(itemName)) {
             return new ArrayList<>();
         }
 
@@ -572,6 +572,7 @@ public class ItemExporter extends BaseExporter {
         }
 
         Item item = Item.create(itemName, itemType)
+                .withLink(itemLink)
                 .withDescription(content)
                 .withSubtype(itemSubType)
                 .withProvided(attributes)
@@ -1072,13 +1073,27 @@ public class ItemExporter extends BaseExporter {
             return "droid system";
         }
 
-        printUnique("\"" + subType.toLowerCase()+"\"");
+        //printUnique("\"" + subType.toLowerCase()+"\"");
         return "equipment";
     }
 
 
     private static String standardizeTypes(String trim) {
-        if (trim == null || trim.equalsIgnoreCase("equipment")) {
+        if(trim == null){
+            trim = "equipment";
+        }
+
+        try{
+
+            ItemSubtype subtype = ItemSubtype.getEnum(trim);
+            return subtype.toString();
+        } catch (IllegalArgumentException e){
+            System.err.println(trim + " is not a valid subtype");
+        }
+
+
+
+        if (trim.equalsIgnoreCase("equipment")) {
             // printUnique(Context.getValue("name"));
             return "Equipment";
         }
@@ -1318,7 +1333,7 @@ public class ItemExporter extends BaseExporter {
                 .withDescription(shieldGeneratorDescription)
                 .withProvided(Change.create(ChangeKey.SHIELD_RATING, 15).withModifier("Ion"))
                 .withCost("3750 x Cost Factor")
-                .withWeight("c")
+                .withWeight("(30 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
                 .withPrerequisite(new OrPrerequisite(SR15Prerequisite,
                         List.of(
@@ -1584,6 +1599,55 @@ public class ItemExporter extends BaseExporter {
                 .withAvailability("Military")
                 .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "11"))
                 .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "1"))
+                .toJSON());
+
+        items.add(Item.create("Datapad", "equipment")
+                        .withDescription("These handheld personal computers serve as notebooks, day planners, calculators, and sketchpads. In addition to performing basic computer functions, Datapads can interface with larger computer networks directly or via Comlink.\n" +
+                                "\n" +
+                                "A Datapad is a computer with an Intelligence score of 12. Basic Datapads also exist (Intelligence 10, 100 credits), but they are actually just storage devices with display, input, and editing capability; they have no ability to run programs.")
+                .withSubtype("Computers and Storage Devices")
+                .withCost("1000")
+                .withWeight("0.5 kg")
+                .withProvided(Change.create(ChangeKey.INTELLIGENCE, 12))
+                .toJSON());
+
+        items.add(Item.create("Basic Datapad", "equipment")
+                .withDescription("These handheld personal computers serve as notebooks, day planners, calculators, and sketchpads. In addition to performing basic computer functions, Datapads can interface with larger computer networks directly or via Comlink.\n" +
+                        "\n" +
+                        "A Datapad is a computer with an Intelligence score of 12. Basic Datapads also exist (Intelligence 10, 100 credits), but they are actually just storage devices with display, input, and editing capability; they have no ability to run programs.")
+
+                .withSubtype("Computers and Storage Devices")
+                .withCost("100")
+                .withWeight("0.3 kg")
+                .withProvided(Change.create(ChangeKey.INTELLIGENCE, 10))
+                .toJSON());
+
+        items.add(Item.create("Bacta Tank", "equipment")
+                .withDescription("This large specialized tank is filled with the powerful healing agent, Bacta, which promotes rapid healing.\n" +
+                        "\n" +
+                        "A Bacta Tank can be used in conjunction with Surgery. If the Treat Injury check is successful, the patient heals a number of hit points equal to it's Character Level, in addition to that provided by Surgery.\n" +
+                        "\n" +
+                        "A Bacta Tank can also be used when treating Disease, Poison, or Radiation in a creature. In this case, the Bacta Tank grants a +5 Equipment bonus on your Treat Injury check.\n" +
+                        "\n" +
+                        "A Bacta Tank and a supply of Bacta is expensive, so much medical equipment is usually found only in hospitals, aboard Capital Ships, and within major military bases. Each hour of treatment consumes one liter of Bacta, which costs 100 credits. A typical Bacta Tank holds up to 300 liters of Bacta, and the Bacta Tank must hold at least 150 liters at all times to provide any benefit. Only one creature can be immersed in the tank at any given time.")
+                .withSubtype("Medical Gear")
+                .withCost("100000 + bacta * 100")
+                        .withWeight("500 + bacta * 2 kg")
+                .withProvided(Change.create(ChangeKey.BACTA, 0))
+                .toJSON());
+
+        items.add(Item.create("Bacta (liter)", "equipment")
+                .withDescription("This large specialized tank is filled with the powerful healing agent, Bacta, which promotes rapid healing.\n" +
+                        "\n" +
+                        "A Bacta Tank can be used in conjunction with Surgery. If the Treat Injury check is successful, the patient heals a number of hit points equal to it's Character Level, in addition to that provided by Surgery.\n" +
+                        "\n" +
+                        "A Bacta Tank can also be used when treating Disease, Poison, or Radiation in a creature. In this case, the Bacta Tank grants a +5 Equipment bonus on your Treat Injury check.\n" +
+                        "\n" +
+                        "A Bacta Tank and a supply of Bacta is expensive, so much medical equipment is usually found only in hospitals, aboard Capital Ships, and within major military bases. Each hour of treatment consumes one liter of Bacta, which costs 100 credits. A typical Bacta Tank holds up to 300 liters of Bacta, and the Bacta Tank must hold at least 150 liters at all times to provide any benefit. Only one creature can be immersed in the tank at any given time.")
+                .withSubtype("Medical Gear")
+                .withCost("100")
+                .withWeight("2 kg")
+                .withProvided(Change.create(ChangeKey.BACTA, 1))
                 .toJSON());
         return items;
     }

@@ -27,6 +27,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     protected String subtype;
     protected List<FoundryEffect<?>> effects = new LinkedList<>();
     private final List<Modification> modifications;
+    protected JSONObject system;
     private String id;
     private String link;
 
@@ -70,7 +71,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         }
         root.put("permission", getPermission());
 
-        JSONObject system = new JSONObject();
+        system = system == null ? new JSONObject() : system;
         system.put("description", description);
         system.put("choices", JSONy.toArray(choices));
         system.put("source", source);

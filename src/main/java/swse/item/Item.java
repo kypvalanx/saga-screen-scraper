@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import swse.common.*;
 
 import static swse.util.Util.cloneList;
+import static swse.util.Util.printUnique;
 
 class Item extends FoundryItem<Item> implements Copyable<Item> {
     private String size;
@@ -35,6 +36,37 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
     }
 
     public Item withWeight(String weight) {
+        if(weight == null || "Varies".equals(weight)){
+            return this;
+        }
+
+        if(weight.endsWith(" (empty)")){
+            weight = weight.substring(0, weight.length()-8);
+        }
+
+        if(weight.endsWith("+ (see below)")){
+            weight = weight.substring(0, weight.length()-13);
+        }
+
+        if(weight.endsWith(" (when using a secondary data store) or - (when concealed in the Droid's main Processor)")){
+            weight = weight.substring(0, weight.length()-88);
+        }
+
+
+
+        if(weight.endsWith("/Meter")){
+            weight = weight.substring(0, weight.length()-6);
+            this.withName(this.getName() + " (Meter)");
+        }
+
+        if("-".equals(weight) || "Appendage Weight + Weapon Weight".equals(weight)){
+            weight = "0 kg";
+        }
+        //weight = weight.replaceAll("/Kilograms?/", "kg");
+        if(!weight.endsWith("kg") && !weight.endsWith("Kilograms")&& !weight.endsWith("kilograms") && !weight.endsWith("Kilogram")&& !weight.endsWith("Tons") && !weight.contains("Appendage Weight")){
+
+            printUnique(this.name + " [" + weight + "] "+this.getLink());
+        }
         this.withProvided(Change.create(ChangeKey.WEIGHT, weight));
         return this;
     }

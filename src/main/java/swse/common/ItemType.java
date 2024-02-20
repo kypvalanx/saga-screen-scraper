@@ -12,7 +12,8 @@ public enum ItemType {
     FORCE_REGIMEN("forceRegimen"),
     BACKGROUND("background"),
     DESTINY("destiny"),
-    WEAPON("weapon");
+    WEAPON("weapon"),
+    ARMOR("armor");
 
 
     String toStringOverride = null;
