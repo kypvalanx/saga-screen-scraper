@@ -146,28 +146,47 @@ public class SpeciesExporter extends BaseExporter {
         }
 
 
-        Set<Category> categories = new HashSet<>(Category.getCategories(doc));
+
+        List<String> variants = getVariants(speciesName);
+
+        List<JSONy> jsonies = Lists.newArrayList();
+        for (String variant :
+                variants) {
+
+            Set<Category> categories = new HashSet<>(Category.getCategories(doc, variant));
+
+            Species species = Species.create(variant)
+                    .withDescription(content)
+                    .withImage(imageFile)
+                    .withProvided(categories)
+                    .withProvided(addTraitsFromCategories(categories, variant))
+                    .withProvided(StartingFeats.getStartingFeatsFromCategories(categories))
+                    .withProvided(StatBonuses.getStatBonuses(content, variant))
+                    .withProvided(getDroidChoice(variant))
+                    .withProvided(getMechanicLocomotionChoice(variant))
+                    .withProvided(getSpeciesSpecificChoice(variant))
+                    .withProvided(Speed.getSpeed(content, variant))
+                    .withProvided(AgeCategories.getAgeCategories(content))
+                    //.withProvided(getSize(content)) seems to be duplicated by addTraitsFromCategories
+                    .withProvided(getWeaponFamiliarity(variant))
+                    .withProvided(getBonusTree(variant))
+                    .withProvided(getManualBonusItems(variant))
+                    .withProvided(getBonusItems(content, variant));
+            jsonies.add(species);
+        }
 
 
-        Species species = Species.create(speciesName)
-                .withDescription(content)
-                .withImage(imageFile)
-                .withProvided(categories)
-                .withProvided(addTraitsFromCategories(categories, speciesName))
-                .withProvided(StartingFeats.getStartingFeatsFromCategories(categories))
-                .withProvided(StatBonuses.getStatBonuses(content, speciesName))
-                .withProvided(getDroidChoice(speciesName))
-                .withProvided(getMechanicLocomotionChoice(speciesName))
-                .withProvided(getSpeciesSpecificChoice(speciesName))
-                .withProvided(Speed.getSpeed(content, speciesName))
-                .withProvided(AgeCategories.getAgeCategories(content))
-                //.withProvided(getSize(content)) seems to be duplicated by addTraitsFromCategories
-                .withProvided(getWeaponFamiliarity(speciesName))
-                .withProvided(getBonusTree(speciesName))
-                .withProvided(getManualBonusItems(speciesName))
-                .withProvided(getBonusItems(content));
 
-        return Lists.newArrayList(species);
+
+
+        return jsonies;
+    }
+
+    private List<String> getVariants(String speciesName) {
+        if("Umbaran".equals(speciesName)){
+            return List.of("Umbaran", "Umbaran (Alternate Species Traits)");
+        }
+        return List.of(speciesName);
     }
 
     private static Collection<?> addTraitsFromCategories(Set<Category> categories, String speciesName) {
@@ -208,8 +227,13 @@ public class SpeciesExporter extends BaseExporter {
         return extraArms;
     }
 
-    private static Collection<?> getBonusItems(Element content) {
+    private static Collection<?> getBonusItems(Element content, String variant) {
         List<Object> provided = new ArrayList<>();
+
+        if("Umbaran (Alternate Species Traits)".equals(variant)){
+
+            return provided;
+        }
 
         for (Element child : content.select("p,li")) {
 //            if(child.children().isEmpty()) {
@@ -538,6 +562,7 @@ public class SpeciesExporter extends BaseExporter {
         }
         return Lists.newArrayList();
     }
+
 
     private static Collection<Choice> getDroidChoice(String speciesName) {
         Collection<Choice> choices = new ArrayList<>();

@@ -3,10 +3,8 @@ package swse.species;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,166 +15,170 @@ import swse.common.Option;
 import swse.common.ProvidedItem;
 import swse.util.Util;
 
+import static swse.common.ItemType.TRAIT;
+import static swse.common.ProvidedItem.create;
+
 class StatBonuses
 {
+    public static final List<String> WEIRD_SPECIES = Lists.newArrayList("Devaronian", "Melodie", "Ruurian", "Rybet", "Arkanian Offshoot", "Republic Clone", "Hutt", "Umbaran", "Umbaran (Alternate Species Traits)");
+    public static final String ABILITY_SCORE_SELECTOR = "(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)";
+    public static final Pattern MANY_PENALTY_PATTERN = Pattern.compile("(-\\d*) penalties to (?:their )?" + ABILITY_SCORE_SELECTOR + ", " + ABILITY_SCORE_SELECTOR + ", and " + ABILITY_SCORE_SELECTOR);
+    public static final Pattern DOUBLE_PENALTY_PATTERN = Pattern.compile("(-\\d*) (?:penalties|penalty) to (?:both )?(?:their )?" + ABILITY_SCORE_SELECTOR + " and " + ABILITY_SCORE_SELECTOR);
+    public static final Pattern SINGLE_PENALTY_PATTERN = Pattern.compile("(-\\d*) penalty to (?:their )?" + ABILITY_SCORE_SELECTOR);
+    public static final Pattern MULTIPLE_BONUS_PATTERN = Pattern.compile("(\\+\\d*) bonus(?:es)? to (?:both )?(?:their )?" + ABILITY_SCORE_SELECTOR + "(?:,)? and (?:their )?" + ABILITY_SCORE_SELECTOR);
+    public static final Pattern SINGLE_BONUS_PATTERN = Pattern.compile("(\\+\\d*)(?: bonus)? to (?:their )?" + ABILITY_SCORE_SELECTOR);
     private static List<Object> standardAgeBonuses;
 
     public static List<Object> getStatBonuses(Element content, String speciesName)
     {
         List<Object> bonuses = new ArrayList<>();
-        Map<String, Map<String, Integer>> bonusMap = new HashMap<>();
-        List<String> weirdSpecies = Lists.newArrayList("Devaronian", "Melodie", "Ruurian", "Rybet", "Arkanian Offshoot", "Republic Clone", "Hutt");
 
 
-        String subset = "all";
+        if (WEIRD_SPECIES.contains(speciesName)) {
+            switch (speciesName) {
+                case "Arkanian Offshoot":
+                    bonuses.add(createProvidedTrait("Constitution (-2)"));
+                    bonuses.add(new Choice("Select an Attribute Bonus")
+                            .withShowSelectionInName(false)
+                            .withOption("Strength", new Option().withProvidedItem(createProvidedTrait("Strength (+2)")))
+                            .withOption("Dexterity", new Option().withProvidedItem(createProvidedTrait("Dexterity (+2)"))));
+                    break;
+                case "Melodie":
+                    bonuses.add(createProvidedTrait("Constitution (+2)"));
 
-        for (Element element : content.select("li,p"))
-        {
-            String text = element.text();
-            if (text.toLowerCase().startsWith("ability modifier") || text.toLowerCase().startsWith("ability scores"))
+                    bonuses.add(createProvidedTrait("Wisdom (+2)", "TRAIT:Child"));
+                    bonuses.add(createProvidedTrait("Strength (-2)", "TRAIT:Child"));
+
+                    bonuses.add(createProvidedTrait("Wisdom (+2)", "TRAIT:Young adult"));
+                    bonuses.add(createProvidedTrait("Strength (-2)", "TRAIT:Young adult"));
+
+                    bonuses.add(createProvidedTrait("Charisma (+2)", "TRAIT:Adult"));
+                    bonuses.add(createProvidedTrait("Dexterity (-4)", "TRAIT:Adult"));
+
+                    bonuses.add(createProvidedTrait("Charisma (+2)", "TRAIT:Middle age"));
+                    bonuses.add(createProvidedTrait("Dexterity (-4)", "TRAIT:Middle age"));
+
+                    bonuses.add(createProvidedTrait("Charisma (+2)", "TRAIT:Old"));
+                    bonuses.add(createProvidedTrait("Dexterity (-4)", "TRAIT:Old"));
+
+                    bonuses.add(createProvidedTrait("Charisma (+2)", "TRAIT:Venerable"));
+                    bonuses.add(createProvidedTrait("Dexterity (-4)", "TRAIT:Venerable"));
+
+                    break;
+                case "Devaronian":
+                    bonuses.add(createProvidedTrait("Dexterity (+2)", "GENDER:Male"));
+                    bonuses.add(createProvidedTrait("Wisdom (-2)", "GENDER:Male"));
+                    bonuses.add(createProvidedTrait("Charisma (-2)", "GENDER:Male"));
+
+                    bonuses.add(createProvidedTrait("Intelligence (+2)", "GENDER:Female"));
+                    bonuses.add(createProvidedTrait("Wisdom (+2)", "GENDER:Female"));
+                    bonuses.add(createProvidedTrait("Dexterity (-2)", "GENDER:Female"));
+                    break;
+                case "Ruurian":
+                    bonuses.add(createProvidedTrait("Strength (-2)"));
+                    bonuses.add(createProvidedTrait("Constitution (-2)"));
+
+                    bonuses.add(createProvidedTrait("Intelligence (+4)", "TRAIT:Child"));
+
+                    bonuses.add(createProvidedTrait("Intelligence (+4)", "TRAIT:Young adult"));
+
+                    bonuses.add(createProvidedTrait("Intelligence (+4)", "TRAIT:Adult"));
+
+                    bonuses.add(createProvidedTrait("Charisma (+4)", "TRAIT:Middle age"));
+
+                    bonuses.add(createProvidedTrait("Charisma (+4)", "TRAIT:Old"));
+
+                    bonuses.add(createProvidedTrait("Charisma (+4)", "TRAIT:Venerable"));
+
+                    break;
+                case "Rybet":
+                    bonuses.add(createProvidedTrait("Dexterity (+2)", "GENDER:Male"));
+                    bonuses.add(createProvidedTrait("Strength (-2)", "GENDER:Male"));
+
+                    bonuses.add(createProvidedTrait("Strength (+2)", "GENDER:Female"));
+                    bonuses.add(createProvidedTrait("Dexterity (-2)", "GENDER:Female"));
+
+                    break;
+                case "Republic Clone":
+                    bonuses.add(createProvidedTrait("Strength (+5)"));
+                    bonuses.add(createProvidedTrait("Dexterity (+3)"));
+                    bonuses.add(createProvidedTrait("Intelligence (+2)"));
+                    bonuses.add(createProvidedTrait("Charisma (-2)"));
+                    bonuses.add(createProvidedTrait("Disable Attribute Modification"));
+
+                    bonuses.add(new Choice("Select an Attribute Bonus")
+                            .withShowSelectionInName(false)
+                            .withOption("Strength", new Option().withProvidedItem(createProvidedTrait("Strength (+2)")))
+                            .withOption("Dexterity", new Option().withProvidedItem(createProvidedTrait("Dexterity (+2)")))
+                            .withOption("Constitution", new Option().withProvidedItem(createProvidedTrait("Constitution (+2)")))
+                            .withOption("Intelligence", new Option().withProvidedItem(createProvidedTrait("Intelligence (+2)")))
+                            .withOption("Wisdom", new Option().withProvidedItem(createProvidedTrait("Wisdom (+2)")))
+                            .withOption("Charisma", new Option().withProvidedItem(createProvidedTrait("Charisma (+2)"))));
+                    break;
+                case "Hutt":
+
+                    bonuses.add(createProvidedTrait("Constitution (+2)"));
+                    bonuses.add(createProvidedTrait("Intelligence (+2)"));
+                    bonuses.add(createProvidedTrait("Strength (+2)"));
+                    bonuses.add(createProvidedTrait("Dexterity (-6)"));
+                    break;
+                case "Replica Droid":
+                    bonuses.add(createProvidedTrait("Strength (+2)"));
+                    bonuses.add(createProvidedTrait("Dexterity (+2)"));
+                    bonuses.add(createProvidedTrait("Charisma (-2)"));
+                    break;
+                case "Umbaran (Alternate Species Traits)":
+                    bonuses.add(createProvidedTrait("Wisdom (+2)"));
+                    bonuses.add(createProvidedTrait("Charisma (+2)"));
+                    bonuses.add(createProvidedTrait("Constitution (-2)"));
+                    break;
+                case "Umbaran":
+                    bonuses.add(createProvidedTrait("Dexterity (+2)"));
+                    bonuses.add(createProvidedTrait("Wisdom (+2)"));
+                    bonuses.add(createProvidedTrait("Constitution (-2)"));
+                    break;
+            }
+        } else {
+            for (Element element : content.select("li,p"))
             {
-                if (text.contains("no Ability Score adjustments") || text.contains("no bonuses or penalties to their Ability Scores") || text.contains("None. "))
+                String text = element.text();
+                if (text.toLowerCase().startsWith("ability modifier") || text.toLowerCase().startsWith("ability scores"))
                 {
-                    continue;
-                }
-                if (weirdSpecies.contains(speciesName))
-                {
-                    if("Arkanian Offshoot".equals(speciesName)){
-                        bonuses.add(ProvidedItem.create("Constitution (-2)", ItemType.TRAIT));
-                        bonuses.add(new Choice("Select an Attribute Bonus")
-                                .withShowSelectionInName(false)
-                                .withOption("Strength", new Option().withProvidedItem(ProvidedItem.create("Strength (+2)", ItemType.TRAIT)))
-                                .withOption("Dexterity", new Option().withProvidedItem(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT))));
-                    } else if("Melodie".equals(speciesName)){
-                        bonuses.add(ProvidedItem.create("Constitution (+2)", ItemType.TRAIT));
+                    if (!text.contains("no Ability Score adjustments") && !text.contains("no bonuses or penalties to their Ability Scores") && !text.contains("None. ")) {
 
-                        bonuses.add(ProvidedItem.create("Wisdom (+2)", ItemType.TRAIT, "TRAIT:Child"));
-                        bonuses.add(ProvidedItem.create("Strength (-2)", ItemType.TRAIT, "TRAIT:Child"));
+                        Matcher singleBonusMatcher = SINGLE_BONUS_PATTERN.matcher(text);
+                        while (singleBonusMatcher.find()) {
+                            bonuses.add(createProvidedTrait(singleBonusMatcher.group(2) + " (" + singleBonusMatcher.group(1) + ")"));
+                        }
 
-                        bonuses.add(ProvidedItem.create("Wisdom (+2)", ItemType.TRAIT, "TRAIT:Young adult"));
-                        bonuses.add(ProvidedItem.create("Strength (-2)", ItemType.TRAIT, "TRAIT:Young adult"));
+                        Matcher multipleBonusMatcher = MULTIPLE_BONUS_PATTERN.matcher(text);
+                        while (multipleBonusMatcher.find()) {
+                            bonuses.add(createProvidedTrait(multipleBonusMatcher.group(2) + " (" + multipleBonusMatcher.group(1) + ")"));
+                            bonuses.add(createProvidedTrait(multipleBonusMatcher.group(3) + " (" + multipleBonusMatcher.group(1) + ")"));
+                        }
 
-                        bonuses.add(ProvidedItem.create("Charisma (+2)", ItemType.TRAIT, "TRAIT:Adult"));
-                        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT, "TRAIT:Adult"));
+                        Matcher singlePenaltyMatcher = SINGLE_PENALTY_PATTERN.matcher(text);
+                        while (singlePenaltyMatcher.find()) {
+                            bonuses.add(createProvidedTrait(singlePenaltyMatcher.group(2) + " (" + singlePenaltyMatcher.group(1) + ")"));
+                        }
 
-                        bonuses.add(ProvidedItem.create("Charisma (+2)", ItemType.TRAIT, "TRAIT:Middle age"));
-                        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT, "TRAIT:Middle age"));
+                        Matcher doublePenaltyMatcher = DOUBLE_PENALTY_PATTERN.matcher(text);
+                        while (doublePenaltyMatcher.find()) {
+                            bonuses.add(createProvidedTrait(doublePenaltyMatcher.group(2) + " (" + doublePenaltyMatcher.group(1) + ")"));
+                            bonuses.add(createProvidedTrait(doublePenaltyMatcher.group(3) + " (" + doublePenaltyMatcher.group(1) + ")"));
+                        }
 
-                        bonuses.add(ProvidedItem.create("Charisma (+2)", ItemType.TRAIT, "TRAIT:Old"));
-                        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT, "TRAIT:Old"));
-
-                        bonuses.add(ProvidedItem.create("Charisma (+2)", ItemType.TRAIT, "TRAIT:Venerable"));
-                        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT, "TRAIT:Venerable"));
-
-                    } else if("Devaronian".equals(speciesName)){
-                        bonuses.add(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT, "GENDER:Male"));
-                        bonuses.add(ProvidedItem.create("Wisdom (-2)", ItemType.TRAIT, "GENDER:Male"));
-                        bonuses.add(ProvidedItem.create("Charisma (-2)", ItemType.TRAIT, "GENDER:Male"));
-
-                        bonuses.add(ProvidedItem.create("Intelligence (+2)", ItemType.TRAIT, "GENDER:Female"));
-                        bonuses.add(ProvidedItem.create("Wisdom (+2)", ItemType.TRAIT, "GENDER:Female"));
-                        bonuses.add(ProvidedItem.create("Dexterity (-2)", ItemType.TRAIT, "GENDER:Female"));
-                    } else if("Ruurian".equals(speciesName)){
-                        bonuses.add(ProvidedItem.create("Strength (-2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Constitution (-2)", ItemType.TRAIT));
-
-                        bonuses.add(ProvidedItem.create("Intelligence (+4)", ItemType.TRAIT, "TRAIT:Child"));
-
-                        bonuses.add(ProvidedItem.create("Intelligence (+4)", ItemType.TRAIT, "TRAIT:Young adult"));
-
-                        bonuses.add(ProvidedItem.create("Intelligence (+4)", ItemType.TRAIT, "TRAIT:Adult"));
-
-                        bonuses.add(ProvidedItem.create("Charisma (+4)", ItemType.TRAIT, "TRAIT:Middle age"));
-
-                        bonuses.add(ProvidedItem.create("Charisma (+4)", ItemType.TRAIT, "TRAIT:Old"));
-
-                        bonuses.add(ProvidedItem.create("Charisma (+4)", ItemType.TRAIT, "TRAIT:Venerable"));
-
-                    } else if("Rybet".equals(speciesName)){
-                        bonuses.add(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT, "GENDER:Male"));
-                        bonuses.add(ProvidedItem.create("Strength (-2)", ItemType.TRAIT, "GENDER:Male"));
-
-                        bonuses.add(ProvidedItem.create("Strength (+2)", ItemType.TRAIT, "GENDER:Female"));
-                        bonuses.add(ProvidedItem.create("Dexterity (-2)", ItemType.TRAIT, "GENDER:Female"));
-
-                    } else if("Republic Clone".equals(speciesName)){
-                        bonuses.add(ProvidedItem.create("Strength (+5)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Dexterity (+3)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Intelligence (+2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Charisma (-2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Disable Attribute Modification", ItemType.TRAIT));
-
-                        bonuses.add(new Choice("Select an Attribute Bonus")
-                                .withShowSelectionInName(false)
-                                .withOption("Strength", new Option().withProvidedItem(ProvidedItem.create("Strength (+2)", ItemType.TRAIT)))
-                                .withOption("Dexterity", new Option().withProvidedItem(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT)))
-                                .withOption("Constitution", new Option().withProvidedItem(ProvidedItem.create("Constitution (+2)", ItemType.TRAIT)))
-                                .withOption("Intelligence", new Option().withProvidedItem(ProvidedItem.create("Intelligence (+2)", ItemType.TRAIT)))
-                                .withOption("Wisdom", new Option().withProvidedItem(ProvidedItem.create("Wisdom (+2)", ItemType.TRAIT)))
-                                .withOption("Charisma", new Option().withProvidedItem(ProvidedItem.create("Charisma (+2)", ItemType.TRAIT))));
-                    } else if ("Hutt".equals(speciesName)) {
-
-                        bonuses.add(ProvidedItem.create("Constitution (+2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Intelligence (+2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Strength (+2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Dexterity (-6)", ItemType.TRAIT));
-                    } else if ("Replica Droid".equals(speciesName)) {
-                        bonuses.add(ProvidedItem.create("Strength (+2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT));
-                        bonuses.add(ProvidedItem.create("Charisma (-2)", ItemType.TRAIT));
+                        Matcher manyPenaltyMatcher = MANY_PENALTY_PATTERN.matcher(text);
+                        while (manyPenaltyMatcher.find()) {
+                            bonuses.add(createProvidedTrait(manyPenaltyMatcher.group(2) + " (" + manyPenaltyMatcher.group(1) + ")"));
+                            bonuses.add(createProvidedTrait(manyPenaltyMatcher.group(3) + " (" + manyPenaltyMatcher.group(1) + ")"));
+                            bonuses.add(createProvidedTrait(manyPenaltyMatcher.group(4) + " (" + manyPenaltyMatcher.group(1) + ")"));
+                        }
                     }
-
-                    //System.out.println(speciesName);
-                    continue;
-                }
-
-
-                final String s = "(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)";
-                Pattern singleBonusPattern = Pattern.compile("(\\+\\d*)(?: bonus)? to (?:their )?" + s);
-
-                Matcher singleBonusMatcher = singleBonusPattern.matcher(text);
-                while (singleBonusMatcher.find())
-                {
-                    bonuses.add(ProvidedItem.create(singleBonusMatcher.group(2) + " (" + singleBonusMatcher.group(1) + ")", ItemType.TRAIT));
-                }
-
-                Pattern multipleBonusPattern = Pattern.compile("(\\+\\d*) bonus(?:es)? to (?:both )?(?:their )?"+s+"(?:,)? and (?:their )?"+s);
-
-                Matcher multipleBonusMatcher = multipleBonusPattern.matcher(text);
-                while (multipleBonusMatcher.find())
-                {
-                    bonuses.add(ProvidedItem.create(multipleBonusMatcher.group(2) + " (" + multipleBonusMatcher.group(1) + ")", ItemType.TRAIT));
-                    bonuses.add(ProvidedItem.create(multipleBonusMatcher.group(3) + " (" + multipleBonusMatcher.group(1) + ")", ItemType.TRAIT));
-                }
-
-                Pattern singlePenaltyPattern = Pattern.compile("(-\\d*) penalty to (?:their )?"+s);
-
-                Matcher singlePenaltyMatcher = singlePenaltyPattern.matcher(text);
-                while (singlePenaltyMatcher.find())
-                {
-                    bonuses.add(ProvidedItem.create(singlePenaltyMatcher.group(2) + " (" + singlePenaltyMatcher.group(1) + ")", ItemType.TRAIT));
-                }
-
-                Pattern doublePenaltyPattern = Pattern.compile("(-\\d*) (?:penalties|penalty) to (?:both )?(?:their )?"+s+" and "+s);
-
-                Matcher doublePenaltyMatcher = doublePenaltyPattern.matcher(text);
-                while (doublePenaltyMatcher.find())
-                {
-                    bonuses.add(ProvidedItem.create(doublePenaltyMatcher.group(2) + " (" + doublePenaltyMatcher.group(1) + ")", ItemType.TRAIT));
-                    bonuses.add(ProvidedItem.create(doublePenaltyMatcher.group(3) + " (" + doublePenaltyMatcher.group(1) + ")", ItemType.TRAIT));
-                }
-
-                Pattern manyPenaltyPattern = Pattern.compile("(-\\d*) penalties to (?:their )?"+s+", "+s+", and "+s);
-
-                Matcher manyPenaltyMatcher = manyPenaltyPattern.matcher(text);
-                while (manyPenaltyMatcher.find())
-                {
-                    bonuses.add(ProvidedItem.create(manyPenaltyMatcher.group(2) + " (" + manyPenaltyMatcher.group(1) + ")", ItemType.TRAIT));
-                    bonuses.add(ProvidedItem.create(manyPenaltyMatcher.group(3) + " (" + manyPenaltyMatcher.group(1) + ")", ItemType.TRAIT));
-                    bonuses.add(ProvidedItem.create(manyPenaltyMatcher.group(4) + " (" + manyPenaltyMatcher.group(1) + ")", ItemType.TRAIT));
                 }
             }
         }
+
 
         bonuses.addAll(getAgeStatMods(!speciesName.toLowerCase().contains("droid")));
         bonuses.addAll(getDroidSizeMods(speciesName.toLowerCase().contains("droid")));
@@ -187,6 +189,10 @@ class StatBonuses
         return bonuses;
     }
 
+    private static ProvidedItem createProvidedTrait(String itemName, String... prerequisite) {
+        return create(itemName, TRAIT, prerequisite);
+    }
+
     private static Collection<?> getDroidSizeMods(boolean droid)
     {
         Set<ProvidedItem> bonuses = new HashSet<>();
@@ -194,29 +200,29 @@ class StatBonuses
             return bonuses;
         }
 
-        bonuses.add(ProvidedItem.create("Dexterity (+8)", ItemType.TRAIT,"TRAIT:Fine"));
-        bonuses.add(ProvidedItem.create("Strength (-8)", ItemType.TRAIT, "TRAIT:Fine"));
+        bonuses.add(createProvidedTrait("Dexterity (+8)", "TRAIT:Fine"));
+        bonuses.add(createProvidedTrait("Strength (-8)", "TRAIT:Fine"));
 
-        bonuses.add(ProvidedItem.create("Dexterity (+6)", ItemType.TRAIT,"TRAIT:Diminutive"));
-        bonuses.add(ProvidedItem.create("Strength (-6)", ItemType.TRAIT, "TRAIT:Diminutive"));
+        bonuses.add(createProvidedTrait("Dexterity (+6)", "TRAIT:Diminutive"));
+        bonuses.add(createProvidedTrait("Strength (-6)", "TRAIT:Diminutive"));
 
-        bonuses.add(ProvidedItem.create("Dexterity (+4)", ItemType.TRAIT,"TRAIT:Tiny"));
-        bonuses.add(ProvidedItem.create("Strength (-4)", ItemType.TRAIT, "TRAIT:Tiny"));
+        bonuses.add(createProvidedTrait("Dexterity (+4)", "TRAIT:Tiny"));
+        bonuses.add(createProvidedTrait("Strength (-4)", "TRAIT:Tiny"));
 
-        bonuses.add(ProvidedItem.create("Dexterity (+2)", ItemType.TRAIT,"TRAIT:Small"));
-        bonuses.add(ProvidedItem.create("Strength (-2)", ItemType.TRAIT, "TRAIT:Small"));
+        bonuses.add(createProvidedTrait("Dexterity (+2)", "TRAIT:Small"));
+        bonuses.add(createProvidedTrait("Strength (-2)", "TRAIT:Small"));
 
-        bonuses.add(ProvidedItem.create("Dexterity (-2)", ItemType.TRAIT,"TRAIT:Large"));
-        bonuses.add(ProvidedItem.create("Strength (+8)", ItemType.TRAIT, "TRAIT:Large"));
+        bonuses.add(createProvidedTrait("Dexterity (-2)", "TRAIT:Large"));
+        bonuses.add(createProvidedTrait("Strength (+8)", "TRAIT:Large"));
 
-        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT,"TRAIT:Huge"));
-        bonuses.add(ProvidedItem.create("Strength (+16)", ItemType.TRAIT, "TRAIT:Huge"));
+        bonuses.add(createProvidedTrait("Dexterity (-4)", "TRAIT:Huge"));
+        bonuses.add(createProvidedTrait("Strength (+16)", "TRAIT:Huge"));
 
-        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT,"TRAIT:Gargantuan"));
-        bonuses.add(ProvidedItem.create("Strength (+24)", ItemType.TRAIT, "TRAIT:Gargantuan"));
+        bonuses.add(createProvidedTrait("Dexterity (-4)", "TRAIT:Gargantuan"));
+        bonuses.add(createProvidedTrait("Strength (+24)", "TRAIT:Gargantuan"));
 
-        bonuses.add(ProvidedItem.create("Dexterity (-4)", ItemType.TRAIT,"TRAIT:Colossal"));
-        bonuses.add(ProvidedItem.create("Strength (+32)", ItemType.TRAIT, "TRAIT:Colossal"));
+        bonuses.add(createProvidedTrait("Dexterity (-4)", "TRAIT:Colossal"));
+        bonuses.add(createProvidedTrait("Strength (+32)", "TRAIT:Colossal"));
         return bonuses;
     }
 
@@ -230,40 +236,40 @@ class StatBonuses
         }
 
         standardAgeBonuses = new ArrayList<>();
-        standardAgeBonuses.add(ProvidedItem.create("Strength (-3)", ItemType.TRAIT, "TRAIT:Child"));
-        standardAgeBonuses.add(ProvidedItem.create("Constitution (-3)", ItemType.TRAIT, "TRAIT:Child"));
-        standardAgeBonuses.add(ProvidedItem.create("Dexterity (-1)", ItemType.TRAIT, "TRAIT:Child"));
-        standardAgeBonuses.add(ProvidedItem.create("Intelligence (-1)", ItemType.TRAIT, "TRAIT:Child"));
-        standardAgeBonuses.add(ProvidedItem.create("Wisdom (-1)", ItemType.TRAIT, "TRAIT:Child"));
-        standardAgeBonuses.add(ProvidedItem.create("Charisma (-1)", ItemType.TRAIT, "TRAIT:Child"));
+        standardAgeBonuses.add(createProvidedTrait("Strength (-3)", "TRAIT:Child"));
+        standardAgeBonuses.add(createProvidedTrait("Constitution (-3)", "TRAIT:Child"));
+        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Child"));
+        standardAgeBonuses.add(createProvidedTrait("Intelligence (-1)", "TRAIT:Child"));
+        standardAgeBonuses.add(createProvidedTrait("Wisdom (-1)", "TRAIT:Child"));
+        standardAgeBonuses.add(createProvidedTrait("Charisma (-1)", "TRAIT:Child"));
 
-        standardAgeBonuses.add(ProvidedItem.create("Strength (-1)", ItemType.TRAIT, "TRAIT:Young adult"));
-        standardAgeBonuses.add(ProvidedItem.create("Constitution (-1)", ItemType.TRAIT, "TRAIT:Young adult"));
-        standardAgeBonuses.add(ProvidedItem.create("Dexterity (-1)", ItemType.TRAIT, "TRAIT:Young adult"));
-        standardAgeBonuses.add(ProvidedItem.create("Intelligence (-1)", ItemType.TRAIT, "TRAIT:Young adult"));
-        standardAgeBonuses.add(ProvidedItem.create("Wisdom (-1)", ItemType.TRAIT, "TRAIT:Young adult"));
-        standardAgeBonuses.add(ProvidedItem.create("Charisma (-1)", ItemType.TRAIT, "TRAIT:Young adult"));
+        standardAgeBonuses.add(createProvidedTrait("Strength (-1)", "TRAIT:Young adult"));
+        standardAgeBonuses.add(createProvidedTrait("Constitution (-1)", "TRAIT:Young adult"));
+        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Young adult"));
+        standardAgeBonuses.add(createProvidedTrait("Intelligence (-1)", "TRAIT:Young adult"));
+        standardAgeBonuses.add(createProvidedTrait("Wisdom (-1)", "TRAIT:Young adult"));
+        standardAgeBonuses.add(createProvidedTrait("Charisma (-1)", "TRAIT:Young adult"));
 
-        standardAgeBonuses.add(ProvidedItem.create("Strength (-1)", ItemType.TRAIT, "TRAIT:Middle age"));
-        standardAgeBonuses.add(ProvidedItem.create("Constitution (-1)", ItemType.TRAIT, "TRAIT:Middle age"));
-        standardAgeBonuses.add(ProvidedItem.create("Dexterity (-1)", ItemType.TRAIT, "TRAIT:Middle age"));
-        standardAgeBonuses.add(ProvidedItem.create("Intelligence (+1)", ItemType.TRAIT, "TRAIT:Middle age"));
-        standardAgeBonuses.add(ProvidedItem.create("Wisdom (+1)", ItemType.TRAIT, "TRAIT:Middle age"));
-        standardAgeBonuses.add(ProvidedItem.create("Charisma (+1)", ItemType.TRAIT, "TRAIT:Middle age"));
+        standardAgeBonuses.add(createProvidedTrait("Strength (-1)", "TRAIT:Middle age"));
+        standardAgeBonuses.add(createProvidedTrait("Constitution (-1)", "TRAIT:Middle age"));
+        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Middle age"));
+        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Middle age"));
+        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Middle age"));
+        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Middle age"));
 
-        standardAgeBonuses.add(ProvidedItem.create("Strength (-2)", ItemType.TRAIT, "TRAIT:Old"));
-        standardAgeBonuses.add(ProvidedItem.create("Constitution (-2)", ItemType.TRAIT, "TRAIT:Old"));
-        standardAgeBonuses.add(ProvidedItem.create("Dexterity (-2)", ItemType.TRAIT, "TRAIT:Old"));
-        standardAgeBonuses.add(ProvidedItem.create("Intelligence (+1)", ItemType.TRAIT, "TRAIT:Old"));
-        standardAgeBonuses.add(ProvidedItem.create("Wisdom (+1)", ItemType.TRAIT, "TRAIT:Old"));
-        standardAgeBonuses.add(ProvidedItem.create("Charisma (+1)", ItemType.TRAIT, "TRAIT:Old"));
+        standardAgeBonuses.add(createProvidedTrait("Strength (-2)", "TRAIT:Old"));
+        standardAgeBonuses.add(createProvidedTrait("Constitution (-2)", "TRAIT:Old"));
+        standardAgeBonuses.add(createProvidedTrait("Dexterity (-2)", "TRAIT:Old"));
+        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Old"));
+        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Old"));
+        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Old"));
 
-        standardAgeBonuses.add(ProvidedItem.create("Strength (-3)", ItemType.TRAIT, "TRAIT:Venerable"));
-        standardAgeBonuses.add(ProvidedItem.create("Constitution (-3)", ItemType.TRAIT, "TRAIT:Venerable"));
-        standardAgeBonuses.add(ProvidedItem.create("Dexterity (-3)", ItemType.TRAIT, "TRAIT:Venerable"));
-        standardAgeBonuses.add(ProvidedItem.create("Intelligence (+1)", ItemType.TRAIT, "TRAIT:Venerable"));
-        standardAgeBonuses.add(ProvidedItem.create("Wisdom (+1)", ItemType.TRAIT, "TRAIT:Venerable"));
-        standardAgeBonuses.add(ProvidedItem.create("Charisma (+1)", ItemType.TRAIT, "TRAIT:Venerable"));
+        standardAgeBonuses.add(createProvidedTrait("Strength (-3)", "TRAIT:Venerable"));
+        standardAgeBonuses.add(createProvidedTrait("Constitution (-3)", "TRAIT:Venerable"));
+        standardAgeBonuses.add(createProvidedTrait("Dexterity (-3)", "TRAIT:Venerable"));
+        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Venerable"));
+        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Venerable"));
+        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Venerable"));
         standardAgeBonuses = Util.mergeBonuses(standardAgeBonuses);
 
         return standardAgeBonuses;

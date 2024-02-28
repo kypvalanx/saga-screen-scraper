@@ -2,6 +2,8 @@ package swse.common;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -21,6 +23,13 @@ public class Category implements JSONy, Copyable<Category>{
 
 
     public static Set<Category> getCategories(Element content){
+       return getCategories(content, null);
+         }
+    public static Set<Category> getCategories(Element content, String variant){
+        if("Umbaran (Alternate Species Traits)".equals(variant)){
+            return List.of("Conditional Bonus Feat (Skill Focus (Persuasion))", "Medium", "Low-Light Vision", "Soothing Voice", "Light Sensitivity", "Umbarans").stream().map(text -> text.replace("Condition ", "Conditional ")).map(Category::create).collect(Collectors.toSet());
+        }
+
         return content.select("li.category,a.newcategory").stream().map(Element::text).map(text -> text.replace("Condition ", "Conditional ")).map(Category::create).collect(Collectors.toSet());
     }
 
