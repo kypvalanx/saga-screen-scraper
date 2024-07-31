@@ -72,7 +72,8 @@ public class UnitExporter extends BaseExporter {
             "Persuasion|Pilot|Ride|Stealth|Survival|Swim|Treat Injury|Use Computer|Use the Force";
     public static final Pattern VALUE_AND_PAYLOADS = Pattern.compile("(Multiattack Proficiency \\(Advanced Melee Weapons\\)|Multiattack Proficiency \\(Rifles\\)|[\\w\\s',-]+)(?:\\()?(" + SKILLS_REGEX + "|[\\s\\w,-;+-]+)?(?:\\))?(?:\\()?([\\s\\w,-;()+-]+)?(?:\\))?");
    // public static final Pattern VALUE_AND_PAYLOADS_ITEMS = Pattern.compile("(Multiattack Proficiency \\(Advanced Melee Weapons\\)|Multiattack Proficiency \\(Rifles\\)|[\\w\\s,'-]+)(?:\\()?(" + SKILLS_REGEX + "|[\\s\\w,-;+-]+)?(?:\\))?(?:\\()?([\\s\\w,-;()+-]+)?(?:\\))?");
-    public static final Pattern SKILL_PATTERN = Pattern.compile("(" + SKILLS_REGEX + ") \\+(\\d+)");
+   public static final Pattern SKILL_PATTERN = Pattern.compile("(" + SKILLS_REGEX + ") \\+(\\d+)");
+   public static final Pattern DEFENSE_PATTERN = Pattern.compile("Reflex Defense: (\\d*) \\(Flat-Footed: (\\d*)\\), Fortitude Defense: (\\d*), Will Defense: (\\d*)");
     private static Map<String,String> ITEMS_BY_ALTERNATE_NAME;
 
     private static Map<String, String> namedCrewPosition = new HashMap<>();
@@ -90,6 +91,8 @@ public class UnitExporter extends BaseExporter {
 
         List<String> nonHeroicUnits = new ArrayList<>(getAlphaLinks("/wiki/Category:Nonheroic_Units?from="));
         nonHeroicUnits.add("/wiki/Category:Nonheroic_Units");
+        nonHeroicUnits.addAll(getAlphaLinks("/wiki/Category:Variable?from="));
+        nonHeroicUnits.add("/wiki/Category:Variable");
         List<String> heroicUnits = new ArrayList<>(getAlphaLinks("/wiki/Category:Heroic_Units?from="));
         heroicUnits.add("/wiki/Category:Heroic_Units");
 
@@ -107,12 +110,13 @@ public class UnitExporter extends BaseExporter {
         List<String> exclusionByName = List.of();//getNames(overrides);
 
 
-        List<JSONObject> entries = new UnitExporter().getEntriesFromCategoryPage(nonHeroicUnits, false, exclusionByName);
-        entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false, exclusionByName));
         //entries.addAll(overrides);
 
         List<Integer> filter = List.of();//, 1, 2, 3, 4, 5 );//2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);//0, 1, 2, 3, 4);
-        List<String> nameFilter = List.of();//"A9G-Series Archive Droid"); //"B1-Series Battle Droid Squad");
+        List<String> nameFilter = List.of();//"B2-GR-Series Super Battle Droid");//"A9G-Series Archive Droid"); //"B1-Series Battle Droid Squad");
+
+        List<JSONObject> entries = new UnitExporter().getEntriesFromCategoryPage(nonHeroicUnits, false, exclusionByName, nameFilter);
+        entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false, exclusionByName, nameFilter));
 
         for (Integer i :
                 cls.stream()
@@ -140,7 +144,7 @@ public class UnitExporter extends BaseExporter {
     }
 
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -170,9 +174,12 @@ public class UnitExporter extends BaseExporter {
         List<Unit> items = new LinkedList<>();
 
         String itemName = title.text().trim();
-//        if(!itemName.equals("Veteran Imperial Officer")){
-//            return List.of();
-//        }
+
+
+
+        if((nameFilter != null && nameFilter.size()>0) && (!nameFilter.contains(itemName))){
+            return List.of();
+        }
         Unit current = Unit.create(itemName + variantQualifier);
         current.withLink(itemLink);
         items.add(current);
@@ -492,6 +499,20 @@ public class UnitExporter extends BaseExporter {
 
                 if (text.startsWith("Reflex Defense:")) {
 
+                    Matcher m = DEFENSE_PATTERN.matcher(text);
+
+                    while (m.find()) {
+
+                        if(isNumeric(m.group(1))){
+                            current.withDefense("reflex", parseInt(m.group(1)));
+                        }
+                        if(isNumeric(m.group(3))){
+                            current.withDefense("fortitude", parseInt(m.group(3)));
+                        }
+                        if(isNumeric(m.group(4))){
+                            current.withDefense("will", parseInt(m.group(4)));
+                        }
+                    }
                     continue;
                 }
 

@@ -78,7 +78,7 @@ public class CharacterClassExporter extends BaseExporter {
         List<JSONObject> entries = new ArrayList<>();
         final CharacterClassExporter characterClassExporter = new CharacterClassExporter();
         for (String speciesLink : classLinkList) {
-            List<JSONObject> collect = characterClassExporter.parseItem(speciesLink, true).stream().map(item -> item.toJSON()).collect(Collectors.toList());
+            List<JSONObject> collect = characterClassExporter.parseItem(speciesLink, true, null, null).stream().map(item -> item.toJSON()).collect(Collectors.toList());
             for(JSONObject entity: collect){
                 names.add((String) entity.get("name"));
             }
@@ -97,7 +97,7 @@ public class CharacterClassExporter extends BaseExporter {
     }
 
 
-    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }

@@ -23,8 +23,12 @@ import static org.fusesource.leveldbjni.JniDBFactory.*;
 
 
 public abstract class BaseExporter {
+    public static final String LOCAL_ROOT = "C:/Users/lijew/AppData/Local/FoundryVTT/Data/";
+    public static final String IMAGE_FOLDER = "systems/swse/icon";
     public static String ROOT = "https://swse.fandom.com";
 public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/Data/systems/swse";
+    protected static Map<String, String> availableFiles = new HashMap<>();
+    protected static List<String> itemsWithoutImages = new ArrayList<>();
 
     protected static void writeToDB(File dbFile, List<JSONObject> entries, boolean dryRun) throws IOException {
         if (dryRun) {
@@ -342,6 +346,37 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         return getDescription(response.toString().trim());
     }
 
+    public static String getSource(Element content) {
+        if (content == null) {
+            return "";
+        }
+
+
+        //"Reference Book":
+        //                        case "Homebrew Reference Book"
+        content = content.clone();
+        removeEditSpan(content);
+        removeTableOfContents(content);
+        removeImagesAndFigures(content);
+        removeComments(content);
+        makeLocalLinksAbsolute(content);
+
+
+        for (Node node : content.childNodes()) {
+
+            if(node instanceof Element){
+                String text = ((Element)node).text();
+                if (text.contains("Reference Book")) {
+                    String[] toks = text.split(":");
+                    return toks[1].trim();
+                }
+            }
+
+        }
+
+        return "";
+    }
+
     private static void makeLocalLinksAbsolute(Element content) {
         Elements anchors = content.select("a");
         for (Element anchor : anchors) {
@@ -446,6 +481,8 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 
             expandedLinks.add(alphaCategory + alpha);
         }
+
+        expandedLinks.add(alphaCategory + "¡");
         return expandedLinks;
     }
 
@@ -534,9 +571,48 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         System.out.println("List.of(\"" + names.stream().map(s -> s.replaceAll("\"", "\\\\\"")).collect(Collectors.joining("\", \"")) + "\")");
     }
 
-    abstract protected Collection<JSONy> parseItem(String itemLink, boolean overwrite);
+    ///C:\Users\lijew\AppData\Local\FoundryVTT\Data\systems\swse\icon\feat
 
-    private Collection<? extends JSONObject> readCategoryItemPage(String itemPageLink, boolean overwrite) {
+//    protected static String getImage(String itemType, String itemName){
+//        return getImage(itemType, List.of(itemName));
+//    }
+    protected static String getImage(String itemType, String... names){
+        return getImage(itemType, List.of(names));
+    }
+    protected static String getImage(String itemType, List<String> itemNames) {
+        if (itemType.contains(",")) {
+            itemType = itemType.split(",")[0];
+        }
+
+        for (String itemName :
+                itemNames) {
+
+        String key = getFileKey(itemName);
+
+        if (availableFiles.containsKey(key)) {
+            String exists = availableFiles.remove(key);
+            return IMAGE_FOLDER + "/" + itemType + "/"+exists;
+        }
+        }
+        itemsWithoutImages.add(itemNames.get(0));
+        if (new File(LOCAL_ROOT + IMAGE_FOLDER + "/" + itemType + "/default.png").exists()) {
+            return IMAGE_FOLDER + "/" + itemType + "/default.png";
+        } else {
+            //System.out.println("could not find "+ IMAGE_FOLDER+"/" + itemType + "/default.png");
+            new File(LOCAL_ROOT + IMAGE_FOLDER + "/" + itemType).mkdir();
+        }
+
+        return IMAGE_FOLDER + "/default.png";
+    }
+
+    private static String getFileKey(String itemName) {
+        itemName = itemName.replace("'", "_").replace(":", "").replace("-", " ").replace("ä", "a");
+        return itemName.toLowerCase();
+    }
+
+    abstract protected Collection<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter);
+
+    private Collection<? extends JSONObject> readCategoryItemPage(String itemPageLink, boolean overwrite, List<String> exclusion, List<String> nameFilter) {
         Document doc = getDoc(itemPageLink, overwrite);
         if (doc == null) {
             return new ArrayList<>();
@@ -550,23 +626,23 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         links.forEach(a -> hrefs.add(a.attr("href")));
 
         return hrefs.stream()
-                .flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite).stream())
+                .flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite, exclusion, nameFilter).stream())
                 .map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
     }
 
     public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite) {
-        return getEntriesFromCategoryPage(talentLinks, overwrite, List.of());
+        return getEntriesFromCategoryPage(talentLinks, overwrite, List.of(), List.of());
     }
-    public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite, List<String> exclusion) {
+    public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite, List<String> exclusion, List<String> nameFilter) {
         List<JSONObject> entries = new ArrayList<>();
         List<String> names = new LinkedList<>();
         for (String talentLink : talentLinks) {
             //entries.addAll(readCategoryItemPage(talentLink, false));
             Collection<? extends JSONObject> newEntities = List.of();
             if(talentLink.contains("Category")) {
-                newEntities = readCategoryItemPage(talentLink, overwrite);
+                newEntities = readCategoryItemPage(talentLink, overwrite, exclusion, nameFilter);
             } else {
-                newEntities = parseItem(talentLink, overwrite).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
+                newEntities = parseItem(talentLink, overwrite, null, nameFilter).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
             }
             for (JSONObject newEntity : newEntities) {
                 String name = newEntity.getString("name");

@@ -38,7 +38,7 @@ public class TraitExporter extends BaseExporter {
     private static final Option[] ATTRIBUTE_BONUS_OPTIONS = {new Option("Strength").withChange(Change.create(ChangeKey.STRENGTH_BONUS, 1)),
             new Option("Dexterity").withChange(Change.create(ChangeKey.DEXTERITY_BONUS, 1)),
             new Option("Constitution").withChange(Change.create(ChangeKey.CONSTITUTION_BONUS, 1)),
-            new Option("Intelligence").withChange(Change.create(ChangeKey.INITIATIVE_BONUS, 1)),
+            new Option("Intelligence").withChange(Change.create(ChangeKey.INTELLIGENCE_BONUS, 1)),
             new Option("Wisdom").withChange(Change.create(ChangeKey.WISDOM_BONUS, 1)),
             new Option("Charisma").withChange(Change.create(ChangeKey.CHARISMA_BONUS, 1))};
 
@@ -64,7 +64,7 @@ public class TraitExporter extends BaseExporter {
 
         final TraitExporter traitExporter = new TraitExporter();
         for (String abilityLink : abilities) {
-            entries.addAll(traitExporter.parseItem(abilityLink, overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+            entries.addAll(traitExporter.parseItem(abilityLink, overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
         }
 
         entries.addAll(getManualAbilities());
@@ -423,7 +423,7 @@ public class TraitExporter extends BaseExporter {
         return Util.getCategoryLinks(doc);
     }
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink || "/wiki/Category:Droid_Traits".equals(itemLink)) {
             return new ArrayList<>();
         }
@@ -771,12 +771,12 @@ public class TraitExporter extends BaseExporter {
         }
         if ("Bonus Trained Skill".equals(itemName)) {
 
-//            attributes.add(Change.create(ChangeKey.TRAINED_SKILLS, "1"));
+            attributes.add(Change.create(ChangeKey.TRAINED_SKILLS, "1"));
 //        }
 //        if ("Automatic Trained Skill".equals(itemName)) {
 
-            attributes.add(Change.create(ChangeKey.AUTOMATIC_TRAINED_SKILL, "#payload#"));
-            attributes.add(new Choice("Choose an automatically trained skill").withOption("AVAILABLE_UNTRAINED_SKILLS", new Option().withPayload("AVAILABLE_UNTRAINED_SKILLS")));
+            //attributes.add(Change.create(ChangeKey.AUTOMATIC_TRAINED_SKILL, "#payload#"));
+            //attributes.add(new Choice("Choose an automatically trained skill").withOption("AVAILABLE_UNTRAINED_SKILLS", new Option().withPayload("AVAILABLE_UNTRAINED_SKILLS")));
         }
         return attributes;
     }

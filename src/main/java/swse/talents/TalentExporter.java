@@ -71,6 +71,14 @@ public class TalentExporter extends BaseExporter
 
     public static void main(String[] args)
     {
+
+        String dir = LOCAL_ROOT + IMAGE_FOLDER + "/talent";
+
+        for (String file :
+                new File(dir).list()) {
+            availableFiles.put(file.substring(0, file.lastIndexOf(".")).toLowerCase().trim().replace("-", " ").replace("ä", "a"), file);
+        }
+
         List<String> talentLinks = new ArrayList<String>();
         //talentLinks.add("/wiki/Talents");
         //talentLinks.add("/wiki/Force_Talents");
@@ -89,7 +97,7 @@ public class TalentExporter extends BaseExporter
 
 
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite)
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter)
     {
         if (null == itemLink)
         {
@@ -123,6 +131,7 @@ public class TalentExporter extends BaseExporter
         String talentDescription = null;
         Prerequisite prerequisite = null;
         Elements entries = content.select("p,h4");
+        String book = null;
 
         for(Element element: entries){
             if((element.tag().equals(Tag.valueOf("h4")) && element.getElementsByClass("mw-headline").size()>0))
@@ -139,7 +148,9 @@ public class TalentExporter extends BaseExporter
                             .withPossibleProviders(possibleProviders)
                             .withForceTradition(tradition)
                             .withProvided(getAttributes(talentName))
-                            .withProvided(getChoices(talentName)));
+                            .withProvided(getChoices(talentName))
+                                    .withImage(getImage("talent", talentName, itemName))
+                            .withSource(book));
                 }
 
                 talentName = element.getElementsByClass("mw-headline").first().text();
@@ -158,7 +169,9 @@ public class TalentExporter extends BaseExporter
 
                     prerequisite = Prerequisite.getPrerequisite(itemName, text, talentName);
                     //allPrerequisites.addAll(prerequisite.getAll());
-                } else{
+                } else if(text.toLowerCase().contains("reference book")){
+                    book = text.split(":")[1].trim();
+                } else {
                     if(talentDescription == null){
                         talentDescription = getDescription(element);
                     }else {
@@ -184,7 +197,9 @@ public class TalentExporter extends BaseExporter
                     .withPossibleProviders(possibleProviders)
                     .withForceTradition(tradition)
                     .withProvided(getAttributes(talentName))
-                    .withProvided(getChoices(talentName)));
+                    .withProvided(getChoices(talentName))
+                    .withImage(getImage("talent", talentName, itemName))
+                    .withSource(book));
         }
 
         return talents;
@@ -357,7 +372,11 @@ public class TalentExporter extends BaseExporter
                 attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES_MAX, 10));
                 attributes.add(Change.create(ChangeKey.SNEAK_ATTACK, "1d6"));
                 break;
-
+            case "Sentinel Strike":
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES_MAX, 5));
+                attributes.add(Change.create(ChangeKey.SENTINEL_STRIKE, "1d6"));
+                break;
         }
 
         return attributes;

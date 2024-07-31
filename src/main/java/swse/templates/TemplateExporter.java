@@ -39,6 +39,7 @@ public class TemplateExporter extends BaseExporter {
         templateLinks.put("/wiki/Weapon_Templates", List.of("weapon"));
         templateLinks.put("/wiki/Armor_Templates", List.of("armor"));
         templateLinks.put("/wiki/Vehicle_Templates", List.of("vehicle"));
+        templateLinks.put("/wiki/Beast_Templates", List.of("beast"));
         //templateLinks.put("/wiki/General_Templates", List.of());
         final boolean overwrite = false;
 
@@ -681,7 +682,7 @@ public class TemplateExporter extends BaseExporter {
     }
 
     @Override
-    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         return null;
     }
 }

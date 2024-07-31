@@ -17,6 +17,7 @@ import java.util.Map;
 import static swse.util.Util.cloneList;
 
 public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
+    protected boolean disabled;
     protected List<Change> changes = Lists.newArrayList();
     protected String name;
     protected String group;
@@ -26,6 +27,7 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
     public FoundryEffect(String name) {
         this.name = name;
         this.flags = Maps.newHashMap();
+        this.disabled = true;
     }
 
     public static JSONArray constructEffectList(List<FoundryEffect<?>> effects) {
@@ -48,6 +50,16 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
 
     public T withGroup(String group) {
         this.group = group;
+        return (T) this;
+    }
+
+    public T enabled(){
+        this.disabled = false;
+        return (T) this;
+    }
+
+    public T disabled(){
+        this.disabled = true;
         return (T) this;
     }
 
@@ -75,7 +87,7 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
     public JSONObject toJSON() {
         resolveDynamicValues();
         JSONObject effect = new JSONObject();
-        effect.put("disables", true);
+        effect.put("disabled", disabled);
         effect.put("name", name);
         effect.put("changes", Change.constructChangeList(changes));
         effect.put("flags", getJsonFlags());

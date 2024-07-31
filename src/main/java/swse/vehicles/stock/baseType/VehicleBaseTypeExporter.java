@@ -32,7 +32,7 @@ public class VehicleBaseTypeExporter extends BaseExporter {
         final VehicleBaseTypeExporter vehicleBaseTypeExporter = new VehicleBaseTypeExporter();
         for (String stockTemplateLink :
                 stockTemplateLinks) {
-            entries.addAll(vehicleBaseTypeExporter.parseItem(stockTemplateLink, overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+            entries.addAll(vehicleBaseTypeExporter.parseItem(stockTemplateLink, overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
         }
         entries.add(createCustom());
 
@@ -43,7 +43,7 @@ public class VehicleBaseTypeExporter extends BaseExporter {
         return VehicleBaseType.create("Custom").toJSON();
     }
 
-    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }

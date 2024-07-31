@@ -60,11 +60,11 @@ public class VehicleSystemsExporter extends BaseExporter {
             drawProgressBar(entries.size() * 100.0 / 323.0);
         }
         List<JSONObject> newEntities = new ArrayList<>();
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Droid_Socket", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Grenade_Launcher", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Missile_Launcher", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Frag_Grenade", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Heavy_Repeating_Blaster", overwrite).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Droid_Socket", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Grenade_Launcher", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Missile_Launcher", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Frag_Grenade", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Heavy_Repeating_Blaster", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
         newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Fire").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
         newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Repeating").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
         newEntities.addAll(assembleFromNameAndChildren(null, "Battery").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
@@ -123,12 +123,12 @@ public class VehicleSystemsExporter extends BaseExporter {
         links.forEach(a -> hrefs.add(a.attr("href")));
 
 
-        return hrefs.stream().flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite).stream())
+        return hrefs.stream().flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite, null, null).stream())
                 .map(item -> item.toJSON())
                 .collect(Collectors.toList());
     }
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }

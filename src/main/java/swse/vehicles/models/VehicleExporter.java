@@ -63,7 +63,7 @@ public class VehicleExporter extends BaseExporter {
     }
 
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }

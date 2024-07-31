@@ -56,8 +56,10 @@ public class MoveWorldCompendiumsToSystem {
             for(File child : Objects.requireNonNull(targetPath.toFile().listFiles())){
                 deleteRecursively(child.toPath());
             }
-        } else if(targetPath.toFile().exists()){
+        }
+        if(targetPath.toFile().exists()){
             Files.delete(targetPath);
         }
+
     }
 }

@@ -5,6 +5,7 @@ public enum ChangeKey {
     AID_ANOTHER_BONUS("aidAnotherBonus"),
     AMMO("ammo"),
     AMMO_USE_MULTIPLIER("ammoUseMultiplier"),
+    AMMO_USE("ammoUse"),
     APPENDAGES("appendages"),
     APPLICATION("application"),
     ARMOR_PROFICIENCY("armorProficiency"),
@@ -197,11 +198,13 @@ public enum ChangeKey {
     CRITICAL_HIT_POSTMULTIPLIER_BONUS_DIE("criticalHitPostMultiplierBonusDie"),
     BONUS_DAMAGE_DIE("bonusDamageDie"),
     BONUS_DAMAGE_DIE_TYPE("bonusDamageDieType"),
+    BONUS_CRITICAL_DAMAGE_DIE_TYPE("bonusCriticalDamageDieType"),
     EXOTIC_WEAPON("exoticWeapon"),
     ALLOWS_BLOCK("allowsBlock"),
     ALLOWS_DEFLECT("allowsDeflect"),
     ALLOWS_REDIRECT_SHOT("allowsRedirectShot"),
     SIZE_BONUS("sizeBonus"),
+    SIZE("size"),
     RANGE_MULTIPLIER("rangeMultiplier"),
     SKILL_BONUS("skillBonus"),
     SPEED_BONUS("speedBonus"),
@@ -259,7 +262,18 @@ public enum ChangeKey {
     BONUS_SECOND_WIND("bonusSecondWind"),
     WEIGHT("weight"),
     BASE_ATTACK_BONUS("baseAttackBonus"),
-    AUTOMATIC_TRAINED_SKILL("automaticTrainedSkill"), CONSUMES("consumes"), TAKE_MULTIPLE_TIMES_MAX("takeMultipleTimesMax"), BACTA("bacta");
+    AUTOMATIC_TRAINED_SKILL("automaticTrainedSkill"),
+    CONSUMES("consumes"),
+    TAKE_MULTIPLE_TIMES_MAX("takeMultipleTimesMax"),
+    BACTA("bacta"),
+    AURA_COLOR("auraColor"),
+    AURA_LUMINOSITY("auraLuminosity"),
+    AURA_BRIGHT("auraBright"),
+    AURA_DIM("auraDim"),
+    AURA_ANIMATION_TYPE("auraAnimationType"),
+    AURA_ANIMATION_SPEED("auraAnimationSpeed"),
+    AURA_ANIMATION_INTENSITY("auraAnimationIntensity"),
+    SKILL_MODIFIER("skillModifier"), SENTINEL_STRIKE("sentinelStrike");
 
     private final String value;
 

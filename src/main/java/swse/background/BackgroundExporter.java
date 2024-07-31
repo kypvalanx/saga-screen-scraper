@@ -212,7 +212,7 @@ public class BackgroundExporter extends BaseExporter {
     }
 
     @Override
-    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         return null;
     }
 }

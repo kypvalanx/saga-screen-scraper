@@ -1,9 +1,6 @@
 package swse.item;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,41 +15,56 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
-import javax.imageio.ImageIO;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import swse.common.*;
 import swse.prerequisite.OrPrerequisite;
+import swse.prerequisite.Prerequisite;
 import swse.prerequisite.SimplePrerequisite;
 import swse.util.Context;
 
+import static swse.prerequisite.SimplePrerequisite.simple;
 import static swse.util.Util.*;
 
 public class ItemExporter extends BaseExporter {
     public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\items.json";
     public static final String JSON_TEMP_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\";
-    public static final Effect EFFECT_AUTOFIRE = Effect.create("Autofire", "ROF", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, "-5"), Change.create(ChangeKey.SKIP_CRITICAL_MULTIPLY, "true")));
-    public static final Effect EFFECT_SINGLE_SHOT = Effect.create("Single-Shot", "ROF", List.of());
-    public static final Effect EFFECT_BARRAGE = Effect.create("Barrage", "ROF", List.of());
-    public static final String IMAGE_FOLDER = "systems/swse/icon/item";
-    public static final String ROOT = "G:/FoundryVTT/Data";
+    public static final Effect EFFECT_AUTOFIRE = Effect.create("Autofire", "Fire Mode", List.of(
+            Change.create(ChangeKey.TO_HIT_MODIFIER, "-5"),
+            Change.create(ChangeKey.SKIP_CRITICAL_MULTIPLY, "true"),
+            Change.create(ChangeKey.AMMO_USE, 10)));
+    public static final Effect EFFECT_SINGLE_SHOT = Effect.create("Single-Shot", "Fire Mode", List.of());
+    public static final Effect EFFECT_BARRAGE = Effect.create("Barrage", "Fire Mode", List.of());
     private static final Set<String> unique = new HashSet<>();
     public static final Pattern SHOTS_PER_PACK = Pattern.compile("After (\\d*|one) \\w*, the ([\\w\\s]*) must be \\w*\\.");
+    public static final List<String> LIGHTSABER_CRYSTALS = List.of("Ankarres Sapphire", "Barab Ingot", "Bondar Crystal", "Compressed Crystal", "Corusca Gem",
+            "Dantari Crystal", "Dragite Crystal", "Durindfire Crystal", "Firkraan Crystal", "Heart of the Guardian",
+            "Hurikane Crystal", "Ilum Crystal", "Jenraux Crystal", "Kaiburr Crystal Shard", "Kasha Crystal",
+            "Kathracite Crystal", "Krayt Dragon Pearl", "Lambent Crystal", "Mantle of the Force", "Mephite Crystal",
+            "Opila Crystal", "Phond Crystal", "Pontite Crystal", "Rubat Crystal", "Sigil Crystal", "Solari Crystal",
+            "Standard Synthetic Crystal", "Unstable Crystal");
     private Set<String> duplicates = new HashSet<>();
 
 
     public static void main(String[] args) {
+        List<String> filter = List.of();
+        if(args.length > 0){
+            filter = List.of(args[0]);
+        }
+
         List<String> itemLinks = new ArrayList<>();
         //weapons
         itemLinks.addAll(getAlphaLinks("/wiki/Category:Weapons?from="));
         itemLinks.addAll(getAlphaLinks("/wiki/Category:General_Equipment?from="));
         itemLinks.addAll(getAlphaLinks("/wiki/Category:Armor?from="));
+        itemLinks.addAll(getAlphaLinks("/wiki/Category:Equipment_Upgrades?from="));
+        itemLinks.addAll(getAlphaLinks("/wiki/Category:Weapon_Upgrades?from="));
         itemLinks.add("/wiki/Advanced_Melee_Weapons");
         itemLinks.add("/wiki/Exotic_Weapons_(Melee)");
         itemLinks.add("/wiki/Exotic_Weapons_(Ranged)");
@@ -116,16 +128,42 @@ public class ItemExporter extends BaseExporter {
         itemLinks.add("/wiki/Appendages");
         itemLinks.add("/wiki/Droid_Accessories");
 
-        ItemExporter itemExporter = new ItemExporter();
+        //itemLinks.clear();
+        //itemLinks.add("/wiki/Lightsaber_Construction");
+        itemLinks.add("/wiki/Category:Adegan_Crystals");
+        itemLinks.add("/wiki/Category:Rare_Crystals");
+        itemLinks.add("/wiki/Category:Synthetic_Crystals");
+        itemLinks.add("/wiki/Category:Traditional_Jewels");
+        itemLinks.add("/wiki/Category:Lightsaber_Crystals");
+
+        itemLinks.add("/wiki/Beckon_Call");
+        itemLinks.add("/wiki/Blade_Lock");
+        itemLinks.add("/wiki/Concealed_Compartment");
+        itemLinks.add("/wiki/Electrum_Detail");
+        itemLinks.add("/wiki/Fiber_Cord");
+        itemLinks.add("/wiki/Force-Activated");
+        itemLinks.add("/wiki/Interlocking_Hilt");
+        itemLinks.add("/wiki/Pressure_Grip");
+        itemLinks.add("/wiki/Trapped_Grip");
+        itemLinks.add("/wiki/Waterproof_Casing");
+
+        List<String> traitTables = List.of("/wiki/Tech_Specialist", "/wiki/Superior_Tech", "/wiki/Sith_Alchemy_Talent_Tree");
+
         List<JSONObject> entries = new ArrayList<>();
+        for (String link : traitTables) {
+            entries.addAll(parseTraitTable(link, false));
+        }
+
+
+        ItemExporter itemExporter = new ItemExporter();
         double size = itemLinks.size();
         AtomicInteger i = new AtomicInteger();
         for (String itemLink : itemLinks) {
-            entries.addAll(itemExporter.readItemMenuPage(itemLink, false));
+            entries.addAll(itemExporter.readItemMenuPage(itemLink, false, filter));
             drawProgressBar(i.getAndIncrement() * 100 / size);
         }
 
-        entries.addAll(getManualItems());
+        entries.addAll(getManualItems( filter));
 
 
         Multimap<String, JSONObject> entryMaps = ArrayListMultimap.create();
@@ -133,7 +171,8 @@ public class ItemExporter extends BaseExporter {
             entryMaps.put(entry.getString("type"), entry);
         }
 
-        printUniqueNames(entries);
+        //printUniqueNames(entries);
+        //printUniqueNames(entries);
 
         //System.out.println("DROID SYSTEMS:");
 
@@ -144,13 +183,58 @@ public class ItemExporter extends BaseExporter {
 
 
         for(String key : entryMaps.keySet()){
-
-            writeToJSON(new File(JSON_TEMP_OUTPUT+key+".json"), entryMaps.get(key), hasArg(args, "d"), toTitleCase(key));
+            System.out.println(key + " : " + entryMaps.get(key).size());
+            if(entryMaps.get(key).size() > 0){
+                writeToJSON(new File(JSON_TEMP_OUTPUT+key+".json"), entryMaps.get(key), hasArg(args, "d"), toTitleCase(key));
+            }
         }
         //writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
     }
 
-    private Collection<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite) {
+    private static Collection<JSONObject> parseTraitTable(String itemPageLink, boolean overwrite) {
+        Document doc = getDoc(itemPageLink, overwrite);
+
+        if(doc == null){
+            return List.of();
+        }
+
+
+        Element body = doc.body();
+
+        Elements tables = body.getElementsByClass("wikitable");
+
+        String subtype =null;
+
+        List<JSONObject> of = new ArrayList<>();
+        for (Element table : tables) {
+            Elements rows = table.getElementsByTag("tr");
+            for (Element row : rows) {
+                Element first = row.children().first();
+                if (first.tag().equals(Tag.valueOf("th"))) {
+                    subtype = standardizeTypes(first.text(), Set.of(), null);
+                    continue;
+                }
+
+                Element second = row.children().get(1);
+                Element third = row.children().size()>2 ? row.children().get(2) : null;
+
+                of.add(Item
+                        .create(first.text(), getFoundryType(subtype))
+                                .withSubtype(subtype)
+                                .withLink(itemPageLink)
+                        .withDescription(second)
+                        .withDescription(third)
+                        .withPrerequisite(getPrerequisite(subtype))
+                                .withProvided(getManualAttributes(first.text(), subtype))
+                        .toJSON());
+            }
+        }
+
+        //System.out.println(of);
+        return of;
+    }
+
+    private Collection<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite, List<String> filter) {
         Document doc = getDoc(itemPageLink, overwrite);
 
         if(doc == null){
@@ -184,7 +268,9 @@ public class ItemExporter extends BaseExporter {
                     }));
         });
 
-
+        if(hrefs.size() == 0){
+            hrefs.add(itemPageLink);
+        }
 
 
         return hrefs.stream().map(s -> {
@@ -196,7 +282,7 @@ public class ItemExporter extends BaseExporter {
         })
                 .filter(Objects::nonNull)
                 .filter(ItemExporter::filterByLink)
-                .flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite).stream()).map(item -> item.toJSON())
+                .flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite, filter, null).stream()).map(item -> item.toJSON())
                 .collect(Collectors.toList());
     }
 
@@ -204,7 +290,7 @@ public class ItemExporter extends BaseExporter {
         return !List.of("/wiki/Illegal", "/wiki/Military", "/wiki/Rare", "/wiki/Restricted", "/wiki/Power_Pack_Bomb", "/wiki/The_Madness_of_Knowledge").contains(s);
     }
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -216,7 +302,11 @@ public class ItemExporter extends BaseExporter {
             return new ArrayList<>();
         }
 
-        if ("home".equalsIgnoreCase(itemName) || "datapad".equalsIgnoreCase(itemName) || "bacta tank".equalsIgnoreCase(itemName)) {
+        if ("home".equalsIgnoreCase(itemName)
+                || "datapad".equalsIgnoreCase(itemName)
+                || "bacta tank".equalsIgnoreCase(itemName)
+                || (filter != null && !filter.contains(itemName))
+                || isCategory(itemName)) {
             return new ArrayList<>();
         }
 
@@ -237,6 +327,10 @@ public class ItemExporter extends BaseExporter {
         content.select("div.toc").remove();
         content.select("img,figure").remove();
         removeComments(content);
+
+
+
+        Set<Category> categories = new HashSet<>(Category.getCategories(doc, null));
 
         String itemSubType = null;
         String damageType = null;
@@ -533,7 +627,7 @@ public class ItemExporter extends BaseExporter {
             }
         }
 
-        itemSubType = standardizeTypes(itemUpgradeType != null ? itemUpgradeType : itemSubType);
+        itemSubType = standardizeTypes(itemUpgradeType != null ? itemUpgradeType : itemSubType, categories, itemName);
         String itemType = getFoundryType(itemSubType);
         attributes.addAll(getManualAttributes(itemName, itemSubType));
         attributes.addAll(getModes(rateOfFire, itemName));
@@ -576,19 +670,10 @@ public class ItemExporter extends BaseExporter {
             special = null;
         }
 
-        //SubType subtype = SubType.create(damageType);
-
-
-//        List<Attack> attacks = resolveAttacks(damage, stunSetting, attack, rateOfFire, damageType);
-
         final List<JSONy> jsonObjects = new ArrayList<>();
 
-        if (itemName.equals("Energy Shields")) {
-            //TODO build energy shield objects here
 
-            return jsonObjects;
-        }
-
+        Prerequisite prerequisite = getPrerequisite(itemSubType);
         Item item = Item.create(itemName, itemType)
                 .withLink(itemLink)
                 .withDescription(content)
@@ -606,6 +691,7 @@ public class ItemExporter extends BaseExporter {
                 .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, bonusToReflexDefense))
                 .withProvided(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, bonusToFortitudeDefense))
                 .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, maximumDexterityBonus))
+                .withPrerequisite(prerequisite)
                 .withSplash(splash)
                 .withHeirloomBonus(heirloomBonus)
                 .withSeeAlso(seeAlso)
@@ -643,6 +729,34 @@ public class ItemExporter extends BaseExporter {
         jsonObjects.add(item);
 
         return jsonObjects;
+    }
+
+    private static String getItemSubTypeByItemName(String itemName) {
+        if(List.of("Beckon Call",
+        "Blade Lock",
+        "Concealed Compartment",
+                "Electrum Detail",
+                "Fiber Cord",
+                "Force-Activated",
+                "Interlocking Hilt",
+                "Pressure Grip",
+                "Trapped Grip",
+        "Waterproof Casing").contains(itemName)){
+            return "Lightsaber Modifications";
+        };
+
+        return null;
+    }
+
+    private static Prerequisite getPrerequisite(String itemSubType) {
+        if(List.of("Adegan Crystals", "Rare Crystals", "Synthetic Crystals", "Traditional Jewels", "Lightsaber Crystals", "Lightsaber Modifications").contains(itemSubType)){
+            return simple("Lightsabers", "SUBTYPE", "lightsabers");
+        }
+        return null;
+    }
+
+    private boolean isCategory(String itemName) {
+        return List.of("Adegan Crystals", "Rare Crystals", "Synthetic Crystals", "Traditional Jewels").contains(itemName);
     }
 
     private List<Object> getDroidAppendageAttributes(String itemName) {
@@ -806,7 +920,7 @@ public class ItemExporter extends BaseExporter {
             Pattern TREATED_AS_FOR_RANGE = Pattern.compile("treated as(?: a)? (Rifle|Rifles|Pistol|Simple Weapon \\(Ranged\\)|Simple Weapons \\(Ranged\\))(?:, not a Thrown Weapon,)? for");
             Matcher m = TREATED_AS_FOR_RANGE.matcher(text);
             if (m.find()) {
-                attributes.add(Change.create(ChangeKey.TREATED_AS, standardizeTypes(m.group(1))));
+                attributes.add(Change.create(ChangeKey.TREATED_AS, standardizeTypes(m.group(1), null, itemName)));
             }
         }
 
@@ -826,14 +940,178 @@ public class ItemExporter extends BaseExporter {
             }
         }
 
+        Pattern fortitudeEquipmentBonus = Pattern.compile("\\+(\\d*) Equipment bonus to your Fortitude Defense");
+
+        Matcher m = fortitudeEquipmentBonus.matcher(text);
+        if(m.find()){
+            attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, standardizeTypes(m.group(1), null, itemName)));
+        }
+
+
+
+        if (attributes.size() == 0){
+            //printUnique(text);
+            //System.out.println();
+        }
+        return attributes;
+    }
+
+    private static Collection<?> addLightsaberCrystalAttributes( String itemName) {
+        List<Object> attributes = new ArrayList<>();
+        List<Change> attunementBonuses = new ArrayList<>();
+        AuraEffect auraEffect = new AuraEffect();
+
+        switch (itemName){
+            case "Ankarres Sapphire":
+                attunementBonuses.add(Change.create(ChangeKey.SKILL_BONUS, "treat injury:5").withParentPrerequisite(simple("Dark Side Score of 0", "DARK SIDE SCORE", "0")));
+                attunementBonuses.add(Change.create(ChangeKey.SKILL_BONUS, "use the force:5").withModifier("Activate Vital Transfer Force Power").withParentPrerequisite(simple("Dark Side Score of 0", "DARK SIDE SCORE", "0")));
+                auraEffect.withColor("blue");
+
+                break;
+            case "Barab Ingot":
+                attunementBonuses.add(Change.create(ChangeKey.DAMAGE_TYPE, "Fire"));
+                auraEffect.withAnimationType("flame").withAnimationIntensity("4").withAnimationSpeed("5");
+                auraEffect.withAnimationSpeed("2");
+                break;
+            case "Bondar Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.DAMAGE_TYPE, "Stun"));
+                break;
+            case "Compressed Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SPECIAL, "the targets of your Lightsaber attacks take a -2 " +
+                        "penalty on Use the Force checks made to negate the attack with the Block Talent."));
+                auraEffect.withColor("red").withColor("varies").withBright("0.3").withDim("0.7");
+                break;
+            case "Corusca Gem":
+                attunementBonuses.add(Change.create(ChangeKey.BONUS_DAMAGE_DIE, 1).withModifier("against target with damage reduction"));
+                break;
+            case "Dantari Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SPECIAL, "If you wield an attuned Lightsaber with a Dantari Crystal " +
+                        "and roll a natural 19 on a Use the Force check made to activate a Force Power, you regain some of " +
+                        "your spent Force Powers. If you have a Dark Side Score of 0, you regain all spent Force Powers " +
+                        "with the [Light Side] descriptor. If you have a Dark Side Score of 1+, you regain all spent " +
+                        "Force Powers with the [Dark Side] descriptor. If you roll a natural 20 on a Use the Force check " +
+                        "made to activate a Force Power, you still regain all spent Force Powers."));
+                auraEffect.withColor("varies");
+                break;
+            case "Dragite Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.CRITICAL_HIT_POSTMULTIPLIER_BONUS_DIE, 1).withModifier("Sonic"));
+                break;
+            case "Durindfire Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SPECIAL, "when you wield an attuned Lightsaber with a Durindfire " +
+                        "Crystal, the Lightsaber emits a glow comparable to a Fusion Lantern, illuminating the area " +
+                        "brightly.  Fusion Lantern: A hand-held light source larger than a Glow Rod, the Fusion Lantern produces " +
+                        "light and heat. The light spreads out from the lantern, producing illumination in a 6-square radius"));
+                auraEffect.withColor("silver").withBright("6").withDim("0");
+                break;
+            case "Firkraan Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.DAMAGE_TYPE, "Ion"));
+                auraEffect.withAnimationType("wave").withAnimationSpeed("2").withAnimationIntensity("1");
+                break;
+            case "Heart of the Guardian":
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 2).withModifier("target wielding lightsaber"));
+                auraEffect.withColor("orange").withLuminosity("0.7");
+                break;
+            case "Hurikane Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 2).withModifier("targets with an armor bonus to their Reflex Defense."));
+                auraEffect.withColor("blue");
+                auraEffect.withColor("violet");
+                break;
+            case "Ilum Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 1));
+                auraEffect.withColor("blue");
+                auraEffect.withColor("green");
+                break;
+            case "Jenraux Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SKILL_BONUS, "use the force:2").withModifier("Block"));
+                break;
+            case "Kaiburr Crystal Shard":
+                //attunementBonuses.add(Effect.create("Amplify", List.of(Change.create(ChangeKey.BONUS_DAMAGE_DIE_TYPE, 1))));
+                auraEffect.withColor("crimson");
+                break;
+            case "Kasha Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.WILL_DEFENSE_BONUS, 2));
+                break;
+            case "Kathracite Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.BONUS_DAMAGE_DIE_TYPE, -1).withModifier("Reduce d4 to d6 -1"));
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 1));
+                break;
+            case "Krayt Dragon Pearl":
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 3));
+                break;
+            case "Lambent Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SKILL_MODIFIER, "Use the Force:you ignore the normal penalties when using the Sense Force and Sense Surroundings applications of the Use the Force Skill to sense Yuuzhan Vong."));
+                break;
+            case "Mantle of the Force":
+                attunementBonuses.add(Change.create(ChangeKey.SKILL_BONUS, "use the force:5").withModifier("Force Powers that have you as the sole target"));
+                auraEffect.withColor("cyan").withLuminosity("0.7");
+                break;
+            case "Mephite Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 1));
+                break;
+            case "Opila Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.CRITICAL_HIT_POSTMULTIPLIER_BONUS_DIE, 1));
+                break;
+            case "Phond Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.BONUS_DAMAGE_DIE, 1).withModifier("against target with a Shield Rating"));
+                break;
+            case "Pontite Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SKILL_MODIFIER, "Persuasion:you take no penalty on Persuasion checks made to change the Attitude of Unfriendly or Indifferent creatures within 6 squares."));
+                auraEffect.withColor("blue");
+                auraEffect.withColor("green");
+                break;
+            case "Rubat Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SPECIAL, "Once per encounter, when you wield an attuned " +
+                        "Lightsaber with a Rubat Crystal, you may reroll one damage roll made with that Lightsaber, " +
+                        "keeping the better of the two results."));
+                break;
+            case "Sigil Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 2));
+                break;
+            case "Solari Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.SKILL_BONUS, "use the force:2").withModifier("Deflect"));
+                break;
+            case "Standard Synthetic Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.TO_HIT_MODIFIER, 1));
+                auraEffect.withColor("red");
+                auraEffect.withColor("varies");
+                break;
+            case "Unstable Crystal":
+                attunementBonuses.add(Change.create(ChangeKey.CRITICAL_HIT_POSTMULTIPLIER_BONUS_DIE, 1));
+                attunementBonuses.add(Change.create(ChangeKey.SPECIAL, "on an attack roll that is a natural 1, your Lightsaber " +
+                        "deactivates and may not be reactivated until after the end of your next turn."));
+                auraEffect.withColor("red").withColor("varies").withAnimationType("dome").withAnimationIntensity("2").withAnimationSpeed("5");
+                break;
+            default:
+                //System.out.println("case \"" + itemName+"\":");
+        }
+        if(attunementBonuses.size() == 0){
+            return attributes;
+        }
+
+
+
+
+        attributes.add(Effect.create("Attuned", attunementBonuses));
+
+        attributes.add(Effect.create("Ignite", auraEffect.getChanges()).disabled());
+
+        attributes.add(auraEffect.getColorChoice());
+
         return attributes;
     }
 
     private static List<Object> getManualAttributes(String itemName, String itemSubType) {
+
+
         List<Object> attributes = new LinkedList<>();
+        if(isLightsaberCrystal(itemName)){
+            attributes.addAll(addLightsaberCrystalAttributes(itemName));
+        }
 
         if("Lightsabers".equals(itemSubType)){
-            attributes.add(Effect.create("Self-Built", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, 1))));
+            attributes.add(Choice.create("Lightsaber Crystal").withShowSelectionInName(false).withOption("AVAILABLE_LIGHTSABER_CRYSTALS", new Option().withPayload("AVAILABLE_LIGHTSABER_CRYSTALS")));
+            //attributes.add(Effect.create("Self-Built", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, 1))));
+            //attributes.add(Effect.create("Ignited", List.of(Change.create(ChangeKey.AURA_COLOR, "#FF0000"))).disabled());
         }
         else if ("Energy Lance".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:50"));
@@ -854,15 +1132,19 @@ public class ItemExporter extends BaseExporter {
         }
         else if ("Variable Blaster Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:500"));
-            attributes.add(Effect.create("3d4", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d4"))));
+            attributes.add(Effect.create("3d4", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d4"))).enabled());
             attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d6"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "5"))));
             attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"))));
+        }
+        else if ("Heavy Assault Blaster".equals(itemName)) {
+            attributes.add(Change.create(ChangeKey.BONUS_CRITICAL_DAMAGE_DIE_TYPE, 1));
         }
         else if ("Heavy Variable Blaster Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:500"));
             attributes.add(Effect.create("Ascension gun", "POWER", List.of(Change.create(ChangeKey.AMMO, "Syntherope:2"))));
-            attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d6"))));
+            attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d6"))).enabled());
             attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"))));
+            attributes.add(Effect.create("3d10", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d10"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "20"))));
             attributes.add(Effect.create("3d10", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d10"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "20"))));
         }
         else if ("Sonic Blaster".equals(itemName)) {
@@ -974,6 +1256,10 @@ public class ItemExporter extends BaseExporter {
         return attributes;
     }
 
+    private static boolean isLightsaberCrystal(String itemName) {
+        return LIGHTSABER_CRYSTALS.contains(itemName);
+    }
+
     private static String getDamageDie(String itemName, String damage) {
         return "Amphistaff".equalsIgnoreCase(itemName) ? null : getDieEquation(damage, itemName);
     }
@@ -991,16 +1277,27 @@ public class ItemExporter extends BaseExporter {
 
     private static List<Effect> getModes(String rateOfFire, String itemName) {
         List<Effect> effects = new LinkedList<>();
+        if (rateOfFire != null && rateOfFire.contains("Single-Shot")) {
+            effects.add(EFFECT_SINGLE_SHOT.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE)).enabled());
+        }
         if (rateOfFire != null && rateOfFire.contains("Autofire")) {
-            effects.add(EFFECT_AUTOFIRE.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE)));
+            Effect fire_mode = EFFECT_AUTOFIRE.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE));
+
+            if(effects.size() == 0){
+                fire_mode.enabled();
+            }
+
+            effects.add(fire_mode);
         }
         if (rateOfFire != null && rateOfFire.contains("Barrage")) {
-            effects.add(EFFECT_BARRAGE.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE)));
+            Effect fire_mode = EFFECT_BARRAGE.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE));
+
+            if(effects.size() == 0){
+                fire_mode.enabled();
+            }
+            effects.add(fire_mode);
         }
 
-        if (rateOfFire != null && rateOfFire.contains("Single-Shot")) {
-            effects.add(EFFECT_SINGLE_SHOT.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE)));
-        }
 
         if ("Amphistaff".equalsIgnoreCase(itemName)) {
             effects.add(Effect.create("Quarterstaff", "AMPHISTAFF_FORM", List.of(
@@ -1011,7 +1308,7 @@ public class ItemExporter extends BaseExporter {
                             "and Fortitude Defense, the target moves -1 Persistent step on the Condition Track. " +
                             "An Amphistaff can only spit venom once every 24 standard hours."
                     ))
-            )));
+            )).enabled());
             effects.add(Effect.create("Spear", "AMPHISTAFF_FORM", List.of(
                     Change.create(ChangeKey.DAMAGE, "1d8"),
                     Change.create(ChangeKey.DAMAGE_TYPE, "Piercing"),
@@ -1063,6 +1360,10 @@ public class ItemExporter extends BaseExporter {
         if ("Lightsaber (Weapon)".equals(itemName)) {
             return "Lightsaber";
         }
+
+        if("Ilum Crystals".equals(itemName)){
+            return "Ilum Crystal";
+        }
         return itemName;
     }
 
@@ -1073,7 +1374,14 @@ public class ItemExporter extends BaseExporter {
             return "weapon";
         } else if (List.of("light armor", "medium armor", "heavy armor", "droid accessories (droid armor)").contains(subType.toLowerCase())) {
             return "armor";
-        } else if (List.of("weapon upgrade", "armor upgrade", "universal upgrade").contains(subType.toLowerCase())) {
+        } else if (List.of("armor trait",
+                "device trait",
+                "droid trait",
+                "vehicle trait",
+                "weapon trait",
+                "dark armor trait",
+                "sith weapon trait",
+                "sith abomination trait", "weapon upgrade", "armor upgrade", "universal upgrade", "lightsaber crystals", "lightsaber modifications", "traditional jewels", "synthetic crystals", "adegan crystals", "rare crystals").contains(subType.toLowerCase())) {
             return "upgrade";
         } else if (List.of("hazard").contains(subType.toLowerCase())) {
             return "hazard";
@@ -1105,9 +1413,21 @@ public class ItemExporter extends BaseExporter {
     }
 
 
-    private static String standardizeTypes(String trim) {
+    private static String standardizeTypes(String trim, Set<Category> categories, String itemName) {
         if(trim == null){
-            trim = "equipment";
+            if(categories != null){
+                for(Category c : categories){
+                    if(List.of("Traditional Jewels", "Synthetic Crystals", "Rare Crystals", "Adegan Crystals", "Lightsaber Crystals").contains(c.getValue())){
+                        return "Lightsaber Crystals";
+                    }
+                }
+            }
+
+            trim = getItemSubTypeByItemName(itemName);
+
+                    if(trim == null){
+                         trim = "equipment";
+                    }
         }
 
         try{
@@ -1137,59 +1457,8 @@ public class ItemExporter extends BaseExporter {
     }
 
 
-    private static String getImage(String name, String itemType) {
-        Document doc = null;
-        String url = "https://starwars.fandom.com/wiki/" + name + "/Legends";
-        String filename = null;
-        try {
-            doc = Jsoup.connect(url).get();
-
-            Element body = doc.body();
-
-            Elements images = body.select(".pi-image-thumbnail");
-            if (images.size() > 0) {
-                Element image = images.first();
-
-
-                String src = image.attr("src");
-                String alt = image.attr("data-image-key");
-
-                filename = IMAGE_FOLDER + "/" + alt;
-
-                URL imageUrl = new URL(src);
-                BufferedImage bufferedImage = ImageIO.read(imageUrl);
-                File file = new File(ROOT + "/" + filename);
-                ImageIO.write(bufferedImage, "png", file);
-            }
-
-        } catch (IOException e) {
-            //System.err.println(name);
-        }
-
-
-        itemType = (itemType != null ? itemType : "untyped");
-
-        if (itemType.contains(",")) {
-            itemType = itemType.split(",")[0];
-        }
-
-//        if (filename != null && false) //false for now, we're going to use defaults
-//        {
-//            return filename;
-//        } else if (new File("G:/FoundryVTT/Data/" + IMAGE_FOLDER + "/" + itemType + "/default.png").exists())
-//        {
-//            return IMAGE_FOLDER + "/" + itemType + "/default.png";
-//        } else
-//        {
-//            //System.out.println("could not find "+ IMAGE_FOLDER+"/" + itemType + "/default.png");
-//            new File("G:/FoundryVTT/Data/" + IMAGE_FOLDER + "/" + itemType).mkdir();
-//        }
-        return IMAGE_FOLDER + "/default.png";
-    }
-
-
     @Nonnull
-    private static Collection<JSONObject> getManualItems() {
+    private static Collection<JSONObject> getManualItems(List<String> filter) {
         List<JSONObject> items = new ArrayList<>();
 
         String energyShieldDescription = "Energy Shields give a character a Shield Rating, which functions exactly as normal shielding. An energy-shield generator is typically worn on the forearm or upper arm and must be activated as a Swift Action. Energy Shields typically have 5 charges, and energy shields can only be activated once per encounter (the stress on the shield generator causes the device to overload otherwise, so the manufacturers build in failsafes to prevent such an occurrence).\n" +
@@ -1676,6 +1945,11 @@ public class ItemExporter extends BaseExporter {
                 .withWeight("2 kg")
                 .withProvided(Change.create(ChangeKey.BACTA, 1))
                 .toJSON());
+
+        if(filter != null){
+            items = items.stream().filter(jsonObject -> filter.contains(jsonObject.getString("name"))).collect(Collectors.toList());
+        }
+
         return items;
     }
 

@@ -26,6 +26,8 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
 
         system
                 .put("size", size);
+        system.getJSONArray("changes").put(Change.create(ChangeKey.SIZE, size).toJSON());
+
         return json;
     }
 

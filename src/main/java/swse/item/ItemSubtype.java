@@ -13,6 +13,7 @@ public enum ItemSubtype {
     SIMPLE_RANGED_WEAPONS("Simple Ranged Weapons", "simple ranged weapons", "simple weapons (ranged)", "simple weapon (ranged)"),
     GRENADES("Grenades", "grenades"),
     LIGHTSABERS("Lightsabers", "lightsabers"),
+    LIGHTSABER_Modifications("Lightsaber Modifications", "lightsaber modifications"),
     HEAVY_WEAPONS("Heavy Weapons", "heavy weapons"),
     PISTOLS("Pistols", "pistol", "pistols"),
     EQUIPMENT("Equipment", "equipment"),
@@ -47,7 +48,15 @@ public enum ItemSubtype {
     LOCOMOTION_SYSTEMS("Locomotion Systems", "locomotion systems"),
     PROCESSOR_SYSTEMS("Processor Systems","processor systems"),
     APPENDAGES("Appendages", "appendages"),
-    UNIVERSAL_UPGRADE("Universal Upgrade", "universal upgrade");
+    UNIVERSAL_UPGRADE("Universal Upgrade", "universal upgrade"),
+    ARMOR_TRAIT("Armor Trait", "ARMOR TRAIT"),
+    WEAPON_TRAIT("Weapon Trait", "WEAPON TRAIT"),
+    DEVICE_TRAIT("Device Trait", "DEVICE TRAIT"),
+    DROID_TRAIT("Droid Trait", "DROID TRAIT"),
+    VEHICLE_TRAIT("Vehicle Trait", "VEHICLE TRAIT"),
+    DARK_ARMOR_TRAIT("Dark Armor Trait", "DARK ARMOR TRAIT"),
+    SITH_WEAPON_TRAIT("Sith Weapon Trait", "SITH WEAPON TRAIT"),
+    SITH_ABOMINATION_TRAIT("Sith Abomination Trait", "SITH ABOMINATION TRAIT");
 
 
     private final List<String> mapping;

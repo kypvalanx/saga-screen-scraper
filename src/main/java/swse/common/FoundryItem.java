@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import static swse.common.BaseExporter.getDescription;
+import static swse.common.BaseExporter.getSource;
 
 import swse.item.FoundryEffect;
 import swse.prerequisite.Prerequisite;
@@ -192,6 +193,14 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         return (T) this;
     }
 
+
+    public T withSource(Element content)
+    {
+        this.source = getSource(content);
+        return (T) this;
+    }
+
+
     public T withAvailability(String availability) {
         this.withProvided(Change.create(ChangeKey.AVAILABILITY, availability));
         return (T) this;
@@ -254,6 +263,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
 
     public T withDescription(Element content)
     {
+        if(content == null) return (T) this;
         this.description += getDescription(content);
         return (T) this;
     }

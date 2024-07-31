@@ -22,6 +22,7 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     private List<String> trainedSkills = new ArrayList<>();
     private List<Attribute> attributes = new ArrayList<>();
     private JSONObject data;
+    private Map<String, Integer> defenses = new HashMap<String, Integer>();
 
     public Unit(String name) {
         super(name, "npc");
@@ -61,6 +62,16 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
             health.put("override", hitPoints);
             health.put("value", hitPoints);
             health.put("max", hitPoints);
+        }
+
+        JSONObject defense = new JSONObject();
+        system.put("defense", defense);
+        if (defenses != null) {
+            for (Map.Entry<String, Integer> entry: defenses.entrySet()){
+                JSONObject d = new JSONObject();
+                defense.put(entry.getKey(), d);
+                d.put("expected", entry.getValue());
+            }
         }
 
         system.put("skills", getSkills());
@@ -193,6 +204,11 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
 
     public Unit withSystem(JSONObject system) {
         this.system = system;
+        return this;
+    }
+
+    public Unit withDefense(String key, int value) {
+        this.defenses.put(key, value);
         return this;
     }
 }

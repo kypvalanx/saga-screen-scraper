@@ -67,10 +67,10 @@ public class LanguageExporter extends BaseExporter {
         final LanguageExporter speciesExporter = new LanguageExporter();
 
         return hrefs.stream().flatMap((Function<String, Stream<JSONy>>) itemLink -> speciesExporter
-                .parseItem(itemLink, overwrite).stream()).map(item ->item.toJSON()).collect(Collectors.toList());
+                .parseItem(itemLink, overwrite, null, null).stream()).map(item ->item.toJSON()).collect(Collectors.toList());
     }
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }

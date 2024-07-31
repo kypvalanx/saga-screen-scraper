@@ -383,7 +383,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(simple("Any Weapon", "TYPE", "weapon"));
         }
         if (List.of("armor", "any armor").contains(text.toLowerCase())) {
-            return List.of(simple("Any Weapon", "TYPE", "armor"));
+            return List.of(simple("Any Armor", "TYPE", "armor"));
         }
         if (Objects.equals("Any Weapon with an Ion or Stun Setting", text)) {
             return List.of(and(text, List.of(
@@ -618,7 +618,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
             return List.of(simple(text + " feat", "FEAT", text));
         }
         if (SPECIES_LIST.contains(text)) {
-            return List.of(simple(text + "manual/species", "SPECIES", text));
+            return List.of(simple(text + " species", "SPECIES", text));
         }
         if (TALENT_LIST.contains(text) || DUPLICATE_TALENT_NAMES.contains(text)) {
             if (DUPLICATE_TALENT_NAMES.contains(text)) {

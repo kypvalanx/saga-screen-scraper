@@ -26,6 +26,7 @@ public class FeatExporter extends BaseExporter {
     //static Map<String, List<String>> classStartingFeats = Maps.newHashMap();
 
     static Multimap<String, String> startingFeats = ArrayListMultimap.create();
+
     static {
 //        classStartingFeats.put("Jedi", List.of("Force Sensitivity", "Weapon Proficiency (Lightsabers)", "Weapon Proficiency (Simple Weapons)");
 //classStartingFeats.put("Noble", List.of("Linguist", "Weapon Proficiency (Pistols)", "Weapon Proficiency (Simple Weapons)");
@@ -69,7 +70,7 @@ public class FeatExporter extends BaseExporter {
         startingFeats.put("Weapon Proficiency (Rifles)", "Nonheroic");
         startingFeats.put("Weapon Proficiency (Simple Weapons)", "Nonheroic");
 
-        System.out.println(startingFeats);
+        //System.out.println(startingFeats);
 
         JSONObject startingFeatLookup = new JSONObject();
         for (String key :
@@ -77,7 +78,7 @@ public class FeatExporter extends BaseExporter {
             Collection<String> classes = startingFeats.get(key);
             startingFeatLookup.put(key, classes);
         }
-        System.out.println(startingFeatLookup);
+        //System.out.println(startingFeatLookup);
     }
 
 
@@ -88,26 +89,39 @@ public class FeatExporter extends BaseExporter {
     public static final String WEAPON_FOCUS = "Weapon Focus";
     public static final String SKILL_FOCUS = "Skill Focus";
     public static final String EXOTIC_WEAPON_PROFICIENCY = "Exotic Weapon Proficiency";
-    public static final String IMAGE_FOLDER = "systems/swse/icon/feat";
     private static final String SKILL_MASTERY = "Skill Mastery";
     private static Set<String> allFeats = new HashSet<>();
 
     public static void main(String[] args) throws IOException {
+
+        String dir = LOCAL_ROOT + IMAGE_FOLDER + "/feat";
+
+        for (String file :
+                new File(dir).list()) {
+            availableFiles.put(file.substring(0, file.lastIndexOf(".")).toLowerCase().trim().replace("-", " ").replace("ä", "a"), file);
+        }
 
         List<String> featLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Feats?from="));
 
 
         List<JSONObject> entries = new FeatExporter().getEntriesFromCategoryPage(featLinks, true);
 
-        printUniqueNames(entries);
+        //printUniqueNames(entries);
         
         //addIdsFromDb(new File(DB_FILE), entries);
         //writeToDB(new File(DB_FILE), entries, hasArg(args, "d"));
+
+
+        System.out.println("unused feats images" + availableFiles);
+        System.out.println("items without images" + itemsWithoutImages);
+
+
+
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Feats");
     }
 
 
-    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected Collection<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
@@ -150,6 +164,8 @@ public class FeatExporter extends BaseExporter {
         List<JSONy> feats = new ArrayList<>();
 
         feats.add(Feat.create(itemName)
+                        .withImage(getImage("feat", itemName))
+                        .withSource(content)
                 .withDescription(content)
                 .withProvided(getPayloadChoice(itemName))
                 .withPrerequisite(prerequisite)
@@ -279,10 +295,10 @@ public class FeatExporter extends BaseExporter {
                 changes.add(Change.create(ChangeKey.DUAL_WEAPON_MODIFIER, "0"));
                 break;
             case "Skill Training":
-                //changes.add(Change.create(ChangeKey.TRAINED_SKILLS, "1"));
+                changes.add(Change.create(ChangeKey.TRAINED_SKILLS, "1"));
 
-                changes.add(Change.create(ChangeKey.AUTOMATIC_TRAINED_SKILL, "#payload#"));
-                changes.add(new Choice("Choose an automatically trained skill").withOption("AVAILABLE_UNTRAINED_SKILLS", new Option().withPayload("AVAILABLE_UNTRAINED_SKILLS")));
+                //changes.add(Change.create(ChangeKey.AUTOMATIC_TRAINED_SKILL, "#payload#"));
+                //changes.add(new Choice("Choose an automatically trained skill").withOption("AVAILABLE_UNTRAINED_SKILLS", new Option().withPayload("AVAILABLE_UNTRAINED_SKILLS")));
                 break;
             case "Improved Defenses":
                 changes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS, "1"));
@@ -420,22 +436,6 @@ public class FeatExporter extends BaseExporter {
         }
 
         return null;
-    }
-
-    private static String getImage(String itemType) {
-        itemType = (itemType != null ? itemType : "untyped");
-
-        if (itemType.contains(",")) {
-            itemType = itemType.split(",")[0];
-        }
-
-        if (new File("G:/FoundryVTT/Data/" + IMAGE_FOLDER + "/" + itemType + "/default.png").exists()) {
-            return IMAGE_FOLDER + "/" + itemType + "/default.png";
-        } else {
-            //System.out.println("could not find "+ IMAGE_FOLDER+"/" + itemType + "/default.png");
-            new File("G:/FoundryVTT/Data/" + IMAGE_FOLDER + "/" + itemType).mkdir();
-        }
-        return IMAGE_FOLDER + "/default.png";
     }
 
 }

@@ -28,7 +28,7 @@ public class ForceRegimensExporter extends BaseExporter
         writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Force Regimes");
     }
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite)
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter)
     {
         if (null == itemLink)
         {

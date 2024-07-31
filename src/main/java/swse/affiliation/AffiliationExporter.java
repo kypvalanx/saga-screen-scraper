@@ -27,7 +27,7 @@ public class AffiliationExporter extends BaseExporter
         writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args,"d"), "Affiliations");
     }
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite)
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter)
     {
         if (null == itemLink)
         {

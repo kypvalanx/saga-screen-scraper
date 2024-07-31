@@ -62,11 +62,11 @@ public class DestinyExporter extends BaseExporter {
         });
 
 
-        return hrefs.stream().flatMap(itemLink -> parseItem(itemLink, overwrite).stream()).map(item -> item.toJSON()).collect(Collectors.toList());
+        return hrefs.stream().flatMap(itemLink -> parseItem(itemLink, overwrite, null, null).stream()).map(item -> item.toJSON()).collect(Collectors.toList());
 
     }
 
-    protected List<JSONy> parseItem(String itemLink, boolean overwrite) {
+    protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
         if (null == itemLink) {
             return new ArrayList<>();
         }
