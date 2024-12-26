@@ -39,6 +39,7 @@ public class SpeciesExporter extends BaseExporter {
     public static final List<String> DUMMY_CATEGORIES = List.of("Damage Reduction", "Conditional Bonus Feat", "Natural Armor", "Bonus Class Skill", "Species", "Homebrew");
     public static final Pattern BONUS_FEAT_PATTERN = Pattern.compile("gain one bonus Feat at 1st level");
     public static final Pattern DAMAGE_REDUCTION = Pattern.compile("Damage Reduction (\\d*)");
+    public static final List<String> SIZES = List.of("Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)");
     private static List<Object> defaultDroidUnarmedDamage;
     private static int languages = 0;
 
@@ -200,26 +201,30 @@ public class SpeciesExporter extends BaseExporter {
         List<Object> provided = new ArrayList<>();
         boolean skipSizes = false;
 
-        if ("Neti".equals(speciesName)) {
-            skipSizes = true;
-            provided.add(ProvidedItem.create("Medium", TRAIT));
-            provided.add(Effect.create("Humanoid", "Metamorph", List.of(
-                    Change.create(ChangeKey.SPEED, "Base Speed 4")
-            ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))).enabled());
-            provided.add(Effect.create("Quadrupedal", "Metamorph", List.of(
-                    Change.create(ChangeKey.SIZE_BONUS, 1),
-                    Change.create(ChangeKey.SPEED, "Base Speed 2"),
-                    Change.create(ChangeKey.DISABLE, "Run"),
-                    Change.create(ChangeKey.DISABLE, "Charge"),
-                    Change.create(ChangeKey.RESIST, "Prone:5")
-            ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
-            provided.add(Effect.create("Treelike", "Metamorph", List.of(
-                    Change.create(ChangeKey.SIZE_BONUS, 2),
-                    Change.create(ChangeKey.SPEED, "Stationary 0"),
-                    Change.create(ChangeKey.DISABLE, "Run"),
-                    Change.create(ChangeKey.DISABLE, "Charge"),
-                    Change.create(ChangeKey.RESIST, "Prone:15")
-            ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
+        switch (speciesName) {
+            case "Neti":
+                skipSizes = true;
+                provided.add(ProvidedItem.create("Medium", TRAIT));
+                provided.add(Effect.create("Humanoid", "Metamorph", List.of(
+                        Change.create(ChangeKey.SPEED, "Base Speed 4")
+                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))).enabled());
+                provided.add(Effect.create("Quadrupedal", "Metamorph", List.of(
+                        Change.create(ChangeKey.SIZE_BONUS, 1),
+                        Change.create(ChangeKey.SPEED, "Base Speed 2"),
+                        Change.create(ChangeKey.DISABLE, "Run"),
+                        Change.create(ChangeKey.DISABLE, "Charge"),
+                        Change.create(ChangeKey.RESIST, "Prone:5")
+                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
+                provided.add(Effect.create("Treelike", "Metamorph", List.of(
+                        Change.create(ChangeKey.SIZE_BONUS, 2),
+                        Change.create(ChangeKey.SPEED, "Stationary 0"),
+                        Change.create(ChangeKey.DISABLE, "Run"),
+                        Change.create(ChangeKey.DISABLE, "Charge"),
+                        Change.create(ChangeKey.RESIST, "Prone:15")
+                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
+                break;
+            case "Replica Droid":
+                skipSizes = true;
         }
 
 
@@ -241,7 +246,9 @@ public class SpeciesExporter extends BaseExporter {
             if ("Weapon Familiarity".equals(category.getValue()) || "Bonus Feat".equals(category.getValue())) {
                 continue;
             }
-            if(skipSizes && List.of("Tiny", "Small", "Medium", "Large", "Huge").contains(category.getValue())){
+            if(SIZES.contains(category.getValue())){
+                if(skipSizes) continue;
+                provided.add(Change.create(ChangeKey.SIZE, category.getValue()));
                 continue;
             }
             provided.add(ProvidedItem.create(category.getValue(), TRAIT));

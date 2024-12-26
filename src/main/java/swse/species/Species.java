@@ -31,12 +31,10 @@ public class Species extends FoundryItem<Species> implements Copyable<Species>
     }
 
     public List<ProvidedItem> providedItemPostFilter(List<ProvidedItem> providedItems) {
-        boolean hasVariableSize = providedItems.stream().anyMatch(item -> item.getName().equalsIgnoreCase("variable size"));
 
         List<ProvidedItem> filteredProvidedItems = Lists.newArrayList();
         for (ProvidedItem providedItem : providedItems) {
             if(providedItem.getName().equalsIgnoreCase(this.name+"s")) continue;
-            if(hasVariableSize && List.of("fine", "diminutive", "tiny", "small", "medium", "large", "huge", "gargantuan", "colossal").contains(providedItem.getName().toLowerCase())) continue;
 
             filteredProvidedItems.add(providedItem);
         }
