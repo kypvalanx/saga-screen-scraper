@@ -39,7 +39,7 @@ public class TemplateExporter extends BaseExporter {
         templateLinks.put("/wiki/Weapon_Templates", List.of("weapon"));
         templateLinks.put("/wiki/Armor_Templates", List.of("armor"));
         templateLinks.put("/wiki/Vehicle_Templates", List.of("vehicle"));
-        templateLinks.put("/wiki/Beast_Templates", List.of("beast"));
+        templateLinks.put("/wiki/Category:Beast_Templates", List.of("beast"));
         //templateLinks.put("/wiki/General_Templates", List.of());
         final boolean overwrite = false;
 
@@ -146,11 +146,11 @@ public class TemplateExporter extends BaseExporter {
             final String resolvedName = itemName + (types.size() > 1 ? " (" + type + ")" : "");
             templates.add(Template.create(resolvedName)
                     .withCost(cost)
-                    .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"))
+                    .with(Change.create(ChangeKey.ITEM_MOD, "true"))
                     .withSubtype(type.equals("droid")? "Droid Templates" : templateType)
                     .withPrerequisite(getItemPrerequisite(content, type))
                     //.withProvided(getAttributes(content))
-                    .withProvided(getManualAttributes(resolvedName))
+                    .with(getManualAttributes(resolvedName))
                     .withDescription(content)
                     .withPrefix(getPrefix(itemName))
                     .withSuffix(getSuffix(itemName)));

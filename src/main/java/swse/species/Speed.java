@@ -19,6 +19,10 @@ public class Speed
 
     public static Collection<Object> getSpeed(Element content, String name)
     {
+        if(List.of("Neti").contains(name)){
+            return List.of();
+        }
+
         if(name.toLowerCase().contains("droid")){
 
             if(defaultDroidSpeeds != null){

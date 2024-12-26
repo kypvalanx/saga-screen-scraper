@@ -52,9 +52,9 @@ class Talent extends FoundryItem<Talent> implements Copyable<Talent>
         }
 
         @Override
-        public Talent withProvided(Collection<?> objects)
+        public Talent with(Collection<?> objects)
         {
-            super.withProvided(objects);
+            super.with(objects);
             for(Object o:objects){
                 if(o instanceof Category){
 

@@ -2,14 +2,11 @@ package swse.common;
 
 import com.google.common.base.MoreObjects;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
+import org.apache.commons.text.WordUtils;
 import org.json.JSONObject;
 
 import static swse.common.FoundryItem.createAttributes;
@@ -22,6 +19,16 @@ public class Option implements JSONy, Copyable<Option> {
     private final Map<String, String> payloads = new HashMap<>();
     private String rollRange;
     private boolean isDefault = false;
+
+    public static Option create(){
+        return new Option();
+    }
+    public static Option create(String display){
+        return new Option(display);
+    }
+    public static Option create(String display, String value){
+        return new Option(display, value);
+    }
 
     public Option() {
         this.display = null;
@@ -36,6 +43,16 @@ public class Option implements JSONy, Copyable<Option> {
     public Option(String display, String value) {
         this.display = display;
         this.value = value;
+    }
+
+    public static Option[] createEach(String options) {
+        String[] split = options.split(", ");
+        Option[] a = new Option[split.length];
+        return Arrays.stream(split).map((s1) -> Option.create(WordUtils.capitalize(s1))).collect(Collectors.toList()).toArray(a);
+    }
+
+    public static Option createFreeTextOption() {
+        return new Option("%%%FREETEXT%%%");
     }
 
 

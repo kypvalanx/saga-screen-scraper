@@ -225,7 +225,7 @@ public class ItemExporter extends BaseExporter {
                         .withDescription(second)
                         .withDescription(third)
                         .withPrerequisite(getPrerequisite(subtype))
-                                .withProvided(getManualAttributes(first.text(), subtype))
+                                .with(getManualAttributes(first.text(), subtype))
                         .toJSON());
             }
         }
@@ -305,7 +305,7 @@ public class ItemExporter extends BaseExporter {
         if ("home".equalsIgnoreCase(itemName)
                 || "datapad".equalsIgnoreCase(itemName)
                 || "bacta tank".equalsIgnoreCase(itemName)
-                || (filter != null && !filter.contains(itemName))
+                || (filter != null && filter.size() > 0 && !filter.contains(itemName))
                 || isCategory(itemName)) {
             return new ArrayList<>();
         }
@@ -678,7 +678,7 @@ public class ItemExporter extends BaseExporter {
                 .withLink(itemLink)
                 .withDescription(content)
                 .withSubtype(itemSubType)
-                .withProvided(attributes)
+                .with(attributes)
                 .withDamageDie(damageDie)
                 .withStunDamageDie(stunDamageDie)
                 .withDamageType(damageType)
@@ -687,10 +687,10 @@ public class ItemExporter extends BaseExporter {
                 .withWeight(weight)
                 .withSource(book)
                 .withAvailability(availability)
-                .withProvided(Change.create(ChangeKey.BASE_ITEM, baseItem))
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, bonusToReflexDefense))
-                .withProvided(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, bonusToFortitudeDefense))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, maximumDexterityBonus))
+                .with(Change.create(ChangeKey.BASE_ITEM, baseItem))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, bonusToReflexDefense))
+                .with(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, bonusToFortitudeDefense))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, maximumDexterityBonus))
                 .withPrerequisite(prerequisite)
                 .withSplash(splash)
                 .withHeirloomBonus(heirloomBonus)
@@ -708,20 +708,29 @@ public class ItemExporter extends BaseExporter {
                 .withKeywords(keywords)
                 .withUnarmedDamage(unarmedDamage)
                 .withUnarmedModifier(unarmedModifier)
-                .withProvided(Change.create(ChangeKey.PREFIX, getPrefix(itemName)))
-                .withProvided(Change.create(ChangeKey.SUFFIX, getSuffix(itemName)));
+                .with(Change.create(ChangeKey.PREFIX, getPrefix(itemName)))
+                .with(Change.create(ChangeKey.SUFFIX, getSuffix(itemName)));
 
         if (isDroid) {
-            item.withProvided(Change.create(ChangeKey.DROID_PART, true));
+            item.with(Change.create(ChangeKey.DROID_PART, true));
         }
         if (armorType != null) {
-            item.withProvided(Change.create(ChangeKey.ARMOR_TYPE, armorType));
+            item.with(Change.create(ChangeKey.ARMOR_TYPE, armorType));
         }
         if (List.of("Probe", "Instrument", "Tool", "Claw", "Hand").contains(itemName)) {
-            item.withProvided(getDroidAppendageAttributes(itemName));
+            item.with(getDroidAppendageAttributes(itemName));
+        }
+        if(List.of("cybernetic devices", "implants", "advanced cybernetics").contains(itemSubType.toLowerCase())){
+            item.with(Change.create(ChangeKey.CYBERNETIC, true));
+        }
+        if("implant".equalsIgnoreCase(itemType)){
+            item.with(Change.create(ChangeKey.SKILL_BONUS, "Use the Force:-1:IMPLANT"));
+        }
+        if("implants".equalsIgnoreCase(itemSubType)){
+            item.with(Change.create(ChangeKey.IMPLANT_DISRUPTION, true));
         }
         if ("Stormtrooper Armor".equals(itemName)) {
-            item.withProvided(Modification.create(ProvidedItem.create("Helmet Package", ItemType.ITEM)));
+            item.with(Modification.create(ProvidedItem.create("Helmet Package", ItemType.ITEM)));
         }
 
         jsonObjects.addAll(getItemVariants(item, itemName));
@@ -880,11 +889,11 @@ public class ItemExporter extends BaseExporter {
             variant.withName(variantName);
 
             if ("Snowtrooper Armor".equals(variantName)) {
-                variant.withProvided(Change.create(ChangeKey.IMMUNITY, "Extreme Cold"));
+                variant.with(Change.create(ChangeKey.IMMUNITY, "Extreme Cold"));
                 variant.withCost("18,000");
             }
             if ("Sandtrooper Armor".equals(variantName)) {
-                variant.withProvided(Change.create(ChangeKey.IMMUNITY, "Extreme Heat"));
+                variant.with(Change.create(ChangeKey.IMMUNITY, "Extreme Heat"));
                 variant.withCost("18,000");
             }
             if ("Sith Trooper Armor".equals(variantName)) {
@@ -1251,6 +1260,8 @@ public class ItemExporter extends BaseExporter {
             attributes.add(Change.create(ChangeKey.SKILL_BONUS, "perception:+2"));
             attributes.add(Change.create(ChangeKey.LOW_LIGHT_VISION, "true"));
             attributes.add(Modification.create(ProvidedItem.create("Hands-Free Comlink", ItemType.ITEM)));
+        } else if ("Ion-Shielding".equals(itemName)){
+            attributes.add(Change.create(ChangeKey.ION_SHIELDED, true));
         }
 
         return attributes;
@@ -1473,65 +1484,65 @@ public class ItemExporter extends BaseExporter {
                 "\n" +
                 "An Energy Shield can be added to a suit of armor as an Armor Accessory. An Energy Shield can be modified by Armor Templates only if the Template specifically states that it can be used on Energy Shields, and the Energy Shield confers that benefit only when it is activated.";
         items.add(Item.create("Energy Shield (SR 5)", "armor")
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 5))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 4))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 5))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 4))
                 .withCost("500")
                 .withSubtype("Light Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 10)", "armor")
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 10))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 4))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 10))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 4))
                 .withCost("2000")
                 .withSubtype("Light Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 15)", "armor")
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 15))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 3))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 15))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 3))
                 .withCost("4500")
                 .withSubtype("Medium Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 20)", "armor")
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 20))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 3))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 20))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 3))
                 .withCost("8000")
                 .withSubtype("Medium Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 25)", "armor")
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 25))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 2))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 25))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 2))
                 .withCost("12500")
                 .withSubtype("Heavy Armor")
                 .toJSON());
 
         items.add(Item.create("Energy Shield (SR 30)", "armor")
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Energy Shield"))
                 .withDescription(energyShieldDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 30))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 2))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 30))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, 2))
                 .withCost("18000")
                 .withSubtype("Heavy Armor")
                 .toJSON());
 
         String shieldGeneratorDescription = "The Droid is fitted with a deflector Shield Generator- the same type mounted on Starships. Whenever the Droid would take damage, reduce the damage by the Droid's Shield Rating (SR). If the damage is equal to or greater than the Droid's Shield Rating, the Droid's Shield Rating is reduced by 5. By spending three Swift Actions on the same or consecutive rounds, the Droid may make a DC 20 Endurance check to restore lost shield power. If the check succeeds, the Droid's Shield Rating increases by 5 points (up to its normal Shield Rating).";
         items.add(Item.create("Shield Generator (SR 5)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 5))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 5))
                 .withCost("2500 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1539,10 +1550,10 @@ public class ItemExporter extends BaseExporter {
 
         final String SR10Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
         items.add(Item.create("Shield Generator (SR 10)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 10))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 10))
                 .withCost("5000 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1559,10 +1570,10 @@ public class ItemExporter extends BaseExporter {
 
         final String SR15Prerequisite = "Only Droids of Small size or larger can be equipped with a SR 10 Generator.";
         items.add(Item.create("Shield Generator (SR 15)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 15))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 15))
                 .withCost("7500 x Cost Factor")
                 .withWeight("(30 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1578,10 +1589,10 @@ public class ItemExporter extends BaseExporter {
 
         final String SR20Prerequisite = "Only Droids of Large or bigger size can be equipped with a SR 20 generator.";
         items.add(Item.create("Shield Generator (SR 20)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 20))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 20))
                 .withCost("10000 x Cost Factor")
                 .withWeight("(40 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1595,20 +1606,20 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
        items.add(Item.create("Ion Shield Generator (SR 5)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 5).withModifier("Ion"))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 5).withModifier("Ion"))
                 .withCost("1250 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
                 .toJSON());
 
         items.add(Item.create("Ion Shield Generator (SR 10)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 10).withModifier("Ion"))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 10).withModifier("Ion"))
                 .withCost("2500 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1624,10 +1635,10 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Ion Shield Generator (SR 15)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 15).withModifier("Ion"))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 15).withModifier("Ion"))
                 .withCost("3750 x Cost Factor")
                 .withWeight("(30 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1642,10 +1653,10 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Ion Shield Generator (SR 20)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
-                .withProvided(Change.create(ChangeKey.SHIELD_RATING, 20).withModifier("Ion"))
+                .with(Change.create(ChangeKey.SHIELD_RATING, 20).withModifier("Ion"))
                 .withCost("5000 x Cost Factor")
                 .withWeight("(40 x Cost Factor) kg")
                 .withSubtype("Droid Accessories (Shield Generator Systems)")
@@ -1660,43 +1671,43 @@ public class ItemExporter extends BaseExporter {
 
 
         items.add(Item.create("Translator Unit (DC 20)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("200")
                 .withWeight("1 kg")
-                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 20)).toJSON());
+                .with(Change.create(ChangeKey.TRANSLATE_DC, 20)).toJSON());
 
         items.add(Item.create("Translator Unit (DC 15)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("500")
                 .withWeight("2 kg")
-                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 15)).toJSON());
+                .with(Change.create(ChangeKey.TRANSLATE_DC, 15)).toJSON());
 
         items.add(Item.create("Translator Unit (DC 10)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("1000")
                 .withWeight("4 kg")
-                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 10)).toJSON());
+                .with(Change.create(ChangeKey.TRANSLATE_DC, 10)).toJSON());
 
         items.add(Item.create("Translator Unit (DC 5)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Translator Units)")
                 .withCost("2000")
                 .withWeight("8 kg")
-                .withProvided(Change.create(ChangeKey.TRANSLATE_DC, 5)).toJSON());
+                .with(Change.create(ChangeKey.TRANSLATE_DC, 5)).toJSON());
 
 
         final String hardenedSystem = "Droids of Large or greater size can be designed to have internal armor and redundant systems that enable it to continue functioning despite heavy damage";
         items.add(Item.create("Hardened Systems (x2)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("1000 x Cost Factor")
                 .withWeight("(100 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 2))
-                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 2))
+                .with(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 2))
+                .with(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 2))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1707,13 +1718,13 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Hardened Systems (x3)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("2500 x Cost Factor")
                 .withWeight("(250 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 3))
-                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 3))
+                .with(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 3))
+                .with(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 3))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1724,13 +1735,13 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Hardened Systems (x4)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("4000 x Cost Factor")
                 .withWeight("(400 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 4))
-                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 4))
+                .with(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 4))
+                .with(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 4))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1741,13 +1752,13 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Hardened Systems (x5)", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("6250 x Cost Factor")
                 .withWeight("(650 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 5))
-                .withProvided(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 5))
+                .with(Change.create(ChangeKey.DAMAGE_THRESHOLD_HARDENED_MULTIPLIER, 5))
+                .with(Change.create(ChangeKey.HEALTH_HARDENED_MULTIPLIER, 5))
                 .withPrerequisite(new OrPrerequisite(hardenedSystem,
                         List.of(
                                 new SimplePrerequisite("Large", "TRAIT", "Large"),
@@ -1758,143 +1769,143 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Repulsor-Assisted Lifting System", "equipment")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.DROID_PART, true))
                 .withSubtype("Droid Accessories (Hardened Systems)")
                 .withCost("200 x Cost Factor")
                 .withWeight("(200 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(ChangeKey.CARGO_CAPACITY, "x3"))
+                .with(Change.create(ChangeKey.CARGO_CAPACITY, "x3"))
                 .toJSON());
 
         items.add(Item.create("Plasteel Shell", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("400 x Cost Factor")
                 .withWeight("(2 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "2"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "5"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "2"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "5"))
                 .toJSON());
 
         items.add(Item.create("Stealth Shell", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("400 x Cost Factor")
                 .withWeight("(2 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(ChangeKey.SKILL_BONUS, "stealth:2"))
+                .with(Change.create(ChangeKey.SKILL_BONUS, "stealth:2"))
                 .toJSON());
 
         items.add(Item.create("Quadanium Shell", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("900 x Cost Factor")
                 .withWeight("(3 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "3"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "3"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
                 .toJSON());
 
         items.add(Item.create("Durasteel Shell", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("1600 x Cost Factor")
                 .withWeight("(8 x Cost Factor) kg")
                 .withAvailability("-")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "4"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "4"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "4"))
                 .toJSON());
 
         items.add(Item.create("Quadanium Plating", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("2500 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withAvailability("Licensed")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "5"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "5"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Durasteel Plating", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Light Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("3600 x Cost Factor")
                 .withWeight("(12 x Cost Factor) kg")
                 .withAvailability("Licensed")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "6"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "6"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Quadanium Battle Armor", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("4900 x Cost Factor")
                 .withWeight("(7 x Cost Factor) kg")
                 .withAvailability("Restricted")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "7"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "7"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Duranium Plating", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("6400 x Cost Factor")
                 .withWeight("(16 x Cost Factor) kg")
                 .withAvailability("Restricted")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
                 .toJSON());
 
         items.add(Item.create("Durasteel Battle Armor", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Medium Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("9600 x Cost Factor")
                 .withWeight("(8 x Cost Factor) kg")
                 .withAvailability("Restricted")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "8"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Mandalorian Steel Shell", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("8100 x Cost Factor")
                 .withWeight("(9 x Cost Factor) kg")
                 .withAvailability("Military, Rare")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "9"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "9"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "3"))
                 .toJSON());
 
         items.add(Item.create("Duranium Battle Armor", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("10000 x Cost Factor")
                 .withWeight("(10 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "10"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "10"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "2"))
                 .toJSON());
 
         items.add(Item.create("Neutronium Plating", "armor")
-                .withProvided(Change.create(ChangeKey.DROID_PART, true))
-                .withProvided(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
+                .with(Change.create(ChangeKey.DROID_PART, true))
+                .with(Change.create(ChangeKey.ARMOR_TYPE, "Heavy Armor"))
                 .withSubtype("Droid Accessories (Droid Armor)")
                 .withCost("12100 x Cost Factor")
                 .withWeight("(20 x Cost Factor) kg")
                 .withAvailability("Military")
-                .withProvided(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "11"))
-                .withProvided(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "1"))
+                .with(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS_ARMOR, "11"))
+                .with(Change.create(ChangeKey.MAXIMUM_DEXTERITY_BONUS, "1"))
                 .toJSON());
 
         items.add(Item.create("Datapad", "equipment")
@@ -1904,7 +1915,7 @@ public class ItemExporter extends BaseExporter {
                 .withSubtype("Computers and Storage Devices")
                 .withCost("1000")
                 .withWeight("0.5 kg")
-                .withProvided(Change.create(ChangeKey.INTELLIGENCE, 12))
+                .with(Change.create(ChangeKey.INTELLIGENCE, 12))
                 .toJSON());
 
         items.add(Item.create("Basic Datapad", "equipment")
@@ -1915,7 +1926,7 @@ public class ItemExporter extends BaseExporter {
                 .withSubtype("Computers and Storage Devices")
                 .withCost("100")
                 .withWeight("0.3 kg")
-                .withProvided(Change.create(ChangeKey.INTELLIGENCE, 10))
+                .with(Change.create(ChangeKey.INTELLIGENCE, 10))
                 .toJSON());
 
         items.add(Item.create("Bacta Tank", "equipment")
@@ -1929,7 +1940,7 @@ public class ItemExporter extends BaseExporter {
                 .withSubtype("Medical Gear")
                 .withCost("100000 + bacta * 100")
                         .withWeight("500 + bacta * 2 kg")
-                .withProvided(Change.create(ChangeKey.BACTA, 0))
+                .with(Change.create(ChangeKey.BACTA, 0))
                 .toJSON());
 
         items.add(Item.create("Bacta (liter)", "equipment")
@@ -1943,10 +1954,10 @@ public class ItemExporter extends BaseExporter {
                 .withSubtype("Medical Gear")
                 .withCost("100")
                 .withWeight("2 kg")
-                .withProvided(Change.create(ChangeKey.BACTA, 1))
+                .with(Change.create(ChangeKey.BACTA, 1))
                 .toJSON());
 
-        if(filter != null){
+        if(filter != null && filter.size() > 0){
             items = items.stream().filter(jsonObject -> filter.contains(jsonObject.getString("name"))).collect(Collectors.toList());
         }
 

@@ -679,7 +679,7 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
         if(text.equals("Weapon Focus (Melee Weapon)")){
             return List.of(or(simple("Weapon Focus (Advanced Melee Weapons)", "FEAT", "Weapon Focus (Advanced Melee Weapons)"),
                     simple("Weapon Focus (Lightsaber)", "FEAT", "Weapon Focus (Lightsabers)"),
-                    simple("Weapon Focus (Simple Melee Weapons)", "FEAT", "Weapon Focus (Simple Melee Weapons)"),
+                    simple("Weapon Focus (Simple Weapons)", "FEAT", "Weapon Focus (Simple Weapons)"),
                     simple("Weapon Focus (Melee Natural Weapons)", "FEAT", "Weapon Focus (Melee Natural Weapons)"),
                     simple("Weapon Focus (Exotic Melee Weapons)", "FEAT", "Weapon Focus (Exotic Melee Weapons)")));
         }

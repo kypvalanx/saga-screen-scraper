@@ -126,9 +126,9 @@ public class BackgroundExporter extends BaseExporter {
                 .create(itemName)
                 .withSubtype(subtype)
                 .withDescription(content)
-                .withProvided(getSkillChoice(content, subtype))
-                .withProvided(getAttributeFromSecondColumn(secondColumn, subtype))
-                .withProvided(getAttributeFromName(itemName, subtype)));
+                .with(getSkillChoice(content, subtype))
+                .with(getAttributeFromSecondColumn(secondColumn, subtype))
+                .with(getAttributeFromName(itemName, subtype)));
 
         return backgrounds;
     }

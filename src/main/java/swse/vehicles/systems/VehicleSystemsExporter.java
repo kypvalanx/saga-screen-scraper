@@ -190,7 +190,7 @@ public class VehicleSystemsExporter extends BaseExporter {
                             //System.out.println(variantName);
 
                             if ("Added Power Couplings".equalsIgnoreCase(itemName)) {
-                                currentVariant.withProvided(Change.create(ChangeKey.EMPLACEMENT_POINTS_BONUS, nameModifier));
+                                currentVariant.with(Change.create(ChangeKey.EMPLACEMENT_POINTS_BONUS, nameModifier));
                             }
 
                             for (int i = 1; i < headers.size(); i++) {
@@ -203,14 +203,14 @@ public class VehicleSystemsExporter extends BaseExporter {
                                         break;
                                     case "EMPLACEMENT POINTS":
                                     case "DAMAGE":
-                                            currentVariant.withProvided(Change.create(ChangeKey
+                                            currentVariant.with(Change.create(ChangeKey
                                                     .valueOf(toEnumCase(key.toLowerCase())), value));
                                         break;
                                     case "COST":
                                         currentVariant.withCost(value);
                                         break;
                                     case "SIZE RESTRICTION":
-                                        currentVariant.withProvided(Prerequisite.create(value));
+                                        currentVariant.with(Prerequisite.create(value));
                                         break;
                                     default:
                                         //System.out.println("- " + key + " : " + value);
@@ -281,10 +281,10 @@ public class VehicleSystemsExporter extends BaseExporter {
                 if (m.find()) {
                     found = true;
                     if(isVariant){
-                        current.withProvided(Change.create(ChangeKey.EMPLACEMENT_POINTS, m.group(1)));
+                        current.with(Change.create(ChangeKey.EMPLACEMENT_POINTS, m.group(1)));
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            variant.withProvided(Change.create(ChangeKey.EMPLACEMENT_POINTS, m.group(1)));
+                            variant.with(Change.create(ChangeKey.EMPLACEMENT_POINTS, m.group(1)));
                         }
                     }
                 }
@@ -325,14 +325,14 @@ public class VehicleSystemsExporter extends BaseExporter {
                         if (m.group(2) != null) {
                             damage.withModifier(m.group(2).trim());
                         }
-                        current.withProvided(damage);
+                        current.with(damage);
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             final Change damage = Change.create(ChangeKey.DAMAGE, m.group(1).trim());
                             if (m.group(2) != null) {
                                 damage.withModifier(m.group(2).trim());
                             }
-                            variant.withProvided(damage);
+                            variant.with(damage);
                         }
 
                     }
@@ -346,10 +346,10 @@ public class VehicleSystemsExporter extends BaseExporter {
                     found = true;
                     if(isVariant){
 
-                        current.withProvided(Change.create(ChangeKey.SEE_ALSO, m.group(1)));
+                        current.with(Change.create(ChangeKey.SEE_ALSO, m.group(1)));
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            variant.withProvided(Change.create(ChangeKey.SEE_ALSO, m.group(1)));
+                            variant.with(Change.create(ChangeKey.SEE_ALSO, m.group(1)));
                         }
 
                     }
@@ -360,11 +360,11 @@ public class VehicleSystemsExporter extends BaseExporter {
                 if (m.find()) {
                     found = true;
                     if(isVariant){
-                        current.withProvided(Prerequisite.create(m.group(1).trim()));
+                        current.with(Prerequisite.create(m.group(1).trim()));
 
                     } else{
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            variant.withProvided(Prerequisite.create(m.group(1).trim()));
+                            variant.with(Prerequisite.create(m.group(1).trim()));
                         }
 
                     }
@@ -430,16 +430,16 @@ public class VehicleSystemsExporter extends BaseExporter {
 
         switch (system.getName()) {
             case "Droid Socket":
-                system.withProvided(Change.create(ChangeKey.PROVIDES_SLOT, ASTROMECH_DROID));
+                system.with(Change.create(ChangeKey.PROVIDES_SLOT, ASTROMECH_DROID));
                 system.withSubtype("Droid Accessories (Droid Stations)");
                 break;
             case "Double Cannon":
                 system.withName("Double")
                         .withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"));
-                system.withProvided(Change.create(ChangeKey.BONUS_DAMAGE, "1d10"));
-                system.withProvided(Change.create(ChangeKey.COST, "*3"));
-                system.withProvided(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
+                        .with(Change.create(ChangeKey.ITEM_MOD, "true"));
+                system.with(Change.create(ChangeKey.BONUS_DAMAGE, "1d10"));
+                system.with(Change.create(ChangeKey.COST, "*3"));
+                system.with(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 systems.add(system.copy().withName("Dual"));
                 systems.add(system.copy().withName("Twin"));
                 systems.add(system.copy().withName("Triple"));
@@ -447,124 +447,124 @@ public class VehicleSystemsExporter extends BaseExporter {
                 break;
             case "Rapid-Fire":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"));
-                system.withProvided(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "+3"));
+                        .with(Change.create(ChangeKey.ITEM_MOD, "true"));
+                system.with(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "+3"));
                 break;
             case "Rapid-Repeating":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"));
-                system.withProvided(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
+                        .with(Change.create(ChangeKey.ITEM_MOD, "true"));
+                system.with(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "Quad Cannon":
                 system.withName("Quad");
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"));
-                system.withProvided(Change.create(ChangeKey.MODIFIES, "TYPE:Weapon Systems"));
-                system.withProvided(Change.create(ChangeKey.BONUS_DAMAGE, "2d10"));
-                system.withProvided(Change.create(ChangeKey.COST, "*5"));
-                system.withProvided(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
+                        .with(Change.create(ChangeKey.ITEM_MOD, "true"));
+                system.with(Change.create(ChangeKey.MODIFIES, "TYPE:Weapon Systems"));
+                system.with(Change.create(ChangeKey.BONUS_DAMAGE, "2d10"));
+                system.with(Change.create(ChangeKey.COST, "*5"));
+                system.with(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "2 Fire-Linked Weapon":
             case "4 Fire-Linked Weapon":
             case "Standard Cannon Enhancements":
             case "Advanced Cannon Enhancements":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"));
-                system.withProvided(Change.create(ChangeKey.MODIFIES, "TYPE:Weapon Systems"));
-                system.withProvided(Change.create(ChangeKey.BONUS_DAMAGE, "2d10"));
-                system.withProvided(Change.create(ChangeKey.COST, "*5"));
-                system.withProvided(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
+                        .with(Change.create(ChangeKey.ITEM_MOD, "true"));
+                system.with(Change.create(ChangeKey.MODIFIES, "TYPE:Weapon Systems"));
+                system.with(Change.create(ChangeKey.BONUS_DAMAGE, "2d10"));
+                system.with(Change.create(ChangeKey.COST, "*5"));
+                system.with(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "Proton Torpedo Launcher":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"));
+                        .with(Change.create(ChangeKey.ITEM_MOD, "true"));
                 //systems.add(system.copy().withName("Light Proton Torpedoes")).replaceAttribute(Attribute.create("damage", ));
                 systems.add(system.copy().withName("Medium Proton Torpedoes"));
                 systems.add(system.copy().withName("Heavy Proton Torpedoes").replaceAttribute(Change.create(ChangeKey.DAMAGE, "9d10x5")));
                 break;
             case "Battery":
                 system.withPrerequisite(new SimplePrerequisite("Can only be added to a Weapon System", "SUBTYPE", "Weapon Systems"))
-                        .withProvided(Change.create(ChangeKey.ITEM_MOD, "true"));
-                system.withProvided(Change.create(ChangeKey.AID_ANOTHER_BONUS, "2"));
+                        .with(Change.create(ChangeKey.ITEM_MOD, "true"));
+                system.with(Change.create(ChangeKey.AID_ANOTHER_BONUS, "2"));
                 //TODO battery should let you chose how many battery slots to add system.withProvided(Choice.create());
                 break;
             case "Heavy Yaret-kor":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "10d10x5"));
-                system.withProvided(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
+                system.with(Change.create(ChangeKey.DAMAGE, "10d10x5"));
+                system.with(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Medium Yaret-kor":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "8d10x5"));
-                system.withProvided(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
+                system.with(Change.create(ChangeKey.DAMAGE, "8d10x5"));
+                system.with(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Light Yaret-kor":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "6d10x5"));
+                system.with(Change.create(ChangeKey.DAMAGE, "6d10x5"));
                 break;
             case "Magma Missile":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "8d10x5"));
-                system.withProvided(Change.create(ChangeKey.SPLASH, "4 square"));
-                system.withProvided(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
+                system.with(Change.create(ChangeKey.DAMAGE, "8d10x5"));
+                system.with(Change.create(ChangeKey.SPLASH, "4 square"));
+                system.with(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Heavy Plasma Projector":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "10d10x5"));
-                system.withProvided(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
+                system.with(Change.create(ChangeKey.DAMAGE, "10d10x5"));
+                system.with(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Medium Plasma Projector":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "8d10x5"));
-                system.withProvided(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
+                system.with(Change.create(ChangeKey.DAMAGE, "8d10x5"));
+                system.with(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Light Plasma Projector":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "6d10x2"));
+                system.with(Change.create(ChangeKey.DAMAGE, "6d10x2"));
                 break;
             case "Dovin Basal":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "7d10x2"));
-                system.withProvided(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
+                system.with(Change.create(ChangeKey.DAMAGE, "7d10x2"));
+                system.with(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Stun Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "7d10x2"));
-                system.withProvided(Change.create(ChangeKey.DAMAGE_TYPE, "Stun"));
+                system.with(Change.create(ChangeKey.DAMAGE, "7d10x2"));
+                system.with(Change.create(ChangeKey.DAMAGE_TYPE, "Stun"));
                 break;
             case "Suppression Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "4d10x2"));
-                system.withProvided(Change.create(ChangeKey.DAMAGE_TYPE, "Stun"));
-                system.withProvided(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
+                system.with(Change.create(ChangeKey.DAMAGE, "4d10x2"));
+                system.with(Change.create(ChangeKey.DAMAGE_TYPE, "Stun"));
+                system.with(Change.create(ChangeKey.AUTOFIRE_ATTACK_BONUS, "0"));
                 break;
             case "Antivehicle Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "5d10x2"));
-                system.withProvided(Change.create(ChangeKey.DAMAGE_TYPE, "Stun"));
+                system.with(Change.create(ChangeKey.DAMAGE, "5d10x2"));
+                system.with(Change.create(ChangeKey.DAMAGE_TYPE, "Stun"));
                 break;
             case "Interceptor Missile":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "4d10x2"));
-                system.withProvided(Change.create(ChangeKey.SPLASH, "4 square"));
+                system.with(Change.create(ChangeKey.DAMAGE, "4d10x2"));
+                system.with(Change.create(ChangeKey.SPLASH, "4 square"));
                 break;
             case "Bomblet Generator":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "4d6"));
-                system.withProvided(Change.create(ChangeKey.DAMAGE_TYPE, "Ion"));
+                system.with(Change.create(ChangeKey.DAMAGE, "4d6"));
+                system.with(Change.create(ChangeKey.DAMAGE_TYPE, "Ion"));
                 break;
             case "Superlaser":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "8d10x40"));
-                system.withProvided(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
+                system.with(Change.create(ChangeKey.DAMAGE, "8d10x40"));
+                system.with(Change.create(ChangeKey.TARGET_SIZE_MODIFIER, "<Colossal:-20"));
                 break;
             case "Volcano Cannon":
                 system.withSubtype("Weapon Systems");
-                system.withProvided(Change.create(ChangeKey.DAMAGE, "6d10x2"));
+                system.with(Change.create(ChangeKey.DAMAGE, "6d10x2"));
                 break;
             case "Heavy Concussion Missile Launcher":
                 final VehicleSystem superHeavy = system.copy().withName("Super-Heavy Concussion Missile ");
-                superHeavy.withProvided(Change.create(ChangeKey.DAMAGE, "11d10x5"));
+                superHeavy.with(Change.create(ChangeKey.DAMAGE, "11d10x5"));
                 systems.add(superHeavy);
                 break;
         }
@@ -574,33 +574,33 @@ public class VehicleSystemsExporter extends BaseExporter {
         if (hyperdriveMatcher.find()) {
             if(system.getName().equals("Class 3 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 2.5 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "2.5")));
+                systems.add(system.copy().withName("Class 2.5 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "2.5")));
             }
             if(system.getName().equals("Class 8 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 7 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "7")));
-                systems.add(system.copy().withName("Class 9 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "9")));
+                systems.add(system.copy().withName("Class 7 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "7")));
+                systems.add(system.copy().withName("Class 9 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "9")));
             }
             if(system.getName().equals("Class 15 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 12 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "12")));
-                systems.add(system.copy().withName("Class 14 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "14")));
-                systems.add(system.copy().withName("Class 16 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "16")));
-                systems.add(system.copy().withName("Class 18 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "18")));
-                systems.add(system.copy().withName("Class 20 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "20")));
-                systems.add(system.copy().withName("Class 24 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "24")));
-                systems.add(system.copy().withName("Class 25 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "25")));
-                systems.add(system.copy().withName("Class 30 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "25")));
+                systems.add(system.copy().withName("Class 12 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "12")));
+                systems.add(system.copy().withName("Class 14 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "14")));
+                systems.add(system.copy().withName("Class 16 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "16")));
+                systems.add(system.copy().withName("Class 18 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "18")));
+                systems.add(system.copy().withName("Class 20 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "20")));
+                systems.add(system.copy().withName("Class 24 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "24")));
+                systems.add(system.copy().withName("Class 25 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "25")));
+                systems.add(system.copy().withName("Class 30 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "25")));
             }
             if(system.getName().equals("Class 0.75 Hyperdrive"))
             {
-                systems.add(system.copy().withName("Class 0.9 Hyperdrive").withProvided(Change.create(ChangeKey.HYPERDRIVE, "0.9")));
+                systems.add(system.copy().withName("Class 0.9 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "0.9")));
                 systems.add(system.copy().withName("Class 0.5 Hyperdrive")
-                        .withProvided(Change.create(ChangeKey.HYPERDRIVE, "0.5")).withAvailability("Illegal")
+                        .with(Change.create(ChangeKey.HYPERDRIVE, "0.5")).withAvailability("Illegal")
                         .withPrerequisite(new SimplePrerequisite("The only way to achieve a Hyperdrive of this type is to modify a Class .75 Hyperdrive using the Starship Designer Feat.", "FEAT", "Starship Designer")));
             }
 
-            system.withProvided(Change.create(ChangeKey.HYPERDRIVE, hyperdriveMatcher.group(1)));
+            system.with(Change.create(ChangeKey.HYPERDRIVE, hyperdriveMatcher.group(1)));
 
 
         }
@@ -614,7 +614,7 @@ public class VehicleSystemsExporter extends BaseExporter {
             for (Map.Entry<String, List<Object>> variant : variantData.entrySet()) {
                 VehicleSystem v = current.copy();
                 items.add(v);
-                v.withProvided(getManualAttributes(variant.getKey()));
+                v.with(getManualAttributes(variant.getKey()));
                 v.withName(nameCleanup(variant.getKey()));
                 for (Object o : variant.getValue()) {
                     if (o instanceof String && ((String) o).startsWith("COST:")) {
@@ -622,13 +622,13 @@ public class VehicleSystemsExporter extends BaseExporter {
                     } else if (o instanceof Prerequisite) {
                         v.withPrerequisite((Prerequisite) o);
                     } else {
-                        v.withProvided(o);
+                        v.with(o);
                     }
                 }
             }
             variantData.clear();
         } else {
-            current.withProvided(getManualAttributes(current.getName()));
+            current.with(getManualAttributes(current.getName()));
             items.add(current);
         }
     }

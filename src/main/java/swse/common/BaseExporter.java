@@ -7,8 +7,12 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.*;
 import org.json.JSONArray;
@@ -20,6 +24,7 @@ import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 
 import static org.fusesource.leveldbjni.JniDBFactory.*;
+import static swse.util.Util.printUnique;
 
 
 public abstract class BaseExporter {
@@ -481,8 +486,9 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 
             expandedLinks.add(alphaCategory + alpha);
         }
-
-        expandedLinks.add(alphaCategory + "¡");
+        if(limit == '¡'){
+            expandedLinks.add(alphaCategory + "¡");
+        }
         return expandedLinks;
     }
 
@@ -650,7 +656,7 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
                     continue;
                 }
                 if (names.contains(name)) {
-                    System.out.println("Duplicate: " + name + " from: " + talentLink);
+                    //System.out.println("Duplicate: " + name + " from: " + talentLink);
                 } else {
                     names.add(name);
                     entries.add(newEntity);
@@ -659,5 +665,120 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         }
 
         return entries;
+    }
+
+    protected Collection<?> getReroll(String content) {
+        if(!content.toLowerCase().contains("reroll")){
+            return List.of();
+        }
+
+        List<Object> of = Lists.newArrayList();
+        String checks = List.of("Acrobatics", "Climb", "Deception", "Endurance", "Gather Information", "Initiative", "Jump",
+                "Knowledge \\(Bureaucracy\\)", "Knowledge \\(Galactic Lore\\)", "Knowledge \\(Life Sciences\\)", "Knowledge \\(Physical Sciences\\)",
+                "Knowledge \\(Social Sciences\\)", "Knowledge \\(Tactics\\)", "Knowledge \\(Technology\\)", "Mechanics", "Perception",
+                "Persuasion", "Pilot", "Ride", "Stealth", "Survival", "Swim", "Treat Injury", "Use Computer", "Use the Force").stream().collect(Collectors.joining("|"));
+
+        String effect = content;//.split("Effect: ")[1];
+
+        if("You can reroll Deception checks made to Innuendo and Perception checks made to decipher an Innuendo, keeping the better result.".equals(effect)){
+
+            of.add(Change.createReRoll("Deception (Make Innuendo)", "kh", effect));
+            of.add(Change.createReRoll("Perception (Understand Innuendo)", "kh", effect));
+        }
+
+        if(effect.endsWith("You may reroll a Deception check to Cheat or a Persuasion check to Intimidate, but the result of the reroll must be accepted, even if it is worse.")){
+
+            of.add(Change.createReRoll("Deception (Cheat)", "kh", effect));
+            of.add(Change.createReRoll("Persuasion (Intimidate)", "kh", effect));
+        }
+
+        if(effect.endsWith("Once per day, you can reroll any check for a Knowledge Skill that you are Trained in, using the better result.")){
+            of.add(Change.createReRoll("Knowledge", "kh", effect));
+        }
+
+
+        if(effect.endsWith("Whenever you roll a Natural 20 while making a Deception check (even if on a reroll), you gain a temporary Force Point. If this Force Point is not spent before the end of the encounter, it is lost.")){
+            of.add(Change.create(ChangeKey.CHECK_TRIGGER, "Deception:20:Temporary Force Point:1"));
+        }
+
+        if(effect.endsWith("You can reroll any Strength- or Constitution-based Skill Checks for Skills that you are Trained in. " +
+                "The result of the reroll must be accepted even if it is worse. Additionally, once per encounter you can add your " +
+                "Strength modifier to your Fortitude Defense as a Reaction; this bonus lasts until the beginning of your next turn.")){
+
+            of.add(Change.createReRoll("Strength", "", effect));
+            of.add(Change.createReRoll("Constitution", "", effect));
+        }
+        if(effect.endsWith("Whenever you make a Persuasion check or a Use the Force check to activate a Fear effect, you may reroll the check, but the result of the reroll must be accepted, even if it is worse.")){
+
+            of.add(Change.createReRoll("Perception (Fear Effect)", "", effect));
+            of.add(Change.createReRoll("Use the Force (Fear Effect)", "", effect));
+        }
+
+        if(of.size()>0){
+            return of;
+        }
+
+        //String checks = "[\\w\\s]*";
+        Pattern p = Pattern.compile("Whenever you reroll an? (" + checks + ") check, you always keep the better result, even if you have multiple reroll abilities");
+        Matcher m = p.matcher(effect);
+
+
+        if(m.find()){
+            of.add(Change.createReRoll(m.group(1), "akh", effect));
+            //printUnique(of);
+        }
+
+        p = Pattern.compile("Whenever you reroll an? (" + checks +") check and");
+        m = p.matcher(content);
+        if(m.find()){
+            of.add(Change.create(ChangeKey.TEMPORARY_FORCE_POINT, "use:"+m.group(1)));
+            //printUnique(of, effect);
+        }
+
+
+        p = Pattern.compile("You (?:may|can)(?: choose to)? reroll(?: any)?(?: the)? (" + checks +") checks?(?: made)?(?: to)? ?([\\w\\s-]*)?, ([\\w\\s]*)");
+        m = p.matcher(content);
+        if(m.find()){
+            String type = m.group(3).startsWith("keeping the better") ? ":kh" : "";
+            String modifier = m.group(2) != null && m.group(2).length()>0 ? " ("+m.group(2)+")" : "";
+            //of.add(Change.create(ChangeKey.SKILL_RE_ROLL, m.group(1) + modifier + type));
+            of.add(Change.createReRoll(m.group(1) + modifier, type, effect));
+            //printUnique(of, effect);
+        }
+//
+//        p = Pattern.compile("You (?:may|can) choose to reroll any (" + checks + ") check, but the result of the reroll must be accepted, even if it is worse");
+//        m = p.matcher(content);
+//        if(m.find()){
+//            of.add(Change.create(ChangeKey.SKILL_RE_ROLL, m.group(1)));
+//            //printUnique(of);
+//        }
+
+//        p = Pattern.compile("You (?:may|can) reroll any (" + checks + ") checks made to ([\\w]*), keeping the better of the two results");
+//        m = p.matcher(content);
+//        if(m.find()){
+//            of.add(Change.create(ChangeKey.SKILL_RE_ROLL, m.group(1) + " ("+m.group(2)+")"));
+//            //printUnique(of);
+//        }
+//
+//        p = Pattern.compile("You (?:may|can) reroll (" + checks + ") checks made to ([\\w]*), keeping the better result.");
+//        m = p.matcher(content);
+//        if(m.find()){
+//            of.add(Change.create(ChangeKey.SKILL_RE_ROLL, m.group(1) + " ("+m.group(2)+"):kh"));
+//            //printUnique(of);
+//        }
+
+//        p = Pattern.compile("You (?:may|can) choose to reroll any (" + checks + ") check, keeping the better of the two results");
+//        m = p.matcher(content);
+//        if(m.find()){
+//            of.add(Change.create(ChangeKey.SKILL_RE_ROLL, m.group(1) +":kh"));
+//            //printUnique(of);
+//        }
+
+        if(of.size() == 0 ){
+            //of.add(Change.create(ChangeKey.SKILL_RE_ROLL, "any:unknown:"+effect));
+            of.add(Change.createReRoll("any", "unknown", effect));
+            printUnique(effect);
+        }
+        return of;
     }
 }

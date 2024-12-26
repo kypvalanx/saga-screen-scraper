@@ -13,6 +13,7 @@ import org.jsoup.select.Elements;
 import swse.common.*;
 import swse.util.GeneratedLists;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -77,8 +78,8 @@ public class UnitExporter extends BaseExporter {
     private static Map<String,String> ITEMS_BY_ALTERNATE_NAME;
 
     private static Map<String, String> namedCrewPosition = new HashMap<>();
-    private static Pattern classPattern;
-    private static Pattern speciesPattern;
+    private static Pattern CLASS_PATTERN;
+    private static Pattern SPECIES_PATTERN;
     private static Pattern speciesTypePattern;
     private static Pattern traitTypePattern;
     private static Pattern templateTypePattern;
@@ -96,8 +97,8 @@ public class UnitExporter extends BaseExporter {
         List<String> heroicUnits = new ArrayList<>(getAlphaLinks("/wiki/Category:Heroic_Units?from="));
         heroicUnits.add("/wiki/Category:Heroic_Units");
 
-        classPattern = Pattern.compile("(" + String.join("|", GeneratedLists.CLASSES) + "|" + String.join("|", FOLLOWERS) + ")(?: )?(\\d+)?");
-        speciesPattern = Pattern.compile("(" + GeneratedLists.SPECIES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + "|" + String.join("|", DROID_TYPES) + "|Near-Human)");
+        CLASS_PATTERN = Pattern.compile("(" + String.join("|", GeneratedLists.CLASSES) + "|" + String.join("|", FOLLOWERS) + ")(?: )?(\\d+)?");
+        SPECIES_PATTERN = Pattern.compile("(" + GeneratedLists.SPECIES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + "|" + String.join("|", DROID_TYPES) + "|Near-Human)");
         speciesTypePattern = Pattern.compile("(" + GeneratedLists.SPECIES_TYPE.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
         traitTypePattern = Pattern.compile("(" + GeneratedLists.TRAITS.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
         templateTypePattern = Pattern.compile("(" + GeneratedLists.TEMPLATES.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")");
@@ -113,7 +114,7 @@ public class UnitExporter extends BaseExporter {
         //entries.addAll(overrides);
 
         List<Integer> filter = List.of();//, 1, 2, 3, 4, 5 );//2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);//0, 1, 2, 3, 4);
-        List<String> nameFilter = List.of();//"B2-GR-Series Super Battle Droid");//"A9G-Series Archive Droid"); //"B1-Series Battle Droid Squad");
+        List<String> nameFilter = List.of();//"Rancor");//"B2-GR-Series Super Battle Droid");//"A9G-Series Archive Droid"); //"B1-Series Battle Droid Squad");
 
         List<JSONObject> entries = new UnitExporter().getEntriesFromCategoryPage(nonHeroicUnits, false, exclusionByName, nameFilter);
         entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false, exclusionByName, nameFilter));
@@ -149,7 +150,7 @@ public class UnitExporter extends BaseExporter {
             return new ArrayList<>();
         }
 
-//        if(!itemLink.endsWith("Replica_Droid")){
+//        if(!itemLink.equals("Rancor")){
 //            return List.of();
 //        }
 
@@ -224,7 +225,7 @@ public class UnitExporter extends BaseExporter {
 
                     for (String affiliation : affiliations) {
                         if (GeneratedLists.AFFILIATIONS.contains(affiliation)) {
-                            current.withProvided(ProvidedItem.create(affiliation, ItemType.AFFILIATION));
+                            current.with(ProvidedItem.create(affiliation, ItemType.AFFILIATION));
                         } else {
                             //TODO there are missing affiliations
                             //printUnique("MISSING AFFILIATION: " + affiliation);
@@ -329,7 +330,7 @@ public class UnitExporter extends BaseExporter {
                         } else {
                             providedItem.withPayload("");
                         }
-                        current.withProvided(providedItem);
+                        current.with(providedItem);
                         continue;
                     }
 
@@ -350,7 +351,7 @@ public class UnitExporter extends BaseExporter {
                         } else {
                             providedItem.withPayload("");
                         }
-                        current.withProvided(providedItem);
+                        current.with(providedItem);
 
                         continue;
                     }
@@ -381,7 +382,7 @@ public class UnitExporter extends BaseExporter {
                             providedItem.withPayload("");
                             providedItem.withPayload("payload2", "");
                         }
-                        current.withProvided(providedItem);
+                        current.with(providedItem);
 
                         continue;
                     }
@@ -397,7 +398,7 @@ public class UnitExporter extends BaseExporter {
 
                         providedItem.withPayload(String.valueOf(destinyMatcher.group(1) != null && destinyMatcher.group(1).equals("Fulfilled")));
 
-                        current.withProvided(providedItem);
+                        current.with(providedItem);
 
                         continue;
                     }
@@ -574,14 +575,14 @@ public class UnitExporter extends BaseExporter {
             if (child.tag().equals(Tag.valueOf("i")) || (child.tag().equals(Tag.valueOf("a")) && child.children().size() > 0 && child.child(0).tag().equals(Tag.valueOf("i")))) {
                 ProvidedItem providedItem = ProvidedItem.create(awaitingPayload, awaitingPayloadType);
                 providedItem.withPayload(secret);
-                current.withProvided(providedItem);
+                current.with(providedItem);
             } else if (secret.startsWith("Force Power Mastery")) {
                 awaitingPayload = "Force Power Mastery";
                 awaitingPayloadType = ItemType.FORCE_TECHNIQUE;
             } else if (GeneratedLists.SECRETS.contains(secret)) {
-                current.withProvided(ProvidedItem.create(secret, ItemType.FORCE_SECRET));
+                current.with(ProvidedItem.create(secret, ItemType.FORCE_SECRET));
             } else if (GeneratedLists.TECHNIQUES.contains(secret)) {
-                current.withProvided(ProvidedItem.create(secret, ItemType.FORCE_TECHNIQUE));
+                current.with(ProvidedItem.create(secret, ItemType.FORCE_TECHNIQUE));
             } else {
                 printUnique(current.getName() + " SECRET: " + secret);
             }
@@ -634,7 +635,7 @@ public class UnitExporter extends BaseExporter {
                             providedItem.withPayload(m.group(2));
                         }
 
-                        current.withProvided(providedItem);
+                        current.with(providedItem);
                         continue;
                     }
                     if (DUPLICATE_TALENT_NAMES.contains(talentName)) {
@@ -673,7 +674,7 @@ public class UnitExporter extends BaseExporter {
             System.out.println(current.getName() + " " + current.getLink());
         }
 
-        current.withProvided(providedItem);
+        current.with(providedItem);
 
 
     }
@@ -702,7 +703,7 @@ public class UnitExporter extends BaseExporter {
                         providedItem.withQuantity(modifier);
                     }
 
-                    current.withProvided(providedItem);
+                    current.with(providedItem);
                     continue;
                 }
             }
@@ -879,7 +880,7 @@ public class UnitExporter extends BaseExporter {
         }
 
 
-        current.withProvided(providedItem);
+        current.with(providedItem);
     }
 
 
@@ -892,7 +893,7 @@ public class UnitExporter extends BaseExporter {
             }
 
             if (GeneratedLists.FORCE_REGIMENS.contains(text)) {
-                current.withProvided(ProvidedItem.create(text, ItemType.FORCE_REGIMEN));
+                current.with(ProvidedItem.create(text, ItemType.FORCE_REGIMEN));
                 continue;
             }
 
@@ -915,7 +916,7 @@ public class UnitExporter extends BaseExporter {
             }
 
             if (GeneratedLists.ITEMS.contains(text)) {
-                current.withProvided(ProvidedItem.create(text, ItemType.ITEM).withEquip("equipped"));
+                current.with(ProvidedItem.create(text, ItemType.ITEM).withEquip("equipped"));
                 continue;
             }
 
@@ -926,7 +927,7 @@ public class UnitExporter extends BaseExporter {
                     if (GeneratedLists.ITEMS.contains(toks[1])) {
                         providedItem.withProvided(Modification.create(ProvidedItem.create(toks[1], ItemType.ITEM)));
                     }
-                    current.withProvided(providedItem);
+                    current.with(providedItem);
                     continue;
                 }
             }
@@ -1012,7 +1013,7 @@ public class UnitExporter extends BaseExporter {
                             modifiers.put(mn, --c);
                         }
                     });
-                    current.withProvided(providedItem);
+                    current.with(providedItem);
                 }
 
                 continue;
@@ -1038,7 +1039,7 @@ public class UnitExporter extends BaseExporter {
                 if (GeneratedLists.ITEMS.contains(base)) {
                     ProvidedItem providedItem = ProvidedItem.create(base, ItemType.ITEM);
                     providedItem.withProvided(Change.create(ChangeKey.PAYLOAD, pm.group(2)));
-                    current.withProvided(providedItem);
+                    current.with(providedItem);
                     continue;
                 }
                 printUnique("MISSING DROID PART: " + current.getName() + " : " + text);
@@ -1073,7 +1074,7 @@ public class UnitExporter extends BaseExporter {
 
                     }
 
-                    current.withProvided(providedItem);
+                    current.with(providedItem);
                 }
                 //printUnique(countString + " " + m.group(2));
                 continue;
@@ -1429,22 +1430,22 @@ StringBuilder buffered = new StringBuilder();
                     if (m1.find()) {
                         ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
                         providedItem.withProvided(Change.create(ChangeKey.CREDIT, m1.group(1)));
-                        current.withProvided(providedItem);
+                        current.with(providedItem);
                     } else {
                         try {
                             if (!"".equals(modifier) && parseInt(modifier) > 0) {
                                 ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
                                 providedItem.withProvided(Change.create(ChangeKey.CREDIT, modifier));
-                                current.withProvided(providedItem);
+                                current.with(providedItem);
                             } else if (item.equals("Multiple Credit Chips") || item.equals("Thousands of Credits")) {
                                 ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
                                 providedItem.withProvided(Change.create(ChangeKey.CREDIT, "8d100"));
                                 providedItem.withQuantity("1d4");
-                                current.withProvided(providedItem);
+                                current.with(providedItem);
                             } else if (item.equals("Credits") || item.equals("Credits for Strong Drinks")) {
                                 ProvidedItem providedItem = ProvidedItem.create("Credit Chip", ItemType.ITEM);
                                 providedItem.withProvided(Change.create(ChangeKey.CREDIT, "8d6"));
-                                current.withProvided(providedItem);
+                                current.with(providedItem);
                             } else {
                                 //printUnique("MISSING ITEM: " + item + " : " + modifier + " : " + current.getName());
                             }
@@ -1477,7 +1478,7 @@ StringBuilder buffered = new StringBuilder();
                 if (nameOverride != null) {
                     providedItem.withCustomName(nameOverride);
                 }
-                current.withProvided(providedItem);
+                current.with(providedItem);
             }
         }
     }
@@ -1530,7 +1531,7 @@ StringBuilder buffered = new StringBuilder();
                 provided.withCustomName(nameOverride);
             }
 
-            current.withProvided(provided);
+            current.with(provided);
 
 
             for (String modifier : List.of(split[1].split(" and "))) {
@@ -1554,7 +1555,7 @@ StringBuilder buffered = new StringBuilder();
                             } else {
                                 providedItem = ProvidedItem.create(two, ItemType.ITEM);
                             }
-                            current.withProvided(providedItem);
+                            current.with(providedItem);
                         }
                     }
                 } else {
@@ -1565,143 +1566,160 @@ StringBuilder buffered = new StringBuilder();
     }
 
     private boolean sizeClassAndSpeciesLine(Unit current, String text, String itemName) {
-        if (startsWithOneOf(GeneratedLists.sizes, text) && !text.startsWith("Small Appendages:") && !text.startsWith("Small teams of Soldiers")) {
-            List<String> children = List.of(text.split(" "));
-
-            String size = getUnitSize(children);
-
-            if (size != null) {
-                current.withSize(size);
-            }
-
-            Matcher m = classPattern.matcher(text);
-
-            List<Pair<String,String>> classes = new ArrayList<>();
-
-            boolean isBeast = false;
-
-            while (m.find()) {
-                String level = m.group(2);
-                if (level == null) {
-                    level = "1";
-                }
-                classes.add(Pair.of(m.group(1).trim(), level));
-                if("Beast".equals(m.group(1).trim())){
-                    isBeast = true;
-                }
-            }
-
-            m = speciesPattern.matcher(text);
-
-            String species = null;
-            List<String> speciesAnswers = new ArrayList<>();
-            speciesAnswers.add(getSizeAnswer(size));
-            if (m.find()) {
-                species = m.group(1);
-
-                switch (species) {
-                    case "1st-Degree Droid":
-                        species = "1st-Degree Droid Model";
-                        break;
-                    case "2nd-Degree Droid":
-                        species = "2nd-Degree Droid Model";
-                        break;
-                    case "3rd-Degree Droid":
-                        species = "3rd-Degree Droid Model";
-                        break;
-                    case "4th-Degree Droid":
-                        species = "4th-Degree Droid Model";
-                        break;
-                    case "5th-Degree Droid":
-                        species = "5th-Degree Droid Model";
-                        break;
-                    default:
-                }
-            }
-
-            if (species == null && !isBeast) {
-                species = "Human";
-            }
-
-
-            if (classes.size() != 0) {
-                boolean isFirstClass = true;
-                for (Pair<String, String> pair : classes) {
-                    int count = parseInt(pair.getRight());
-                    for (int i = 0; i < count; i++) {
-                        ProvidedItem providedItem = ProvidedItem.create(pair.getLeft(), ItemType.CLASS);
-                        if(isFirstClass){
-                            providedItem.isFirstLevel();
-                        }
-                        current.withProvided(providedItem);
-                        isFirstClass = false;
-                    }
-                }
-            }
-
-            m = NEAR_HUMAN_PATTERN.matcher(text);
-            if (m.find()) {
-                current.withSpeciesSubType(m.group(1));
-            }
-
-            m = SHARD_DROID_TYPE_PATTERN.matcher(text);
-            if (m.find()) {
-                current.withSpeciesSubType(m.group(1));
-            }
-
-            if ("Aqualish".equals(species)) {
-                m = AQUALISH_TYPE_PATTERN.matcher(text);
-                if (m.find()) {
-                    current.withSpeciesSubType(m.group(1));
-                    speciesAnswers.add(m.group(1));
-                } else {
-                    current.withSpeciesSubType("None");
-                    speciesAnswers.add("None");
-                }
-            }
-
-            if ("Republic Clone".equals(species)) {
-                speciesAnswers.add("Dexterity");
-            }
-
-
-            if (species != null) {
-                ProvidedItem providedItem = ProvidedItem.create(species, ItemType.SPECIES);
-                providedItem.withAnswers(speciesAnswers);
-                current.withProvided(providedItem);
-            }
-
-            m = ageTypePattern.matcher(text);
-            if (m.find()) {
-                current.withAge(m.group(1).replaceAll("-", " "));
-            }
-
-            m = speciesTypePattern.matcher(text);
-            if (m.find()) {
-                current.withProvided(ProvidedItem.create(m.group(1), ItemType.SPECIES_TYPE));
-            }
-            m = traitTypePattern.matcher(text);
-            if (m.find()) {
-                current.withProvided(ProvidedItem.create(m.group(1), ItemType.TRAIT));
-            }
-            m = templateTypePattern.matcher(text);
-            if (m.find()) {
-                current.withProvided(ProvidedItem.create(m.group(1), ItemType.TEMPLATE));
-            }
-            return true;
+        if (!startsWithOneOf(GeneratedLists.sizes, text) || text.startsWith("Small Appendages:") || text.startsWith("Small teams of Soldiers")) {
+            return false;
         }
-        return false;
+
+        Matcher m = CLASS_PATTERN.matcher(text);
+
+        List<Pair<String,String>> classes = new ArrayList<>();
+
+        boolean isBeast = false;
+
+        while (m.find()) {
+            String level = m.group(2);
+            if (level == null) {
+                level = "1";
+            }
+            classes.add(Pair.of(m.group(1).trim(), level));
+            if("Beast".equals(m.group(1).trim())){
+                isBeast = true;
+            }
+        }
+
+
+        List<String> speciesAnswers = new ArrayList<>();
+
+        String size = getUnitSize(text);
+        current.withSize(size);
+        speciesAnswers.add(getSizeAnswer(size));
+        current.with(ProvidedItem.create(size, ItemType.TRAIT));
+
+
+        String species = getSpecies(text, isBeast);
+
+
+        if (classes.size() != 0) {
+            boolean isFirstClass = true;
+            for (Pair<String, String> pair : classes) {
+                int count = parseInt(pair.getRight());
+                //for (int i = 0; i < count; i++) {
+                    ProvidedItem providedItem = ProvidedItem.create(pair.getLeft(), ItemType.CLASS).withQuantity(String.valueOf(count));
+                    if(isFirstClass){
+                        providedItem.isFirstLevel();
+                    }
+                    current.with(providedItem);
+                    isFirstClass = false;
+                //}
+            }
+        }
+
+        m = NEAR_HUMAN_PATTERN.matcher(text);
+        if (m.find()) {
+            current.withSpeciesSubType(m.group(1));
+        }
+
+        m = SHARD_DROID_TYPE_PATTERN.matcher(text);
+        if (m.find()) {
+            current.withSpeciesSubType(m.group(1));
+        }
+
+        if ("Aqualish".equals(species)) {
+            m = AQUALISH_TYPE_PATTERN.matcher(text);
+            if (m.find()) {
+                current.withSpeciesSubType(m.group(1));
+                speciesAnswers.add(m.group(1));
+            } else {
+                current.withSpeciesSubType("None");
+                speciesAnswers.add("None");
+            }
+        }
+
+        if ("Republic Clone".equals(species)) {
+            speciesAnswers.add("Dexterity");
+        }
+
+
+        if (species != null) {
+            ProvidedItem providedItem = ProvidedItem.create(species, ItemType.SPECIES);
+            providedItem.withAnswers(speciesAnswers);
+            current.with(providedItem);
+        }
+
+        m = ageTypePattern.matcher(text);
+        if (m.find()) {
+            current.withAge(m.group(1).replaceAll("-", " "));
+        }
+
+        m = speciesTypePattern.matcher(text);
+        if (m.find()) {
+            current.with(ProvidedItem.create(m.group(1), ItemType.SPECIES_TYPE));
+        }
+        m = traitTypePattern.matcher(text);
+        if (m.find()) {
+            current.with(ProvidedItem.create(m.group(1), ItemType.TRAIT));
+        }
+        m = templateTypePattern.matcher(text);
+        if (m.find()) {
+            current.with(ProvidedItem.create(m.group(1), ItemType.TEMPLATE));
+        }
+        return true;
+    }
+
+    private String getSpecies(String text, boolean isBeast) {
+        Matcher m;
+        m = SPECIES_PATTERN.matcher(text);
+        String species = null;
+        if (m.find()) {
+            species = m.group(1);
+
+            species = normalizeSpeciesName(species);
+        }
+
+        if (species == null && !isBeast) {
+            species = "Human";
+        }
+        return species;
+    }
+
+    private String normalizeSpeciesName(String species) {
+        switch (species) {
+            case "1st-Degree Droid":
+                species = "1st-Degree Droid Model";
+                break;
+            case "2nd-Degree Droid":
+                species = "2nd-Degree Droid Model";
+                break;
+            case "3rd-Degree Droid":
+                species = "3rd-Degree Droid Model";
+                break;
+            case "4th-Degree Droid":
+                species = "4th-Degree Droid Model";
+                break;
+            case "5th-Degree Droid":
+                species = "5th-Degree Droid Model";
+                break;
+            default:
+        }
+        return species;
     }
 
     private String getSizeAnswer(String size) {
         return size;
     }
 
-    private String getUnitSize(List<String> children) {
+    @Nonnull
+    private String getUnitSize(String text) {
+        List<String> children = List.of(text.split(" "));
+
         String size = children.get(0);
         String possibleModifier = children.get(1);
         if (colossal.contains(possibleModifier)) {
             size = size.concat(" ").concat(possibleModifier);
+        }
+
+        if(size == null){
+            return "Medium";
         }
         return size;
     }

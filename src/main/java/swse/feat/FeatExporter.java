@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -167,13 +168,26 @@ public class FeatExporter extends BaseExporter {
                         .withImage(getImage("feat", itemName))
                         .withSource(content)
                 .withDescription(content)
-                .withProvided(getPayloadChoice(itemName))
+                .with(getPayloadChoice(itemName))
                 .withPrerequisite(prerequisite)
                 .withCategories(categories)
-                .withProvided(getGeneratedAttributes(content))
-                .withProvided(getManualAttributes(itemName)));
+                        .withPossibleProviders(getPossibleProviders(itemName))
+                .with(getGeneratedAttributes(content))
+                .with(getManualAttributes(itemName))
+                .with(getReroll(content.text())));
 
         return feats;
+    }
+
+    private List<String> getPossibleProviders(String itemName) {
+        List<String> possibleProviders = Lists.newArrayList();
+        if(itemName.startsWith("Armor Proficiency")){
+            return List.of("Armor Proficiency Feat");
+        }
+        if(itemName.startsWith("Weapon Proficiency")){
+            return List.of("Weapon Proficiency Feat", "Jedi Bonus Feats:Lightsabers");
+        }
+        return List.of();
     }
 
     private static Collection<?> getGeneratedAttributes(Element content) {
@@ -336,6 +350,11 @@ public class FeatExporter extends BaseExporter {
             case "Extra Second Wind":
                 changes.add(Change.create(ChangeKey.BONUS_SECOND_WIND, "1"));
                 break;
+            case "Point-Blank Shot":
+                changes.add(Change.create(ChangeKey.BONUS_DAMAGE, "1:RANGE:Point-Blank"));
+                changes.add(Change.create(ChangeKey.TO_HIT_MODIFIER, "1:RANGE:Point-Blank"));
+            case "Implant Training":
+                changes.add(Change.create(ChangeKey.IMPLANT_TRAINING, true));
             default:
         }
         if (itemName.startsWith("Martial Arts ")) {

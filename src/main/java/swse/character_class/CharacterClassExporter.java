@@ -73,6 +73,11 @@ public class CharacterClassExporter extends BaseExporter {
         classLinkList.add("/wiki/Pathfinder");
         classLinkList.add("/wiki/Martial_Arts_Master");
 
+
+        classLinkList.add("/wiki/Aggressive_Follower");
+        classLinkList.add("/wiki/Defensive_Follower");
+        classLinkList.add("/wiki/Utility_Follower");
+
         List<String> names = new ArrayList<>();
 
         List<JSONObject> entries = new ArrayList<>();
@@ -126,15 +131,15 @@ public class CharacterClassExporter extends BaseExporter {
         Context.setValue("name", itemName);
         JSONy characterClass = CharacterClass.create(itemName)
                 .withLeveledStats(Levels.getLeveledStats(content.select("table"), itemName))
-                .withProvided(ClassSkill.getClassSkills(content.select("p,ul,h4")))
-                .withProvided(HitPoints.getHitPoints(content.select("p,h4"), itemName))
-                .withProvided(ForcePoints.getForcePoints(content.select("p,h4,h3")))
-                .withProvided(DefenceBonuses.getDefenseBonuses(content.select("p,h4"), itemName))
+                .with(ClassSkill.getClassSkills(content.select("p,ul,h4")))
+                .with(HitPoints.getHitPoints(content.select("p,h4"), itemName))
+                .with(ForcePoints.getForcePoints(content.select("p,h4,h3")))
+                .with(DefenceBonuses.getDefenseBonuses(content.select("p,h4"), itemName))
                 .withPrerequisite(Prerequisite.getClassPrerequisite(content.select("p,ul,h4"), itemName))
-                .withProvided(StartingFeats.getStartingFeats(content.select("p,ul,h4"), itemName))
-                .withProvided(getClassChoice(itemName))
-                .withProvided(getClassType(itemName))
-                .withProvided(getProvidedItems(itemName))
+                .with(StartingFeats.getStartingFeats(content.select("p,ul,h4"), itemName))
+                .with(getClassChoice(itemName))
+                .with(getClassType(itemName))
+                .with(getProvidedItems(itemName))
                 .withDescription(content);
 
         return Lists.newArrayList(characterClass);
@@ -152,8 +157,9 @@ public class CharacterClassExporter extends BaseExporter {
 
     private static Collection<?> getClassType(String itemName) {
         List<Object> classTypes = new ArrayList<>();
-        classTypes.add(Change.create(ChangeKey.IS_HEROIC, !List.of("Beast", "Nonheroic").contains(itemName)));
-        classTypes.add(Change.create(ChangeKey.IS_PRESTIGE, !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy").contains(itemName)));
+        classTypes.add(Change.create(ChangeKey.IS_HEROIC, !List.of("Beast", "Nonheroic", "Aggressive Follower", "Defensive Follower", "Utility Follower").contains(itemName)));
+        classTypes.add(Change.create(ChangeKey.IS_PRESTIGE, !List.of("Beast", "Nonheroic", "Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy", "Aggressive Follower", "Defensive Follower", "Utility Follower").contains(itemName)));
+        classTypes.add(Change.create(ChangeKey.IS_FOLLOWER_TEMPLATE, List.of("Aggressive Follower", "Defensive Follower", "Utility Follower").contains(itemName)));
         return classTypes;
     }
 

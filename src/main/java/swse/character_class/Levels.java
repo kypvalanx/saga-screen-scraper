@@ -30,7 +30,7 @@ class Levels {
 
     @NonNull
     private static Map<Integer, Level> parseLevelTable(Element table, String className) {
-        Elements headers = table.select("th");
+        Elements headers = table.select("th:not([rowspan])");
         HashMap<Integer, Level> featuresByLevel = new HashMap<>();
         if (headers.size() == 0) {
             return featuresByLevel;
@@ -44,7 +44,7 @@ class Levels {
             }
             Integer level = 0;
             for (int i = 0; i < headers.size(); i++) {
-                String header = headers.get(i).text();
+                String header = headers.get(i).text().trim();
                 if (header.isEmpty()) {
                     continue;
                 }
@@ -53,6 +53,9 @@ class Levels {
                 switch (header) {
                     case "LEVEL":
                     case "CLASS LEVEL":
+                    case "AGGRESSIVE FOLLOWER LEVEL":
+                    case "DEFENSIVE FOLLOWER LEVEL":
+                    case "UTILITY FOLLOWER LEVEL":
                         level = getNumber(text);
                         if (level == null) {
                             System.err.println("WAT");

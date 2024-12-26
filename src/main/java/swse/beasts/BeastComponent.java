@@ -3,7 +3,7 @@ package swse.beasts;
 import swse.common.Copyable;
 import swse.common.FoundryItem;
 
-class BeastComponent extends FoundryItem<BeastComponent> implements Copyable<BeastComponent> {
+public class BeastComponent extends FoundryItem<BeastComponent> implements Copyable<BeastComponent> {
 
     public BeastComponent(String name) {
         super(name, "beastAttack");

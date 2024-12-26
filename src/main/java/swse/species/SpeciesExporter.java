@@ -2,6 +2,7 @@ package swse.species;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -19,20 +20,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
+
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.character_class.StartingFeats;
-import swse.common.Change;
-import swse.common.ChangeKey;
-import swse.common.BaseExporter;
-import swse.common.Category;
-import swse.common.Choice;
-import swse.common.ItemType;
-import swse.common.JSONy;
-import swse.common.Option;
-import swse.common.ProvidedItem;
+import swse.common.*;
+import swse.item.Effect;
 
 import static swse.common.ItemType.FEAT;
 import static swse.common.ItemType.TRAIT;
@@ -41,7 +36,7 @@ public class SpeciesExporter extends BaseExporter {
     public static final String IMAGE_FOLDER = "systems/swse/icon/species";
     public static final String JSON_OUTPUT = SYSTEM_LOCATION + "\\raw_export\\species.json";
     public static final String ROOT = "G:/FoundryVTT/Data";
-    public static final List<String> DUMMY_CATEGORYS = List.of("Damage Reduction", "Conditional Bonus Feat", "Natural Armor", "Bonus Class Skill", "Species");
+    public static final List<String> DUMMY_CATEGORIES = List.of("Damage Reduction", "Conditional Bonus Feat", "Natural Armor", "Bonus Class Skill", "Species", "Homebrew");
     public static final Pattern BONUS_FEAT_PATTERN = Pattern.compile("gain one bonus Feat at 1st level");
     public static final Pattern DAMAGE_REDUCTION = Pattern.compile("Damage Reduction (\\d*)");
     private static List<Object> defaultDroidUnarmedDamage;
@@ -58,7 +53,7 @@ public class SpeciesExporter extends BaseExporter {
             entries.addAll(readItemMenuPage(itemLink, false));
             drawProgressBar(entries.size() * 100.0 / 345.0);
         }
-        System.out.println("processed "+ entries.size() + " of 345");
+        System.out.println("processed " + entries.size() + " of 345");
         System.out.println("species with auto languages " + languages);
 
         printUniqueNames(entries);
@@ -98,7 +93,7 @@ public class SpeciesExporter extends BaseExporter {
         final SpeciesExporter speciesExporter = new SpeciesExporter();
 
         return hrefs.stream().flatMap((Function<String, Stream<JSONy>>) itemLink -> speciesExporter
-                .parseItem(itemLink, overwrite, null, null).stream()).map(item ->item.toJSON()).collect(Collectors.toList());
+                .parseItem(itemLink, overwrite, null, null).stream()).map(item -> item.toJSON()).collect(Collectors.toList());
     }
 
     protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
@@ -117,14 +112,13 @@ public class SpeciesExporter extends BaseExporter {
 
         String speciesName = headingElements.first().text();
 
-        if(speciesName.equals("t'landa Til")){
+        if (speciesName.equals("t'landa Til")) {
             speciesName = "T'landa Til";
         }
 
         if ("home".equals(speciesName)) {
             return new ArrayList<>();
         }
-
 
 
 //        if (!speciesName.equals("Replica Droid")) {
@@ -145,7 +139,7 @@ public class SpeciesExporter extends BaseExporter {
             //System.out.println(itemLink.getKey());
         }
 
-
+        boolean isDroid = speciesName.toLowerCase().contains("droid");
 
         List<String> variants = getVariants(speciesName);
 
@@ -158,32 +152,45 @@ public class SpeciesExporter extends BaseExporter {
             Species species = Species.create(variant)
                     .withDescription(content)
                     .withImage(imageFile)
-                    .withProvided(categories)
-                    .withProvided(addTraitsFromCategories(categories, variant))
-                    .withProvided(StartingFeats.getStartingFeatsFromCategories(categories))
-                    .withProvided(StatBonuses.getStatBonuses(content, variant))
-                    .withProvided(getDroidChoice(variant))
-                    .withProvided(getMechanicLocomotionChoice(variant))
-                    .withProvided(getSpeciesSpecificChoice(variant))
-                    .withProvided(Speed.getSpeed(content, variant))
-                    .withProvided(AgeCategories.getAgeCategories(content))
-                    //.withProvided(getSize(content)) seems to be duplicated by addTraitsFromCategories
-                    .withProvided(getWeaponFamiliarity(variant))
-                    .withProvided(getBonusTree(variant))
-                    .withProvided(getManualBonusItems(variant))
-                    .withProvided(getBonusItems(content, variant));
+                    .with(categories)
+                    .with(addTraitsFromCategories(categories, variant))
+                    .with(StartingFeats.getStartingFeatsFromCategories(categories))
+                    .with(StatBonuses.getStatBonuses(content, variant))
+                    .with(getDroidChoice(variant))
+                    .with(getSpeciesSpecificChoice(variant))
+                    .with(Speed.getSpeed(content, variant))
+                    .with(AgeCategories.getAgeCategories(content, isDroid))
+                    .with(getWeaponFamiliarity(variant))
+                    .with(getBonusTree(variant))
+                    .with(getManualBonusItems(variant))
+                    .with(getBonusItems(content, variant))
+                    .with(getLanguageFeatures(variant));
             jsonies.add(species);
         }
-
-
-
 
 
         return jsonies;
     }
 
+    private Collection<?> getLanguageFeatures(String variant) {
+        List<Object> provided = new ArrayList<>();
+        switch (variant){
+            case "Gamorrean":
+                provided.add(Change.create(ChangeKey.MAY_SPEAK, "Gamorrean"));
+                break;
+            case "Wookiee":
+                provided.add(Change.create(ChangeKey.MAY_SPEAK, "Shyriiwook"));
+                provided.add(Change.create(ChangeKey.MAY_SPEAK, "Thykarann"));
+                provided.add(Change.create(ChangeKey.MAY_SPEAK, "Xaczik"));
+                break;
+            default:
+                break;
+        }
+        return provided;
+    }
+
     private List<String> getVariants(String speciesName) {
-        if("Umbaran".equals(speciesName)){
+        if ("Umbaran".equals(speciesName)) {
             return List.of("Umbaran", "Umbaran (Alternate Species Traits)");
         }
         return List.of(speciesName);
@@ -191,18 +198,54 @@ public class SpeciesExporter extends BaseExporter {
 
     private static Collection<?> addTraitsFromCategories(Set<Category> categories, String speciesName) {
         List<Object> provided = new ArrayList<>();
+        boolean skipSizes = false;
+
+        if ("Neti".equals(speciesName)) {
+            skipSizes = true;
+            provided.add(ProvidedItem.create("Medium", TRAIT));
+            provided.add(Effect.create("Humanoid", "Metamorph", List.of(
+                    Change.create(ChangeKey.SPEED, "Base Speed 4")
+            ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))).enabled());
+            provided.add(Effect.create("Quadrupedal", "Metamorph", List.of(
+                    Change.create(ChangeKey.SIZE_BONUS, 1),
+                    Change.create(ChangeKey.SPEED, "Base Speed 2"),
+                    Change.create(ChangeKey.DISABLE, "Run"),
+                    Change.create(ChangeKey.DISABLE, "Charge"),
+                    Change.create(ChangeKey.RESIST, "Prone:5")
+            ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
+            provided.add(Effect.create("Treelike", "Metamorph", List.of(
+                    Change.create(ChangeKey.SIZE_BONUS, 2),
+                    Change.create(ChangeKey.SPEED, "Stationary 0"),
+                    Change.create(ChangeKey.DISABLE, "Run"),
+                    Change.create(ChangeKey.DISABLE, "Charge"),
+                    Change.create(ChangeKey.RESIST, "Prone:15")
+            ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
+        }
+
+
         for (Category category : categories) {
 
-            if(DUMMY_CATEGORYS.contains(category.getValue())){
+            if (DUMMY_CATEGORIES.contains(category.getValue())) {
                 continue;
             }
 
             if ("Extra Arms".equals(category.getValue())) {
                 provided.addAll(getExtraArms(speciesName));
-            } else if(!"Weapon Familiarity".equals(category.getValue()) && !"Bonus Feat".equals(category.getValue())){
-                provided.add(ProvidedItem.create(category.getValue(), TRAIT));
-                //printUnique(category.getValue());
+            } else if ("Bonus Trained Skill".equals(category.getValue())) {
+                if (!"Human".equals(speciesName)) {
+                    provided.add(ProvidedItem.create(category.getValue(), TRAIT));
+                    //System.out.println("BONUS TRAINED SKILL " + speciesName);
+                }
+                continue;
             }
+            if ("Weapon Familiarity".equals(category.getValue()) || "Bonus Feat".equals(category.getValue())) {
+                continue;
+            }
+            if(skipSizes && List.of("Tiny", "Small", "Medium", "Large", "Huge").contains(category.getValue())){
+                continue;
+            }
+            provided.add(ProvidedItem.create(category.getValue(), TRAIT));
+
 
         }
         return provided;
@@ -230,14 +273,14 @@ public class SpeciesExporter extends BaseExporter {
     private static Collection<?> getBonusItems(Element content, String variant) {
         List<Object> provided = new ArrayList<>();
 
-        if("Umbaran (Alternate Species Traits)".equals(variant)){
+        if ("Umbaran (Alternate Species Traits)".equals(variant)) {
 
             return provided;
         }
 
         for (Element child : content.select("p,li")) {
 //            if(child.children().isEmpty()) {
-            provided.addAll(getTrait(child));
+            provided.addAll(getTrait(child, variant));
 //            } else {
 //                provided.addAll(getBonusItems(child));
 //            }
@@ -245,23 +288,26 @@ public class SpeciesExporter extends BaseExporter {
         return provided;
     }
 
-    private static Collection<?> getTrait(Element child) {
+    private static Collection<?> getTrait(Element child, String speciesName) {
 
         List<Object> provided = new ArrayList<>();
-        Matcher bonusFeat = BONUS_FEAT_PATTERN.matcher(child.text());
-        if (bonusFeat.find()) {
-            provided.add(ProvidedItem.create("Bonus Feat", TRAIT));
+
+        if (!"Human".equals(speciesName)) {
+            Matcher bonusFeat = BONUS_FEAT_PATTERN.matcher(child.text());
+            if (bonusFeat.find()) {
+                provided.add(ProvidedItem.create("Bonus Feat", TRAIT));
+            }
         }
-        if(false && child.text().startsWith("Automatic Language")){
+        if (false && child.text().startsWith("Automatic Language")) {
             languages++;
 
             Pattern p = Pattern.compile("can (?:both )?speak, read,? and write (?:both )?([\\w\\s-',]*)");
 
             Matcher m = p.matcher(child.text());
-            if(m.find()){
-                if(child.text().contains(". ")){
-                     String complex = child.text().split("\\. ")[1];
-                    if("After the fall of the Empire, Dressellese are also fluent in Bothese.".equals(complex)){
+            if (m.find()) {
+                if (child.text().contains(". ")) {
+                    String complex = child.text().split("\\. ")[1];
+                    if ("After the fall of the Empire, Dressellese are also fluent in Bothese.".equals(complex)) {
                         provided.add(new Choice("After the fall of the Empire, Dressellese are also fluent in Bothese.")
                                 .withOption("Before the fall of the Empire", new Option())
                                 .withOption("After the fall of the Empire", new Option()
@@ -273,49 +319,49 @@ public class SpeciesExporter extends BaseExporter {
 
                     //printUnique(complex); //child.text());
                 }
-                    Set<String> langs = Arrays.stream(m.group(1).split(" and ")).filter(lang -> null != lang && !lang.isBlank()).map(String::trim).collect(Collectors.toSet());
-                    for(String s : langs){
-                        if("Basic, Chev,".equals(s)){
-                            provided.add(Change.create(ChangeKey.SPEAKS, "Basic"));
-                            provided.add(Change.create(ChangeKey.READS, "Basic"));
-                            provided.add(Change.create(ChangeKey.WRITES, "Basic"));
+                Set<String> langs = Arrays.stream(m.group(1).split(" and ")).filter(lang -> null != lang && !lang.isBlank()).map(String::trim).collect(Collectors.toSet());
+                for (String s : langs) {
+                    if ("Basic, Chev,".equals(s)) {
+                        provided.add(Change.create(ChangeKey.SPEAKS, "Basic"));
+                        provided.add(Change.create(ChangeKey.READS, "Basic"));
+                        provided.add(Change.create(ChangeKey.WRITES, "Basic"));
 
-                            provided.add(Change.create(ChangeKey.SPEAKS, "Chev"));
-                            provided.add(Change.create(ChangeKey.READS, "Chev"));
-                            provided.add(Change.create(ChangeKey.WRITES, "Chev"));
-                        } else if("Basic, Huttese,".equals(s)){
-                            provided.add(Change.create(ChangeKey.SPEAKS, "Basic"));
-                            provided.add(Change.create(ChangeKey.READS, "Basic"));
-                            provided.add(Change.create(ChangeKey.WRITES, "Basic"));
+                        provided.add(Change.create(ChangeKey.SPEAKS, "Chev"));
+                        provided.add(Change.create(ChangeKey.READS, "Chev"));
+                        provided.add(Change.create(ChangeKey.WRITES, "Chev"));
+                    } else if ("Basic, Huttese,".equals(s)) {
+                        provided.add(Change.create(ChangeKey.SPEAKS, "Basic"));
+                        provided.add(Change.create(ChangeKey.READS, "Basic"));
+                        provided.add(Change.create(ChangeKey.WRITES, "Basic"));
 
-                            provided.add(Change.create(ChangeKey.SPEAKS, "Huttese"));
-                            provided.add(Change.create(ChangeKey.READS, "Huttese"));
-                            provided.add(Change.create(ChangeKey.WRITES, "Huttese"));
-                        } else if("Nikto, as well as either Basic or Huttese".equals(s)){
-                            provided.add(Change.create(ChangeKey.SPEAKS, "Nikto"));
-                            provided.add(Change.create(ChangeKey.READS, "Nikto"));
-                            provided.add(Change.create(ChangeKey.WRITES, "Nikto"));
+                        provided.add(Change.create(ChangeKey.SPEAKS, "Huttese"));
+                        provided.add(Change.create(ChangeKey.READS, "Huttese"));
+                        provided.add(Change.create(ChangeKey.WRITES, "Huttese"));
+                    } else if ("Nikto, as well as either Basic or Huttese".equals(s)) {
+                        provided.add(Change.create(ChangeKey.SPEAKS, "Nikto"));
+                        provided.add(Change.create(ChangeKey.READS, "Nikto"));
+                        provided.add(Change.create(ChangeKey.WRITES, "Nikto"));
 
-                            provided.add(new Choice("Select an available language")
-                                    .withOption("Basic", new Option()
-                                            .withChange(Change.create(ChangeKey.SPEAKS, "Basic"))
-                                            .withChange(Change.create(ChangeKey.READS, "Basic"))
-                                            .withChange(Change.create(ChangeKey.WRITES, "Basic")))
-                                    .withOption("Huttese", new Option()
-                                            .withChange(Change.create(ChangeKey.SPEAKS, "Huttese"))
-                                            .withChange(Change.create(ChangeKey.READS, "Huttese"))
-                                            .withChange(Change.create(ChangeKey.WRITES, "Huttese")))
-                            );
-                        } else {
-                            provided.add(Change.create(ChangeKey.SPEAKS, s));
-                            provided.add(Change.create(ChangeKey.READS, s));
-                            provided.add(Change.create(ChangeKey.WRITES, s));
-                        }
-                        //printUnique(s);
-                        //do i want 3 systems?
+                        provided.add(new Choice("Select an available language")
+                                .withOption("Basic", new Option()
+                                        .withChange(Change.create(ChangeKey.SPEAKS, "Basic"))
+                                        .withChange(Change.create(ChangeKey.READS, "Basic"))
+                                        .withChange(Change.create(ChangeKey.WRITES, "Basic")))
+                                .withOption("Huttese", new Option()
+                                        .withChange(Change.create(ChangeKey.SPEAKS, "Huttese"))
+                                        .withChange(Change.create(ChangeKey.READS, "Huttese"))
+                                        .withChange(Change.create(ChangeKey.WRITES, "Huttese")))
+                        );
+                    } else {
+                        provided.add(Change.create(ChangeKey.SPEAKS, s));
+                        provided.add(Change.create(ChangeKey.READS, s));
+                        provided.add(Change.create(ChangeKey.WRITES, s));
                     }
+                    //printUnique(s);
+                    //do i want 3 systems?
+                }
 
-            } else{
+            } else {
                 //printUnique(child.text());
             }
 
@@ -354,24 +400,29 @@ public class SpeciesExporter extends BaseExporter {
             case "Medical Droid":
             case "1st-Degree Droid Model":
                 attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "1st-Degree Droid Talent Tree"));
+                attributes.add(ProvidedItem.create("Droid Default Appendage Offset", TRAIT));
                 break;
             case "Astromech Droid":
             case "Mechanic Droid":
             case "2nd-Degree Droid Model":
                 attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "2nd-Degree Droid Talent Tree"));
+                attributes.add(ProvidedItem.create("Droid Default Appendage Offset", TRAIT));
                 break;
             case "Protocol Droid":
             case "Service Droid":
             case "3rd-Degree Droid Model":
                 attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "3rd-Degree Droid Talent Tree"));
+                attributes.add(ProvidedItem.create("Droid Default Appendage Offset", TRAIT));
                 break;
             case "Battle Droid":
             case "Probe Droid":
             case "4th-Degree Droid Model":
                 attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "4th-Degree Droid Talent Tree"));
+                attributes.add(ProvidedItem.create("Droid Default Appendage Offset", TRAIT));
                 break;
             case "Labor Droid":
             case "5th-Degree Droid Model":
+                attributes.add(ProvidedItem.create("Droid Default Appendage Offset", TRAIT));
                 attributes.add(Change.create(ChangeKey.BONUS_TALENT_TREE, "5th-Degree Droid Talent Tree"));
                 break;
 
@@ -379,7 +430,6 @@ public class SpeciesExporter extends BaseExporter {
 
         if (speciesName.contains(" Droid")) {
             attributes.add(Change.create(ChangeKey.IS_DROID, "true"));
-            attributes.add(ProvidedItem.create("Droid Default Appendage Offset", TRAIT));
         }
 
         return attributes;
@@ -472,11 +522,19 @@ public class SpeciesExporter extends BaseExporter {
             choices.add(choice);
             choices.add(ProvidedItem.create("Bonus Trained Skill (Mechanics)", TRAIT));
         } else if ("Labor Droid".equals(speciesName)) {
-            choices.add(Change.create(ChangeKey.SKILL_RE_ROLL, "Strength:kh"));
+            choices.add(Change.createReRoll("Strength", "kh", ""));
         } else if ("Mechanic Droid".equals(speciesName)) {
-            choices.add(Change.create(ChangeKey.SKILL_RE_ROLL, "Mechanics"));
+            choices.add(Change.createReRoll("Mechanics", "", ""));
             choices.add(ProvidedItem.create("Bonus Trained Skill (Mechanics)", TRAIT));
-        } else if ("Medical Droid".equals(speciesName)) {
+            Choice locomotionChoice = new Choice("Select locomotion type:")
+                    .withShowSelectionInName(false);
+
+            locomotionChoice.withOption("Walking", new Option().withProvidedItem(ProvidedItem.create("Walking", ItemType.ITEM)));
+            locomotionChoice.withOption("Tracked", new Option().withProvidedItem(ProvidedItem.create("Tracked", ItemType.ITEM)));
+            locomotionChoice.withOption("Wheeled", new Option().withProvidedItem(ProvidedItem.create("Wheeled", ItemType.ITEM)));
+
+            choices.add(locomotionChoice);
+        }else if ("Medical Droid".equals(speciesName)) {
             Choice choice = new Choice("Select a Bonus Feat:")
                     .withShowSelectionInName(false);
             choice.withOption("Skill Focus (Knowledge (Life Sciences))", new Option().withProvidedItem(ProvidedItem.create("Skill Focus (Knowledge (Life Sciences))", FEAT)));
@@ -508,42 +566,34 @@ public class SpeciesExporter extends BaseExporter {
             choice.withOption("Skill Training (Knowledge (Bureaucracy))", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Knowledge (Bureaucracy))", FEAT)));
             choice.withOption("Skill Training (Knowledge (Galactic Lore))", new Option().withProvidedItem(ProvidedItem.create("Skill Training (Knowledge (Galactic Lore))", FEAT)));
             choices.add(choice);
+        } else if ("Human".equals(speciesName)) {
+
+            Choice choice = new Choice("Select Near-Human Option:");
+            choice.withOption("Human (Default)", new Option().isDefault()
+                    .withProvidedItem(ProvidedItem.create("Bonus Trained Skill", TRAIT))
+                    .withProvidedItem(ProvidedItem.create("Bonus Feat", TRAIT)));
+            choice.withOption("Near-Human (Give Up Bonus Feat)", new Option()
+                    .withProvidedItem(ProvidedItem.create("Bonus Trained Skill", TRAIT))
+                    .withProvidedItem(ProvidedItem.create("Near-Human Trait", TRAIT)));
+            choice.withOption("Near-Human (Give Up Bonus Trained Skill)", new Option()
+                    .withProvidedItem(ProvidedItem.create("Bonus Feat", TRAIT))
+                    .withProvidedItem(ProvidedItem.create("Near-Human Trait", TRAIT)));
+            choices.add(choice);
         }
-
-        return choices;
-    }
-
-
-    private static Collection<Object> getMechanicLocomotionChoice(String speciesName) {
-        Collection<Object> choices = new ArrayList<>();
-        if (!"Mechanic Droid".equals(speciesName)) {
-            return choices;
-        }
-
-        Choice locomotionChoice = new Choice("Select locomotion type:")
-                .withShowSelectionInName(false);
-
-        locomotionChoice.withOption("Walking", new Option().withProvidedItem(ProvidedItem.create("Walking", ItemType.ITEM)));
-        locomotionChoice.withOption("Tracked", new Option().withProvidedItem(ProvidedItem.create("Tracked", ItemType.ITEM)));
-        locomotionChoice.withOption("Wheeled", new Option().withProvidedItem(ProvidedItem.create("Wheeled", ItemType.ITEM)));
-
-        choices.add(locomotionChoice);
 
         return choices;
     }
 
     private static List<Object> getManualBonusItems(String speciesName) {
         List<Object> attributes = new ArrayList<>();
-        for (String item : getBonusItemList(speciesName)) {
+        for (String item : getDroidComponents(speciesName)) {
             attributes.add(ProvidedItem.create(item, ItemType.ITEM).withEquip("equipped"));
         }
         return attributes;
     }
 
-    private static ArrayList<String> getBonusItemList(String speciesName) {
-        if ("Replica Droid".equals(speciesName)) {
-            return Lists.newArrayList("Internal Comlink", "Darkvision", "Diagnosis Package", "Improved Sensor Package", "Internal Storage (Subject to size limitations)", "Translator Unit (DC 15)");
-        } else if ("Labor Droid".equals(speciesName)) {
+    private static ArrayList<String> getDroidComponents(String speciesName) {
+        if ("Labor Droid".equals(speciesName)) {
             return Lists.newArrayList("Walking", "Basic Processor", "Claw", "Claw", "Durasteel Shell", "Vocabulator");
         } else if ("Service Droid".equals(speciesName)) {
             return Lists.newArrayList("Walking", "Basic Processor", "Hand", "Hand", "Tool", "Vocabulator");
@@ -564,9 +614,27 @@ public class SpeciesExporter extends BaseExporter {
     }
 
 
-    private static Collection<Choice> getDroidChoice(String speciesName) {
-        Collection<Choice> choices = new ArrayList<>();
+    private static Collection<Object> getDroidChoice(String speciesName) {
+        Collection<Object> choices = new ArrayList<>();
         if (!speciesName.toLowerCase().contains("droid")) {
+            return choices;
+        }
+        if ("Replica Droid".equals(speciesName)) {
+            Choice replicaSpecies = new Choice("Select the Species that this Droid will replicate");
+            replicaSpecies.withOption("AVAILABLE_SPECIES", new Option().withPayload("AVAILABLE_SPECIES"));
+            choices.add(replicaSpecies);
+
+            Choice replicaOptionalComponents = new Choice("Select two optional components")
+                    .withShowSelectionInName(false)
+                    .withAvailableSelections(2)
+                    .withOption(Option.create("Internal Comlink"))
+                    .withOption(Option.create("Darkvision"))
+                    .withOption(Option.create("Diagnosis Package"))
+                    .withOption(Option.create("Improved Sensor Package"))
+                    .withOption(Option.create("Internal Storage (Subject to size limitations)", "Internal Storage"))
+                    .withOption(Option.create("Translator Unit (DC 15)"));
+            choices.add(replicaOptionalComponents);
+
             return choices;
         }
 
@@ -583,6 +651,8 @@ public class SpeciesExporter extends BaseExporter {
         droidChoice.withOption(new Option("Gargantuan (GM Only)", "Gargantuan").withProvidedItem(ProvidedItem.create("Gargantuan", TRAIT)));
         droidChoice.withOption(new Option("Colossal (GM Only)", "Colossal").withProvidedItem(ProvidedItem.create("Colossal", TRAIT)));
         choices.add(droidChoice);
+
+        choices.add(ProvidedItem.create("Droid Traits", TRAIT));
         return choices;
     }
 

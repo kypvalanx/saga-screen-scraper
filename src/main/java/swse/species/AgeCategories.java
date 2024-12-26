@@ -18,10 +18,13 @@ public class AgeCategories
         this.ages = ages;
     }
 
-    public static Set<Object> getAgeCategories(Element content)
+    public static Set<Object> getAgeCategories(Element content, boolean isDroid)
     {
-        Elements tables = content.select("table.wikitable");
         Set<Object> ageCategories = new HashSet<>();
+        if(isDroid){
+            return ageCategories;
+        }
+        Elements tables = content.select("table.wikitable");
         //Map<String,String> ages = new HashMap<>();
         for(Element table : tables){
             if(table.text().toLowerCase().contains("adult")){

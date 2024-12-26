@@ -19,13 +19,20 @@ import static swse.util.Util.cloneList;
 public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
     protected boolean disabled;
     protected List<Change> changes = Lists.newArrayList();
-    protected String name;
+    protected String label;
     protected String group;
     protected List<Link> links;
     protected Map<String, Object> flags;
 
-    public FoundryEffect(String name) {
-        this.name = name;
+    public T withId(String id) {
+        this.id = id;
+        return (T) this;
+    }
+
+    private String id;
+
+    public FoundryEffect(String label) {
+        this.label = label;
         this.flags = Maps.newHashMap();
         this.disabled = true;
     }
@@ -71,8 +78,8 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
         return (T) this;
     }
 
-    public String getName() {
-        return name;
+    public String getLabel() {
+        return label;
     }
 
     public List<Change> getChanges() {
@@ -88,10 +95,19 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
         resolveDynamicValues();
         JSONObject effect = new JSONObject();
         effect.put("disabled", disabled);
-        effect.put("name", name);
+        effect.put("label", label);
         effect.put("changes", Change.constructChangeList(changes));
         effect.put("flags", getJsonFlags());
+        effect.put("statuses", getStatuses());
         return effect;
+    }
+
+    private JSONArray getStatuses() {
+        JSONArray statuses = new JSONArray();
+        if(id != null){
+            statuses.put(id);
+        }
+        return statuses;
     }
 
     private JSONObject getJsonFlags() {
@@ -137,7 +153,7 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
         return response;
     }
     public FoundryEffect<T> copy() {
-        Effect effect = new Effect(name);
+        Effect effect = new Effect(label);
         effect.withGroup(group);
         effect.withLinks(cloneList(links).toArray(new Link[0]));
         effect.withChanges(cloneList(changes));

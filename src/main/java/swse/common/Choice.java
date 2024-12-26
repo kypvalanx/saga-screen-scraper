@@ -94,6 +94,11 @@ public class Choice implements JSONy, Copyable<Choice>
         return this;
     }
 
+    public Option withOption(){
+        return Option.create();
+    }
+
+
     public Choice withNoOptionsDescription(String noAvailableOptionsDescription){
         this.noAvailableOptionsDescription = noAvailableOptionsDescription;
         return this;

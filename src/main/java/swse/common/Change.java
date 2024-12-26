@@ -20,17 +20,25 @@ public class Change implements JSONy, Copyable<Change> {
         if(value == null){
             return null;
         }
-        return new Change(key.value(), value);
+        return new Change(key.value(), value, false);
     }
     public static Change create(ChangeKey key, Object value, String modifier) {
         if(value == null){
             return null;
         }
-        return new Change(key.value(), value).withModifier(modifier);
+        return new Change(key.value(), value, false).withModifier(modifier);
+    }
+    public static Change createReRoll(String skill, String modifier, String description){
+        return new Change(ChangeKey.SKILL_RE_ROLL.value(), skill+":"+modifier+":"+description, true);
     }
 
 
-    public Change(String key, Object value) {
+    public Change(String key, Object value, boolean ignoreRestrictions) {
+        if(!ignoreRestrictions){
+            if(List.of(ChangeKey.SKILL_RE_ROLL.value()).contains(key)){
+                throw new RuntimeException("Illegal use of ChangeKey."+key);
+            }
+        }
 //
 //        printUnique("Attribute " + key);
 //        if("damage".equals(key)) {
@@ -100,7 +108,7 @@ public class Change implements JSONy, Copyable<Change> {
 
     @Override
     public Change copy() {
-        return new Change(key, value).withModifier(modifier);
+        return new Change(key, value, true).withModifier(modifier);
     }
 
     public Change withValue(Object value) {

@@ -26,7 +26,9 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
 
         system
                 .put("size", size);
-        system.getJSONArray("changes").put(Change.create(ChangeKey.SIZE, size).toJSON());
+        if(size != null){
+            system.getJSONArray("changes").put(Change.create(ChangeKey.SIZE, size).toJSON());
+        }
 
         return json;
     }
@@ -69,41 +71,41 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
 
             printUnique(this.name + " [" + weight + "] "+this.getLink());
         }
-        this.withProvided(Change.create(ChangeKey.WEIGHT, weight));
+        this.with(Change.create(ChangeKey.WEIGHT, weight));
         return this;
     }
 
 
     public Item withSplash(String splash) {
-        return this.withProvided(Change.create(ChangeKey.SPLASH, splash));
+        return this.with(Change.create(ChangeKey.SPLASH, splash));
     }
 
     public Item withHeirloomBonus(String heirloomBonus) {
-        return this.withProvided(Change.create(ChangeKey.HEIRLOOM_BONUS, heirloomBonus));
+        return this.with(Change.create(ChangeKey.HEIRLOOM_BONUS, heirloomBonus));
     }
 
     public Item withSeeAlso(String seeAlso) {
-        this.withProvided(Change.create(ChangeKey.SEE_ALSO, seeAlso));
+        this.with(Change.create(ChangeKey.SEE_ALSO, seeAlso));
         return this;
     }
 
     public Item withBaseSpeed(String baseSpeed) {
-        this.withProvided(Change.create(ChangeKey.BASE_SPEED, baseSpeed));
+        this.with(Change.create(ChangeKey.BASE_SPEED, baseSpeed));
         return this;
     }
 
     public Item withRequires(String requires) {
-        this.withProvided(Change.create(ChangeKey.REQUIRES, requires));
+        this.with(Change.create(ChangeKey.REQUIRES, requires));
         return this;
     }
 
     public Item withTrigger(String trigger) {
-        this.withProvided(Change.create(ChangeKey.TRIGGER, trigger));
+        this.with(Change.create(ChangeKey.TRIGGER, trigger));
         return this;
     }
 
     public Item withRecurrence(String recurrence) {
-        this.withProvided(Change.create(ChangeKey.RECURRENCE, recurrence));
+        this.with(Change.create(ChangeKey.RECURRENCE, recurrence));
         return this;
     }
 
@@ -117,22 +119,22 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
     }
 
     public Item withRejectionAttackBonus(String rejectionAttackBonus) {
-        this.withProvided(Change.create(ChangeKey.REJECTION_ATTACK_BONUS, rejectionAttackBonus));
+        this.with(Change.create(ChangeKey.REJECTION_ATTACK_BONUS, rejectionAttackBonus));
         return this;
     }
 
     public Item withInstallationCost(String installationCost) {
-        this.withProvided(Change.create(ChangeKey.INSTALLATION_COST, installationCost));
+        this.with(Change.create(ChangeKey.INSTALLATION_COST, installationCost));
         return this;
     }
 
     public Item withUpgradePointCost(String upgradePointCost) {
-        this.withProvided(Change.create(ChangeKey.UPGRADE_POINT_COST, upgradePointCost));
+        this.with(Change.create(ChangeKey.UPGRADE_POINT_COST, upgradePointCost));
         return this;
     }
 
     public Item withChallengeLevel(String challengeLevel) {
-        this.withProvided(Change.create(ChangeKey.CHALLENGE_LEVEL, challengeLevel));
+        this.with(Change.create(ChangeKey.CHALLENGE_LEVEL, challengeLevel));
         return this;
     }
 
@@ -140,11 +142,11 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
         if (specials != null) {
             for (String special : specials) {
                 if (special.toLowerCase().contains("can be thrown")) {
-                    this.withProvided(Change.create(ChangeKey.IS_THROWABLE, true));
+                    this.with(Change.create(ChangeKey.IS_THROWABLE, true));
                 } else if (special.toLowerCase().contains("is a reach weapon")) {
-                    this.withProvided(Change.create(ChangeKey.IS_REACH, true));
+                    this.with(Change.create(ChangeKey.IS_REACH, true));
                 } else {
-                    this.withProvided(Change.create(ChangeKey.SPECIAL, special));
+                    this.with(Change.create(ChangeKey.SPECIAL, special));
                 }
             }
         }
@@ -152,25 +154,12 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
     }
 
     public Item withKeywords(List<String> keywords) {
-        this.withProvided(Change.create(ChangeKey.KEYWORDS, keywords));
-        return this;
-    }
-
-    public Item withModes(List<Effect> effects) {
-        this.effects.addAll(effects);
-        return this;
-    }
-
-    public Item withProvided(Object object){
-        super.withProvided(object);
-        if(object instanceof Effect){
-            effects.add((Effect)object);
-        }
+        this.with(Change.create(ChangeKey.KEYWORDS, keywords));
         return this;
     }
 
     public Item withDamageDie(String damageDie) {
-        this.withProvided(Change.create(ChangeKey.DAMAGE, damageDie));
+        this.with(Change.create(ChangeKey.DAMAGE, damageDie));
         return this;
     }
 
@@ -194,7 +183,7 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
             String[] toks = damageType.split(" and ");
 
             for(String tok : toks){
-                this.withProvided(Change.create(ChangeKey.DAMAGE_TYPE, tok.trim()));
+                this.with(Change.create(ChangeKey.DAMAGE_TYPE, tok.trim()));
             }
         } else if(damageType.contains(" or ")){
             String[] toks = damageType.split(" or ");
@@ -204,18 +193,18 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
                 effects.add(Effect.create(tok.trim(), "Damage Type", List.of(Change.create(ChangeKey.DAMAGE_TYPE, tok.trim()))));
             }
         } else {
-            this.withProvided(Change.create(ChangeKey.DAMAGE_TYPE, damageType));
+            this.with(Change.create(ChangeKey.DAMAGE_TYPE, damageType));
         }
         return this;
     }
 
     public Item withUnarmedDamage(Integer unarmedDamage) {
-        this.withProvided(Change.create(ChangeKey.UNARMED_BONUS_DAMAGE, unarmedDamage));
+        this.with(Change.create(ChangeKey.UNARMED_BONUS_DAMAGE, unarmedDamage));
         return this;
     }
 
     public Item withUnarmedModifier(String unarmedModifier) {
-        this.withProvided(Change.create(ChangeKey.UNARMED_MODIFIER, unarmedModifier));
+        this.with(Change.create(ChangeKey.UNARMED_MODIFIER, unarmedModifier));
         return this;
     }
 
@@ -230,11 +219,11 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
                 .withSubtype(subtype)
                 .withSize(size)
                 .withSource(source)
-                .withProvided(cloneList(effects))
-                .withProvided(cloneList(changes))
-                .withProvided(cloneList(providedItems))
-                .withProvided(cloneList(categories))
-                .withProvided(cloneList(choices));
+                .with(cloneList(effects))
+                .with(cloneList(changes))
+                .with(cloneList(providedItems))
+                .with(cloneList(categories))
+                .with(cloneList(choices));
 
         return item;
 

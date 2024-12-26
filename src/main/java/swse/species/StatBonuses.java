@@ -180,7 +180,6 @@ class StatBonuses
         }
 
 
-        bonuses.addAll(getAgeStatMods(!speciesName.toLowerCase().contains("droid")));
         bonuses.addAll(getDroidSizeMods(speciesName.toLowerCase().contains("droid")));
         bonuses = Util.mergeBonuses(bonuses);
         //
@@ -236,41 +235,41 @@ class StatBonuses
         }
 
         standardAgeBonuses = new ArrayList<>();
-        standardAgeBonuses.add(createProvidedTrait("Strength (-3)", "TRAIT:Child"));
-        standardAgeBonuses.add(createProvidedTrait("Constitution (-3)", "TRAIT:Child"));
-        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Child"));
-        standardAgeBonuses.add(createProvidedTrait("Intelligence (-1)", "TRAIT:Child"));
-        standardAgeBonuses.add(createProvidedTrait("Wisdom (-1)", "TRAIT:Child"));
-        standardAgeBonuses.add(createProvidedTrait("Charisma (-1)", "TRAIT:Child"));
-
-        standardAgeBonuses.add(createProvidedTrait("Strength (-1)", "TRAIT:Young adult"));
-        standardAgeBonuses.add(createProvidedTrait("Constitution (-1)", "TRAIT:Young adult"));
-        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Young adult"));
-        standardAgeBonuses.add(createProvidedTrait("Intelligence (-1)", "TRAIT:Young adult"));
-        standardAgeBonuses.add(createProvidedTrait("Wisdom (-1)", "TRAIT:Young adult"));
-        standardAgeBonuses.add(createProvidedTrait("Charisma (-1)", "TRAIT:Young adult"));
-
-        standardAgeBonuses.add(createProvidedTrait("Strength (-1)", "TRAIT:Middle age"));
-        standardAgeBonuses.add(createProvidedTrait("Constitution (-1)", "TRAIT:Middle age"));
-        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Middle age"));
-        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Middle age"));
-        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Middle age"));
-        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Middle age"));
-
-        standardAgeBonuses.add(createProvidedTrait("Strength (-2)", "TRAIT:Old"));
-        standardAgeBonuses.add(createProvidedTrait("Constitution (-2)", "TRAIT:Old"));
-        standardAgeBonuses.add(createProvidedTrait("Dexterity (-2)", "TRAIT:Old"));
-        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Old"));
-        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Old"));
-        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Old"));
-
-        standardAgeBonuses.add(createProvidedTrait("Strength (-3)", "TRAIT:Venerable"));
-        standardAgeBonuses.add(createProvidedTrait("Constitution (-3)", "TRAIT:Venerable"));
-        standardAgeBonuses.add(createProvidedTrait("Dexterity (-3)", "TRAIT:Venerable"));
-        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Venerable"));
-        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Venerable"));
-        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Venerable"));
-        standardAgeBonuses = Util.mergeBonuses(standardAgeBonuses);
+//        standardAgeBonuses.add(createProvidedTrait("Strength (-3)", "TRAIT:Child"));
+//        standardAgeBonuses.add(createProvidedTrait("Constitution (-3)", "TRAIT:Child"));
+//        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Child"));
+//        standardAgeBonuses.add(createProvidedTrait("Intelligence (-1)", "TRAIT:Child"));
+//        standardAgeBonuses.add(createProvidedTrait("Wisdom (-1)", "TRAIT:Child"));
+//        standardAgeBonuses.add(createProvidedTrait("Charisma (-1)", "TRAIT:Child"));
+//
+//        standardAgeBonuses.add(createProvidedTrait("Strength (-1)", "TRAIT:Young adult"));
+//        standardAgeBonuses.add(createProvidedTrait("Constitution (-1)", "TRAIT:Young adult"));
+//        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Young adult"));
+//        standardAgeBonuses.add(createProvidedTrait("Intelligence (-1)", "TRAIT:Young adult"));
+//        standardAgeBonuses.add(createProvidedTrait("Wisdom (-1)", "TRAIT:Young adult"));
+//        standardAgeBonuses.add(createProvidedTrait("Charisma (-1)", "TRAIT:Young adult"));
+//
+//        standardAgeBonuses.add(createProvidedTrait("Strength (-1)", "TRAIT:Middle age"));
+//        standardAgeBonuses.add(createProvidedTrait("Constitution (-1)", "TRAIT:Middle age"));
+//        standardAgeBonuses.add(createProvidedTrait("Dexterity (-1)", "TRAIT:Middle age"));
+//        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Middle age"));
+//        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Middle age"));
+//        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Middle age"));
+//
+//        standardAgeBonuses.add(createProvidedTrait("Strength (-2)", "TRAIT:Old"));
+//        standardAgeBonuses.add(createProvidedTrait("Constitution (-2)", "TRAIT:Old"));
+//        standardAgeBonuses.add(createProvidedTrait("Dexterity (-2)", "TRAIT:Old"));
+//        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Old"));
+//        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Old"));
+//        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Old"));
+//
+//        standardAgeBonuses.add(createProvidedTrait("Strength (-3)", "TRAIT:Venerable"));
+//        standardAgeBonuses.add(createProvidedTrait("Constitution (-3)", "TRAIT:Venerable"));
+//        standardAgeBonuses.add(createProvidedTrait("Dexterity (-3)", "TRAIT:Venerable"));
+//        standardAgeBonuses.add(createProvidedTrait("Intelligence (+1)", "TRAIT:Venerable"));
+//        standardAgeBonuses.add(createProvidedTrait("Wisdom (+1)", "TRAIT:Venerable"));
+//        standardAgeBonuses.add(createProvidedTrait("Charisma (+1)", "TRAIT:Venerable"));
+//        standardAgeBonuses = Util.mergeBonuses(standardAgeBonuses);
 
         return standardAgeBonuses;
     }

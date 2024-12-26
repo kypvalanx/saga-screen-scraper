@@ -9,7 +9,9 @@ import org.json.JSONObject;
 import org.jsoup.nodes.Element;
 import static swse.common.BaseExporter.getDescription;
 import static swse.common.BaseExporter.getSource;
+import static swse.util.Util.printUnique;
 
+import swse.item.Effect;
 import swse.item.FoundryEffect;
 import swse.prerequisite.Prerequisite;
 
@@ -85,7 +87,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
             universalChangesFromCategories();
         }
         //categories.forEach(category -> providedItems.add(ProvidedItem.create(category.getValue(), ItemType.TRAIT)));
-        system.put("providedItems",JSONy.toArray(providedItems));
+        system.put("providedItems",JSONy.toArray(providedItemPostFilter(providedItems)));
         system.put("modifications",JSONy.toArray(modifications));
 
         system.put("changes", createChangeArray(changes.stream().filter(Objects::nonNull).map(Change::toJSON).collect(Collectors.toList()), flags));
@@ -97,6 +99,10 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
 
         root.put("system", system);
         return root;
+    }
+
+    public List<ProvidedItem> providedItemPostFilter(List<ProvidedItem> providedItems) {
+        return providedItems;
     }
 
     private JSONArray createChangeArray(List<JSONObject> collect, List<String> flags) {
@@ -181,9 +187,9 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
 
     }
 
-    public T withProvided(Collection<?> objects) {
+    public T with(Collection<?> objects) {
         if(objects != null) {
-            objects.forEach(this::withProvided);
+            objects.forEach(this::with);
         }
         return (T) this;
     }
@@ -202,7 +208,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
 
 
     public T withAvailability(String availability) {
-        this.withProvided(Change.create(ChangeKey.AVAILABILITY, availability));
+        this.with(Change.create(ChangeKey.AVAILABILITY, availability));
         return (T) this;
     }
 
@@ -217,40 +223,45 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
     }
 
     public T withCost(String cost) {
-        this.withProvided(Change.create(ChangeKey.COST, cost));
+        this.with(Change.create(ChangeKey.COST, cost));
         return (T) this;
     }
 
-    public T withProvided(Object object) {
-        return withProvided(object, false);
+    public T with(Object object) {
+        return with(object, false);
     }
 
-    public T withProvided(Object object, boolean unique) {
-        if(object != null) {
-            if(object instanceof Change) {
-                if(unique){
-                    boolean overwritten = false;
-                    for(Change change : changes){
-                        if(change.getKey().equals(((Change)object).getKey())){
-                            change.withValue(((Change)object).getValue());
-                            overwritten = true;
-                        }
+    public T with(Object object, boolean unique) {
+        //printUnique(object);
+        if (object == null) {
+            return (T) this;
+        }
+
+        if(object instanceof Change) {
+            if(unique){
+                boolean overwritten = false;
+                for(Change change : changes){
+                    if(change.getKey().equals(((Change)object).getKey())){
+                        change.withValue(((Change)object).getValue());
+                        overwritten = true;
                     }
-                    if(!overwritten){
-                        changes.add((Change)object);
-                    }
-                } else {
-                    changes.add((Change) object);
                 }
-            } else if(object instanceof Choice){
-                choices.add((Choice)object);
-            } else if(object instanceof ProvidedItem){
-                providedItems.add((ProvidedItem)object);
-            } else if(object instanceof Category){
-                categories.add((Category)object);
-            } else if(object instanceof Modification){
-                modifications.add((Modification)object);
+                if(!overwritten){
+                    changes.add((Change)object);
+                }
+            } else {
+                changes.add((Change) object);
             }
+        } else if(object instanceof Choice){
+            choices.add((Choice)object);
+        } else if(object instanceof ProvidedItem){
+            providedItems.add((ProvidedItem)object);
+        } else if(object instanceof Category){
+            categories.add((Category)object);
+        } else if(object instanceof Modification){
+            modifications.add((Modification)object);
+        } else if(object instanceof Effect){
+            effects.add((Effect)object);
         }
         return (T) this;
     }

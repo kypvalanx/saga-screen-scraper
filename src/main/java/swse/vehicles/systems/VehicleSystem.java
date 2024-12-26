@@ -1,7 +1,5 @@
 package swse.vehicles.systems;
 
-import javax.annotation.Nonnull;
-import org.json.JSONObject;
 import swse.common.Copyable;
 import swse.common.FoundryItem;
 import static swse.util.Util.cloneList;
@@ -27,10 +25,10 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
         }
         v.withImage(image)
                 .withSource(source)
-                .withProvided(cloneList(changes))
-                .withProvided(cloneList(providedItems))
-                .withProvided(cloneList(categories))
-                .withProvided(cloneList(choices));
+                .with(cloneList(changes))
+                .with(cloneList(providedItems))
+                .with(cloneList(categories))
+                .with(cloneList(choices));
         return v ;
     }
 

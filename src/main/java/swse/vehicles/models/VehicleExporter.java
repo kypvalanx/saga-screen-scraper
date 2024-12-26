@@ -101,7 +101,7 @@ public class VehicleExporter extends BaseExporter {
         String itemName = title.text().trim();
         Vehicle current = Vehicle.create(itemName);
         final ProvidedItem customTemplate = ProvidedItem.create("Custom", ItemType.VEHICLE_BASE_TYPE);
-        current.withProvided(customTemplate);
+        current.with(customTemplate);
         items.add(current);
 
         String subHeader = "";

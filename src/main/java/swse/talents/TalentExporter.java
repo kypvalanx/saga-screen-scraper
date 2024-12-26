@@ -24,6 +24,7 @@ import swse.common.ItemType;
 import swse.common.JSONy;
 import swse.common.Option;
 import swse.common.ProvidedItem;
+import swse.item.Effect;
 import swse.prerequisite.AndPrerequisite;
 import swse.prerequisite.NotPrerequisite;
 import swse.prerequisite.OrPrerequisite;
@@ -139,16 +140,17 @@ public class TalentExporter extends BaseExporter
                 if(talentName != null && !talentName.isEmpty()){
 
                     talents.add(Talent.create(talentName)
-                                    .withProvided(getCountsAsForPrerequisite(talentName))
+                                    .with(getCountsAsForPrerequisite(talentName))
                             .withTalentTreeUrl("https://swse.fandom.com" + itemLink)
                             .withDescription(talentDescription)
+                                    .with(getReroll(talentDescription))
                             .withPrerequisite(prerequisite)
                             .withTalentTree(itemName)
-                            .withProvided(categories)
+                            .with(categories)
                             .withPossibleProviders(possibleProviders)
                             .withForceTradition(tradition)
-                            .withProvided(getAttributes(talentName))
-                            .withProvided(getChoices(talentName))
+                            .with(getAttributes(talentName))
+                            .with(getChoices(talentName))
                                     .withImage(getImage("talent", talentName, itemName))
                             .withSource(book));
                 }
@@ -188,16 +190,17 @@ public class TalentExporter extends BaseExporter
 
         if(talentName != null && !talentName.isEmpty()){
             talents.add(Talent.create(talentName)
-                    .withProvided(getCountsAsForPrerequisite(talentName))
+                    .with(getCountsAsForPrerequisite(talentName))
                     .withTalentTreeUrl("https://swse.fandom.com" +itemLink)
                     .withDescription(talentDescription)
+                    .with(getReroll(content.text()))
                     .withPrerequisite(prerequisite)
                     .withTalentTree(itemName)
-                    .withProvided(categories)
+                    .with(categories)
                     .withPossibleProviders(possibleProviders)
                     .withForceTradition(tradition)
-                    .withProvided(getAttributes(talentName))
-                    .withProvided(getChoices(talentName))
+                    .with(getAttributes(talentName))
+                    .with(getChoices(talentName))
                     .withImage(getImage("talent", talentName, itemName))
                     .withSource(book));
         }
@@ -260,7 +263,7 @@ public class TalentExporter extends BaseExporter
             attributes.add(choice);
         }
         if ("Telekinetic Prodigy".equals(talentName)){
-            attributes.add(ProvidedItem.create("Telekinetic Prodigy Bonus Force Power", ItemType.TRAIT));
+            attributes.add(Change.create(ChangeKey.TELEKINETIC_PRODIGY, true ));
         }
 
         return attributes;
@@ -320,7 +323,7 @@ public class TalentExporter extends BaseExporter
                 break;
             case "Lightsaber Defense":
                 //when getinheritableby id sees a $ it should lookup the following inheritable value
-                attributes.add(Buff.create("Lightsaber Defense").withProvided(Change.create(ChangeKey.DEFLECTION_BONUS, "$lightsaberDefense")));
+                attributes.add(Buff.create("Lightsaber Defense").with(Change.create(ChangeKey.DEFLECTION_BONUS, "$lightsaberDefense")));
                 attributes.add(Change.create(ChangeKey.LIGHTSABER_DEFENSE, 1));
                 attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, 3));
             case "Ataru":
@@ -377,6 +380,103 @@ public class TalentExporter extends BaseExporter
                 attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES_MAX, 5));
                 attributes.add(Change.create(ChangeKey.SENTINEL_STRIKE, "1d6"));
                 break;
+            case "Tough as Nails":
+                attributes.add(Change.create(ChangeKey.BONUS_SECOND_WIND, "1"));
+                break;
+            case "Inspire Loyalty":
+                attributes.add(Change.create(ChangeKey.CREATE_FOLLOWER, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES_MAX, 3));
+                attributes.add(Change.create(ChangeKey.FOLLOWER_CREATION_PROVIDES, "Armor Proficiency Feat:1"));
+                attributes.add(Change.create(ChangeKey.FOLLOWER_CREATION_PROVIDES, "FEAT:Trained Skill (Perception)"));
+                break;
+            case "Undying Loyalty":
+                attributes.add(Change.create(ChangeKey.FOLLOWER_PROVIDES, "FEAT:Toughness"));
+                break;
+            case "Punishing Protection":
+                attributes.add(Change.create(ChangeKey.ACTION, "As a Reaction to you being damaged by an attack or a Force Power, one of your followers can make an immediate melee or ranged attack against the target that attacked you. Until the beginning of your next turn, any time you are damaged by an attack or Force Power, another one of your followers can attack that attacking target. This ability can be used once per encounter. "));
+                break;
+            case "Protector Actions":
+                attributes.add(Change.create(ChangeKey.ACTION, "Bodyguard: As a Standard Action, you can make a melee or ranged attack against a target within Range. Until the end of your next turn, if that target damages you with an attack or Force Power, as a Reaction you can choose to redirect the attack or Force Power to an adjacent follower; the attack or Force Power is resolved against that ally as normal."));
+                attributes.add(Change.create(ChangeKey.ACTION, "Diversion Attack: As a Standard Action, you can make a melee or ranged attack against a target within Range. If that target attacks you or one of your allies before the beginning of your next turn, you can move one of your Followers up to its speed directly toward that target."));
+                attributes.add(Change.create(ChangeKey.ACTION, "The Best Defense: As a Standard Action, you can make a melee or ranged attack against a target within Range. For each of your followers armed with a ranged weapon and having line of sight to the target, that target takes a -1 penalty on attack rolls until the beginning of your next turn."));
+                break;
+
+            case "Reconnaissance Team Leader":
+                attributes.add(Change.create(ChangeKey.CREATE_FOLLOWER, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES_MAX, 3));
+                attributes.add(Change.create(ChangeKey.FOLLOWER_CREATION_PROVIDES, "FEAT:Trained Skill (Perception)"));
+                attributes.add(Change.create(ChangeKey.FOLLOWER_CREATION_PROVIDES, "FEAT:Trained Skill (Stealth)"));
+                attributes.add(Change.create(ChangeKey.ACTION, "Whenever you use the Stealth skill, all your Followers can also make Stealth checks as a part of the same Action if they are able to."));
+                break;
+
+            case "Close-Combat Assault":
+                attributes.add(Change.create(ChangeKey.FOLLOWER_PROVIDES, "FEAT:Point-Blank Shot"));
+                break;
+            case "Get Into Position":
+                attributes.add(Change.create(ChangeKey.ACTION, "As a Move Action, you can cause one of your Followers to move up to his or her speed +2 squares."));
+                break;
+            case "Reconnaissance Actions":
+                attributes.add(Change.create(ChangeKey.ACTION, "Forward Scouting: As a Standard Action, you can make a melee or ranged attack against a target in Range. For each of your Followers armed with a ranged weapon who has line of sight to your target, you can grant one ally a +2 insight bonus on attack rolls against the target until the end of your next turn. Thus, if you have multiple armed Followers with line of sight to the target, you can grant the +2 bonus to multiple allies."));
+                attributes.add(Change.create(ChangeKey.ACTION, "Group Sniping: As a Standard Action, you can make a melee or ranged attack against a target in Range. For each of your Followers armed with a ranged weapon who has line of sight to your target, you and each of your followers gains a +1 circumstance bonus to Stealth checks until the end of your next turn."));
+                attributes.add(Change.create(ChangeKey.ACTION, "Sweep the Area: As a Standard Action, you can make a melee or ranged attack against a target in Range. For each of your Followers armed with a ranged weapon who has line of sight to your target, you and each of your Followers gains a +1 circumstance bonus on Perception checks until the end of your next turn."));
+                break;
+            case "Commanding Officer":
+                attributes.add(Change.create(ChangeKey.CREATE_FOLLOWER, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES_MAX, 3));
+                attributes.add(Change.create(ChangeKey.FOLLOWER_CREATION_PROVIDES, "Armor Proficiency Feat:1"));
+                attributes.add(Change.create(ChangeKey.FOLLOWER_CREATION_PROVIDES, "FEAT:Weapon Proficiency (Rifles)"));
+                break;
+
+            case "Coordinated Tactics":
+                attributes.add(Change.create(ChangeKey.FOLLOWER_PROVIDES, "FEAT:Coordinated Attack"));
+                break;
+
+            case "Fire at Will":
+                attributes.add(Change.create(ChangeKey.ACTION, "As a Full-Round Action, you and one of your Followers can make a ranged attack against one target (each) in line of sight. You each take a -5 penalty to your attack rolls. "));
+                break;
+            case "Squad Actions":
+                attributes.add(Change.create(ChangeKey.ACTION, "Autofire Barrage: As a Standard Action, you can make an Autofire attack against legal target spaces. For each of your Followers who is armed with a ranged Weapon set on Autofire and has a line of sight to the area targeted by your Autofire, you can designate one additional square as targeted by your Autofire (that square must be adjacent to your original target area)."));
+                attributes.add(Change.create(ChangeKey.ACTION, "Open Fire: As a Standard Action, make a ranged attack against a single target. For each of your Followers who is armed with a ranged Weapon and has a line of sight to the target, add +2 to your damage roll on a successful hit."));
+                attributes.add(Change.create(ChangeKey.ACTION, "Painted Target: As a Standard Action, make a ranged attack against a single target. You gain a competence bonus on your attack roll equal to the number of your Followers who are armed with a ranged Weapon and have line of sight to the target. Thus, if you have three armed Followers with line of sight to the target, you gain a +3 competence bonus on your attack roll."));
+                break;
+            case "Spacehound":
+                attributes.add(Change.create(ChangeKey.SPACEHOUND, "true"));
+                attributes.add(Effect.create("Low Gravity", List.of(
+                        Change.create(ChangeKey.GRAVITY, "Low"),
+                        Change.create(ChangeKey.TRANSFER, true),
+                        Change.create(ChangeKey.SPEED_MULTIPLIER, "1.25:min 1"),
+                        Change.create(ChangeKey.CARRY_CAPACITY_MULTIPLIER, "2"),
+                        Change.create(ChangeKey.SKILL_BONUS, "str:2")
+                )).withId("gravityLow"));
+                attributes.add(Effect.create("Zero-Gravity", List.of(
+                        Change.create(ChangeKey.GRAVITY, "Zero"),
+                        Change.create(ChangeKey.TRANSFER, true),
+                        Change.create(ChangeKey.SPEED, "Base Speed -> Flying Speed"),
+                        Change.create(ChangeKey.CARRY_CAPACITY_MULTIPLIER, "10"),
+                        Change.create(ChangeKey.SKILL_BONUS, "all:-5")
+                )).withId("gravityZero"));
+                break;
+            case "Block":
+                attributes.add(Change.create(ChangeKey.ROLLABLE, "block"));
+                break;
+            case "Deflect":
+                attributes.add(Change.create(ChangeKey.ROLLABLE, "deflect"));
+                break;
+            case "Cargo Hauler":
+                attributes.add(Change.create(ChangeKey.SKILL_BONUS, "str:5"));
+                attributes.add(Change.create(ChangeKey.CARRY_CAPACITY_MULTIPLIER, "2"));
+                break;
+            case "Exceptional Skill":
+                attributes.add(Change.create(ChangeKey.TAKE_MULTIPLE_TIMES, true));
+                attributes.add(Change.create(ChangeKey.EXCEPTIONAL_SKILL, "#payload#"));
+                Choice choice = new Choice("Select a Skill to use with Exceptional Skill", "You Must have a trained skill to take Exceptional Skill.");
+                choice.withOption("AVAILABLE_EXCEPTIONAL_SKILL", new Option().withPayload("AVAILABLE_EXCEPTIONAL_SKILL"));
+                attributes.add(choice);
+                break;
+
         }
 
         return attributes;

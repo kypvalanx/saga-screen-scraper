@@ -7,20 +7,20 @@ import swse.common.Link;
 
 public class Effect extends FoundryEffect<Effect>{
 
-    protected Effect(String name) {
-        super(name);
+    protected Effect(String label) {
+        super(label);
     }
 
-    public static Effect create(String name, List<Change> changes) {
-        return new Effect(name).withChanges(changes);
+    public static Effect create(String label, List<Change> changes) {
+        return new Effect(label).withChanges(changes);
     }
 
-    public static Effect create(String name, String group, List<Change> changes) {
-        return new Effect(name).withGroup(group).withChanges(changes);
+    public static Effect create(String label, String group, List<Change> changes) {
+        return new Effect(label).withGroup(group).withChanges(changes);
     }
 
-    public static Effect create(String name, String group, List<Change> changes, List<Link> links) {
-        return new Effect(name).withGroup(group).withLinks(links.toArray(new Link[0])).withChanges(changes);
+    public static Effect create(String label, String group, List<Change> changes, List<Link> links) {
+        return new Effect(label).withGroup(group).withLinks(links.toArray(new Link[0])).withChanges(changes);
     }
 
 

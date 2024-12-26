@@ -34,7 +34,7 @@ public class UnitUpdater extends BaseExporter {
         Unit unit = new Unit(json.getString("name"))
                 .withType(json.getString("type"))
                 .withImage(json.getString("img"))
-                .withProvided(convertItemsToImportableItems(json.getJSONArray("items")))
+                .with(convertItemsToImportableItems(json.getJSONArray("items")))
                 .withSystem(data);
 
 

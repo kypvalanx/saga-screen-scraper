@@ -97,7 +97,7 @@ public class DestinyExporter extends BaseExporter {
         templates.add(Destiny
                 .create(itemName)
                 .withDescription(content)
-                .withProvided(getDestinyAttributes(content)));
+                .with(getDestinyAttributes(content)));
 
         return templates;
     }

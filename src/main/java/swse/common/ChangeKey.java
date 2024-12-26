@@ -89,6 +89,7 @@ public enum ChangeKey {
     IS_DROID("isDroid"),
     IS_HEROIC("isHeroic"),
     IS_PRESTIGE("isPrestige"),
+    IS_FOLLOWER_TEMPLATE("isFollowerTemplate"),
     IS_REACH("isReach"),
     IS_THROWABLE("isThrowable"),
     ITEM_MOD("itemMod"),
@@ -210,6 +211,7 @@ public enum ChangeKey {
     SPEED_BONUS("speedBonus"),
     INITIATIVE_BONUS("initiativeBonus"),
     CARRIED_CRAFT("carriedCraft"),
+    CARRY_CAPACITY_MULTIPLIER("carryCapacityMultiplier"),
     WEAPON_SYSTEMS("weaponSystems"),
     UNARMED_BONUS_DAMAGE("unarmedBonusDamage"),
     CREDIT("credit"),
@@ -273,7 +275,21 @@ public enum ChangeKey {
     AURA_ANIMATION_TYPE("auraAnimationType"),
     AURA_ANIMATION_SPEED("auraAnimationSpeed"),
     AURA_ANIMATION_INTENSITY("auraAnimationIntensity"),
-    SKILL_MODIFIER("skillModifier"), SENTINEL_STRIKE("sentinelStrike");
+    SKILL_MODIFIER("skillModifier"),
+    SENTINEL_STRIKE("sentinelStrike"),
+    MULTIPLE_ATTACK_MODIFIER("multipleAttackModifier"),
+    FORCE_POWER_DESCRIPTION("forcePowerShortDescription"),
+    CHECK("check"), TEMPORARY_FORCE_POINT("tempForcePoint"), CHECK_TRIGGER("checkTrigger"), DISABLE("disable"), RESIST("resist"),
+
+    /**
+     * if a charactor has this tag they are limited to speaking languages that are included with this tag.
+     *  ex. wookiees can only speak Shyriiwook, Thykarann, and Xaczik
+     */
+    MAY_SPEAK("maySpeak"),
+    FOLLOWER_CREATION_PROVIDES("followerCreationProvides"),
+    FOLLOWER_PROVIDES("followerProvides"), CREATE_FOLLOWER("createFollower"), SPACEHOUND("spacehound"),
+    GRAVITY("gravity"), TRANSFER("transfer"), ROLLABLE("rollable"), SPEED_MULTIPLIER("speedMultiplier"),
+    ION_SHIELDED("ionShielded"), CYBERNETIC("cybernetic"), IMPLANT_TRAINING("implantTraining"), IMPLANT_DISRUPTION("implantDisruption"), EXCEPTIONAL_SKILL("exceptionalSkill"), TELEKINETIC_PRODIGY("telekineticProdigy");
 
     private final String value;
 
