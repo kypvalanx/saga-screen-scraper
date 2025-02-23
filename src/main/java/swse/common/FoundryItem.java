@@ -124,10 +124,7 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
 
     private void universalChangesFromCategories() {
         List<String> categoryStrings = categories.stream().map(Category::getValue).collect(Collectors.toList());
-        if (categoryStrings.contains("Homebrew Content")){
-            changes.add(Change.create(ChangeKey.HOMEBREW, true));
-        }
-        if (categoryStrings.contains("Untested")){
+        if (categoryStrings.contains("Homebrew Content") || categoryStrings.contains("Untested")){
             changes.add(Change.create(ChangeKey.HOMEBREW, true));
         }
     }
@@ -185,6 +182,11 @@ public abstract class FoundryItem<T extends FoundryItem> implements JSONy {
         }
         return "Object";
 
+    }
+
+    public T withType(String type){
+        this.type = type;
+        return (T) this;
     }
 
     public T with(Collection<?> objects) {

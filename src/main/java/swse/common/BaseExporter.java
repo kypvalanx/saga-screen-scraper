@@ -266,6 +266,9 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
     }
 
     protected static Document getDoc(String itemPageLink, boolean overwrite) {
+        if(itemPageLink.isEmpty()){
+            return null;
+        }
         try {
 
 
@@ -636,19 +639,19 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
                 .map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
     }
 
-    public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite) {
-        return getEntriesFromCategoryPage(talentLinks, overwrite, List.of(), List.of());
+    public List<JSONObject> getEntriesFromCategoryPage(List<String> links, boolean overwrite) {
+        return getEntriesFromCategoryPage(links, overwrite, List.of(), List.of());
     }
-    public List<JSONObject> getEntriesFromCategoryPage(List<String> talentLinks, boolean overwrite, List<String> exclusion, List<String> nameFilter) {
+    public List<JSONObject> getEntriesFromCategoryPage(List<String> links, boolean overwrite, List<String> exclusion, List<String> nameFilter) {
         List<JSONObject> entries = new ArrayList<>();
         List<String> names = new LinkedList<>();
-        for (String talentLink : talentLinks) {
+        for (String link : links) {
             //entries.addAll(readCategoryItemPage(talentLink, false));
             Collection<? extends JSONObject> newEntities = List.of();
-            if(talentLink.contains("Category")) {
-                newEntities = readCategoryItemPage(talentLink, overwrite, exclusion, nameFilter);
+            if(link.contains("Category")) {
+                newEntities = readCategoryItemPage(link, overwrite, exclusion, nameFilter);
             } else {
-                newEntities = parseItem(talentLink, overwrite, null, nameFilter).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
+                newEntities = parseItem(link, overwrite, null, nameFilter).stream().map(jsoNy -> jsoNy.toJSON()).collect(Collectors.toList());
             }
             for (JSONObject newEntity : newEntities) {
                 String name = newEntity.getString("name");
@@ -780,5 +783,136 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
             printUnique(effect);
         }
         return of;
+    }
+
+    public Collection<?> createCumulativeChecks(Element content) {
+        content = content.clone();
+        Collection<Change> changes = new ArrayList<>();
+
+        List<Node> childNodes = content.childNodes();
+        for (int i = childNodes.size() - 1 ; i >= 0; i--) {
+            Node element = childNodes.get(i);
+            if (element instanceof Comment || element instanceof TextNode) {
+                element.remove();
+            }
+        }
+
+        Elements table = content.select("table.wikitable").remove();
+
+
+        if(table.size() == 1){
+            boolean foundHeader = false;
+            for (Element tr : table.get(0).children().get(0).children()) {
+                Elements rowItems = tr.children();
+                String dc = rowItems.get(0).text();
+                String effect = rowItems.get(1).text().length() > 0 ? rowItems.get(1).text() : rowItems.get(2).text();
+
+                if (("DC".equals(dc) || "RESULT".equals(dc)) && "EFFECT".equals(effect)) {
+                    foundHeader = true;
+                    continue;
+                }
+                changes.add(Change.create(ChangeKey.CHECK, dc + ":" + effect));
+                //System.out.println(dc + " " + effect);
+            }
+            if(!foundHeader){
+                throw new RuntimeException("failed to find header");
+            }
+        }
+
+
+        changes.add(Change.create(ChangeKey.SHORT_DESCRIPTION, content.text()));
+
+        return changes;
+    }
+
+    protected Collection<?> getTags(Element content) {
+        List<Change> tags = Lists.newArrayList();
+        Elements elements = content.children();
+        for (Element element :
+                elements) {
+            String text = element.text().trim();
+            if(text.startsWith("[")){
+                String[] toks = text.substring(1, text.length() - 1).split(", ");
+
+                for (String tok :
+                        toks) {
+                    tags.add(Change.create(ChangeKey.TAG, tok));
+                    //System.out.println(tok);
+                }
+            }
+
+        }
+        return tags;
+    }
+
+    protected Collection<?> getTime(Element content) {
+        List<Change> tags = Lists.newArrayList();
+        Elements elements = content.children();
+        for (Element element :
+                elements) {
+            String text = element.text().trim();
+            if(text.startsWith("Time:")) {
+                String tok = text.substring(6);
+                tags.add(Change.create(ChangeKey.ACTION, tok));
+
+                //System.out.println(tok);
+            }
+        }
+        return tags;
+    }
+
+    protected Collection<?> getTargets(Element content) {
+        List<Change> tags = Lists.newArrayList();
+        Elements elements = content.children();
+        for (Element element :
+                elements) {
+            String text = element.text().trim();
+            if(text.startsWith("Targets:")) {
+                String tok = text.substring(9);
+                tags.add(Change.create(ChangeKey.TARGET, tok));
+                //System.out.println(tok);
+            }
+        }
+        return tags;
+    }
+
+    protected Collection<?> getRollType(Element content) {
+        List<Change> tags = Lists.newArrayList();
+        Elements elements = content.children();
+        for (Element element :
+                elements) {
+            String text = element.text().trim();
+            if(text.startsWith("Make")) {
+
+                Pattern check = Pattern.compile("Make(?: a| an)? (DC \\d\\d)?([\\w\\s]*) (?:Check|check|roll)(?:\\. )?(?:If you succeed on a )?(?:If successful, )?(DC \\d\\d)?(?: ?check\\.|check,)?(.*)?");
+
+                Matcher m = check.matcher(element.text());
+
+                if(text.contains("effects") || text.contains("results")) {
+                    tags.add(Change.create(ChangeKey.CUMULATIVE, true));
+                }
+
+                if(m.find()){
+                    String checkType = m.group(2);
+                    String dc = m.group(1) != null ? m.group(1) : m.group(3);
+                    String resultAction = m.group(4);
+
+
+                    if(checkType != null){
+                        tags.add(Change.create(ChangeKey.ROLL_TYPE, checkType));
+                    }
+                    if(dc != null){
+                        String substring = dc.substring(3);
+                        if(resultAction != null){
+                            substring = substring + ":" + resultAction.trim();
+                        }
+                        tags.add(Change.create(ChangeKey.CHECK, substring));
+                    }
+                } else {
+                    System.err.println(element.text());
+                }
+            }
+        }
+        return tags;
     }
 }

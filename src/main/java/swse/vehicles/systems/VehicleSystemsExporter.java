@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,9 +21,12 @@ import swse.common.Change;
 import swse.common.ChangeKey;
 import swse.common.BaseExporter;
 import swse.common.JSONy;
+import swse.item.Effect;
 import swse.prerequisite.Prerequisite;
 import swse.prerequisite.SimplePrerequisite;
 import swse.util.Context;
+
+import static org.jsoup.internal.StringUtil.isNumeric;
 import static swse.util.Util.toEnumCase;
 
 public class VehicleSystemsExporter extends BaseExporter {
@@ -37,21 +41,26 @@ public class VehicleSystemsExporter extends BaseExporter {
     public static final Pattern DAMAGE_PATTERN = Pattern.compile("Damage: ([\\d\\w\\s]*)(?:\\(([\\w\\s,]*)\\))?");
     public static final Pattern SEE_ALSO_PATTERN = Pattern.compile("See also: ([\\d\\w\\s]*)");
     public static final Pattern SIZE_REQUIREMENT_PATTERN = Pattern.compile("(?:Size Restriction|Size Requirement|Prerequisites): ([\\d\\w\\s]*)");
+    private static final int TOP_HEADER = 0;
+    private static final int HEADER = 1;
+    private static final int ROW = 2;
 
     public static void main(String[] args) {
+        List<String> systemLinks = List.of("/wiki/Movement_Systems",
+                "/wiki/Defense_Systems",
+                "/wiki/Weapon_Systems",
+                "/wiki/Starship_Accessories",
+                "/wiki/Droid_Socket");
 
-        List<String> vehicleSystemLinks = new ArrayList<>(getAlphaLinks("/wiki/Category:Starship_Modifications?from="));
-        //vehicleSystemLinks.addAll(getAlphaLinks("/wiki/Category:Starship_Accessories?from="));
         List<JSONObject> entries = new LinkedList<>();
         List<String> names = new LinkedList<>();
-        VehicleSystemsExporter vehicleSystemsExporter = new VehicleSystemsExporter();
-        boolean overwrite = false;
-        for (String vehicleSystemLink :
-                vehicleSystemLinks) {
-            final List<JSONObject> newEntities = vehicleSystemsExporter.readItemMenuPage(vehicleSystemLink, overwrite);
+
+        for (String systemLink :
+                systemLinks) {
+            final List<JSONObject> newEntities = generateItemsFromLink(systemLink, null, false, null);
             for (JSONObject newEntity : newEntities) {
                 if (names.contains(newEntity.get("name"))) {
-                    //System.out.println("Duplicate: " + newEntity.get("name") + " from: " + vehicleSystemLink);
+                    System.out.println("Duplicate: " + newEntity.get("name") + " from: " + systemLink);
                 } else {
                     names.add((String) newEntity.get("name"));
                     entries.add(newEntity);
@@ -59,49 +68,497 @@ public class VehicleSystemsExporter extends BaseExporter {
             }
             drawProgressBar(entries.size() * 100.0 / 323.0);
         }
-        List<JSONObject> newEntities = new ArrayList<>();
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Droid_Socket", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Grenade_Launcher", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Missile_Launcher", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Frag_Grenade", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(vehicleSystemsExporter.parseItem("/wiki/Heavy_Repeating_Blaster", overwrite, null, null).stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Fire").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Rapid-Repeating").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Battery").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Heavy Yaret-kor").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Medium Yaret-kor").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Light Yaret-kor").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Magma Missile").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Heavy Plasma Projector").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Medium Plasma Projector").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Light Plasma Projector").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Dovin Basal").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Stun Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Suppression Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Bomblet Generator").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Antivehicle Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Interceptor Missile").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Superlaser").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
-        newEntities.addAll(assembleFromNameAndChildren(null, "Volcano Cannon").stream().map(ability -> ability.toJSON()).collect(Collectors.toList()));
+        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Vehicle Systems", "Item");
+    }
 
+    private static List<JSONObject> generateItemsFromLink(String link, Map<String, String> context, boolean overwrite, String subType) {
+        if (null == link) {
+            return new ArrayList<>();
+        }
+        Document doc = getDoc(link, overwrite);
+        if (doc == null) {
+            return new ArrayList<>();
+        }
 
+        //System.out.println("Parsing " + link);
 
-        for (JSONObject newEntity : newEntities) {
-            if (names.contains(newEntity.get("name"))) {
-                //System.out.println("Duplicate: " + newEntity.get("name") + " from: " + vehicleSystemLink);
-            } else {
-                names.add((String) newEntity.get("name"));
-                entries.add(newEntity);
+        Element parserOutput = doc.select(".page__main").first();
+
+        ArrayList<JSONObject> jsonObjects = new ArrayList<>();
+
+        boolean singlePage = false;
+        for (Element element : parserOutput.children()) {
+            if (element.text().contains("Type:")) {
+                singlePage = true;
             }
         }
 
-        //entries.addAll(manualItems());
+        if (singlePage) {
 
-        System.out.println("processed " + entries.size() + " of 340");
+            jsonObjects.addAll(generateItemsFromSingleItemPage(parserOutput, context, subType));
+        } else {
 
-        System.out.println("List.of(\"" + String.join("\", \"", names) + "\")");
+            jsonObjects.addAll(generateItemsFromMenuPage(parserOutput, getSubtypeFromLink(link)));
+        }
 
-        writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"), "Vehicle Systems", "Item");
+        return jsonObjects;
+    }
+
+    private static String getSubtypeFromLink(String link) {
+        return link.substring(6).replace("_", " ");
+    }
+
+    private static List<JSONObject> generateItemsFromMenuPage(Element element, String subType) {
+        ArrayList<JSONObject> jsonObjects = new ArrayList<>();
+        String pageName = element.select(".mw-page-title-main").text();
+
+        Element table = element.select("table.wikitable").first();
+
+        Map<String, Map<String, String>> tableMap = parseTable(pageName, table);
+
+        for (Map<String, String> tableValues : tableMap.values()) {
+            jsonObjects.addAll(generateItemsFromLink(tableValues.get("LINK"), tableValues, false, subType));
+        }
+
+        return jsonObjects;
+    }
+
+    private static Map<String, Map<String, String>> parseTable(String pageName, Element table) {
+        Element caption = table.select("caption").first();
+        if (caption != null && caption.text().contains("Ranges")) {
+            return parseRangeTable(table);
+        }
+        String[] headers = new String[table.select("th").size() * 2];
+
+        String previousLikn = "";
+        Map<String, Map<String, String>> tableMap = new HashMap<>();
+        for (Element row : table.select("tr")) {
+            Map<String, String> rowValues = new HashMap<>();
+
+            for (Element cell : row.children()) {
+                String colspan = cell.attr("colspan");
+                if (!colspan.equals("")) {
+                    continue;
+                }
+
+                if (cell.tag().getName().equals("th")) {
+                    headers[cell.siblingIndex()] = getStandardColumnName(pageName, cell);
+                } else {
+                    rowValues.put(headers[cell.siblingIndex()], cell.text());
+                    if (headers[cell.siblingIndex()].equals("NAME")) {
+                        Element a = cell.select("a").first();
+                        if (a != null) {
+
+                            previousLikn = a.attr("href");
+                            rowValues.put("LINK", previousLikn);
+
+                        } else {
+                            //System.out.println("couldn't find link on "+pageName+" for \"" + cell.text() + "\" using \"" + previousLikn + "\"");
+                            rowValues.put("LINK", previousLikn);
+                        }
+                    }
+                }
+
+
+            }
+
+            tableMap.put(rowValues.get("NAME"), rowValues);
+        }
+        return tableMap;
+    }
+
+    private static Map<String, Map<String, String>> parseRangeTable(Element table) {
+
+        String[] topHeaders = new String[table.select("th").size() * 2];
+        String[] headers = new String[table.select("th").size() * 2];
+
+        int rowType = TOP_HEADER;
+
+        Map<String, Map<String, String>> tableMap = new HashMap<>();
+        for (Element row : table.select("tr")) {
+            int i  = 0;
+            for (Element cell : row.children()) {
+                String colspan = cell.attr("colspan");
+                int width = isNumeric(colspan) ? Integer.parseInt(colspan) : 1;
+                for (int j = i; i < j + width; i++) {
+                    switch (rowType){
+                        case TOP_HEADER:
+                            topHeaders[i] = cell.text();
+                            break;
+                        case HEADER:
+                            headers[i] = cell.text();
+                            break;
+                        default:
+                            if(!topHeaders[i].isEmpty()){
+                                tableMap.computeIfAbsent(topHeaders[i], s -> new HashMap<>())
+                                        .put(headers[i], cell.text());
+                            }
+                    }
+                }
+            }
+            rowType++;
+        }
+        return tableMap;
+    }
+
+    private static String getStandardColumnName(String pageName, Element cell) {
+        String text = cell.text();
+        if (pageName.toLowerCase().contains(text.toLowerCase()) || "STARSHIP ACCESSORY".equals(text)) {
+            text = "NAME";
+        }
+
+        if (text.equals("AVAILABLE")) {
+            text = "AVAILABILITY";
+        }
+        return text;
+    }
+
+    private static List<JSONObject> generateItemsFromSingleItemPage(Element element, Map<String, String> context, String subType) {
+        String name = element.select(".mw-page-title-main").text();
+        Elements headers = element.select(".mw-headline");
+
+        List<Map<String, Map<String, String>>> tables = getTables(element, name);
+
+
+        Map<String, String> changes = new HashMap<>();
+        String variation = name;
+        if (context != null) {
+            changes.putAll(context);
+            variation = context.get("NAME");
+        }
+
+        //System.out.println(context);
+
+        String specificVariation = getSpecificVariation(variation, name);
+
+        changes.putAll(getManualChanges(name, specificVariation));
+        for (Map<String, Map<String, String>> table :
+                tables) {
+
+            if (isRangeTable(table) && !isAmmo(name, specificVariation)) {
+                Map<String, String> characterScale = table.get("RANGE BY STARSHIP SCALE");
+                for (Map.Entry<String, String> range :
+                        characterScale.entrySet()) {
+                    changes.put("STARSHIP_" + range.getKey(), range.getValue());
+                }
+                changes.putAll(table.get("RANGE BY CHARACTER SCALE"));
+
+            } else if(table.containsKey(specificVariation)){
+                Map<String, String> tableRow = table.get(specificVariation);
+
+                if (tableRow != null) {
+
+                    for (Map.Entry<String, String> c :
+                            tableRow.entrySet()) {
+                        if (List.of("NAME", "LINK").contains(c.getKey())) {
+                            continue;
+                        }
+
+                        if (!c.getValue().equals(changes.get(c.getKey()))) {
+                            //System.out.println("Menu values should match for " + variation + ".  menu: " + changes.get(c.getKey()) + " page: " + c.getValue());
+                        }
+                    }
+                }
+            }
+
+
+
+            //System.out.println(tableRow);
+        }
+
+
+        //System.out.println(changes);
+
+        List<JSONObject> jsonObjects = new ArrayList<>();
+        VehicleSystem vehicleSystem = new VehicleSystem(cleanName(variation));
+
+        if(isAmmo(name, specificVariation)){
+            vehicleSystem.withType("equipment"); //TODO change this to AMMO when an ammo type is created
+        }
+
+        if(List.of("Autoblaster", "Point-Defense").contains(name)){
+            vehicleSystem.withType("template");
+        }
+        if("Fire-Linked Weapon, 4".equals(variation) || "Fire-Linked Weapon, 2".equals(variation)){
+            String damage = changes.remove("DAMAGE");
+            vehicleSystem.with(Effect.create("Fire-Linked Weapon", List.of(Change.create(ChangeKey.DAMAGE, damage))).tokenAccessible());
+        }
+
+        vehicleSystem.withDescription(element.selectFirst(".mw-parser-output"));
+
+        if(subType != null){
+            vehicleSystem.withSubtype(subType);
+        }
+
+        for (Map.Entry<String, String> change :
+                changes.entrySet()) {
+            String keyString = change.getKey();
+            if (isIgnored(keyString)) {
+                continue;
+            }
+            String value = change.getValue();
+            if (isPrerequisite(keyString)) {
+
+                vehicleSystem.withPrerequisite(Prerequisite.create(value));
+                continue;
+            }
+            ChangeKey key = mapChangeKey(keyString);
+
+            if (key == null) {
+                continue;
+            }
+
+            if(ChangeKey.DAMAGE.equals(key)){
+                value = value.replace("**", "");
+
+                if(value.endsWith(" (Ion)")){
+                    vehicleSystem.with(Change.create(ChangeKey.DAMAGE_TYPE, "Ion"));
+                    value = value.substring(0, value.length()-6);
+                }
+
+                if(value.startsWith("+")){
+                    vehicleSystem.withType("template");
+                }
+                if("-".equals(value) || "Special".equals(value)){
+                    continue;
+                }
+            }
+
+            if(ChangeKey.EMPLACEMENT_POINTS.equals(key)){
+                if("-".equals(value)){
+                    continue;
+                }
+            }
+
+            vehicleSystem.with(Change.create(key, value));
+        }
+
+        jsonObjects.add(vehicleSystem.toJSON());
+
+
+        //System.out.println(name+" : "+context);
+        return jsonObjects;
+    }
+
+    private static String cleanName(String variation) {
+        return variation.replace("*", "").trim();
+    }
+
+    private static boolean isAmmo(String name, String specificVariation) {
+        if(specificVariation.endsWith("Torpedo") || specificVariation.endsWith("Missile") || specificVariation.endsWith("Bomb")|| name.endsWith("Bomb") && specificVariation.equals("") || specificVariation.endsWith("Grenade")
+                || specificVariation.endsWith("Mine") || specificVariation.endsWith("Shell")
+        ||List.of("Concussion MissileHeavy*", "Concussion MissileMedium", "Concussion MissileLight", "Gravity MineMagnetic").contains(specificVariation)){
+            //System.out.println("AMMO FOUND: " + name + " " + specificVariation);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static Map<String, String> getManualChanges(String name, String specificVariation) {
+        HashMap<String, String> changes = new HashMap<>();
+        if ("Sublight Drive".equals(name)) {
+            Pattern compile = Pattern.compile("Speed (\\d*) Square");
+            Matcher m = compile.matcher(specificVariation);
+            if (m.find()) {
+                changes.put("STARSHIP_SPEED", m.group(1));
+            }
+        } else if ("Hyperdrive".equals(name)) {
+            Pattern compile = Pattern.compile("Class (\\d*)");
+            Matcher m = compile.matcher(specificVariation);
+            if (m.find()) {
+                changes.put("HYPERDRIVE", m.group(1));
+            }
+        } else if ("Combat Thrusters".equals(name)) {
+            changes.put("EFFECTIVE_SIZE_WHEN_TARGETED", "-1");
+            changes.put("DOGFIGHTING", "TRUE");
+        } else if ("Atmospheric Thrusters".equals(name)) {
+            if ("Advanced".equals(specificVariation)) {
+                changes.put("ATMOSPHERIC_THRUSTER_BONUS", "25%");
+            } else {
+                changes.put("ATMOSPHERIC_THRUSTER_BONUS", "10%");
+            }
+        } else if ("Navicomputer".equals(name)) {
+            if ("Advanced".equals(specificVariation)) {
+                changes.put("ASTROGATION_BONUS", "10");
+            } else if ("Limited".equals(specificVariation)) {
+                changes.put("ASTROGATION_BONUS", "5");
+                changes.put("JUMP_LIMIT", "2");
+            } else {
+                changes.put("ASTROGATION_BONUS", "5");
+            }
+        } else if ("Maneuvering Jets".equals(name)) {
+            Pattern compile = Pattern.compile("\\+(\\d*)");
+            Matcher m = compile.matcher(specificVariation);
+            if(m.find()){
+                changes.put("DEXTERITY_BONUS", m.group(1));
+            }
+        } else if ("SubLight Accelerator Motor".equals(name)) {
+            changes.put("SUBLIGHT_ACCELERATOR_MOTOR", "true");
+        } else if ("Starship Shields".equals(name)){
+            Pattern compile = Pattern.compile("SR (\\d*)");
+            Matcher m = compile.matcher(specificVariation);
+            if(m.find()){
+                changes.put("SHIELDS", m.group(1));
+            }
+        } else if ("Reinforced Bulkheads".equals(name)){
+            Pattern compile = Pattern.compile("\\+(\\d*)");
+            Matcher m = compile.matcher(specificVariation);
+            if(m.find()){
+                changes.put("HIT_POINT_EQ", m.group(1));
+            }
+        } else if ("Starship Armor".equals(name)){
+            Pattern compile = Pattern.compile("\\+(\\d*)");
+            Matcher m = compile.matcher(specificVariation);
+            if(m.find()){
+                changes.put("REFLEX_DEFENSE_BONUS", m.group(1));
+            }
+        } else if ("Jamming Array".equals(name)){
+            changes.put("JAMMING_ARRAY", "true");
+        } else if ("Jamming Suite".equals(name)){
+            changes.put("JAMMING_SUITE", "true");
+        } else if ("Security Bracing".equals(name)){
+            changes.put("SECURITY_BRACING", "true");
+        } else if ("Reinforced Keel".equals(name)){
+            if("Boarding".equals(specificVariation)){
+
+                changes.put("RAMMING", "boarding");
+            } else {
+
+                changes.put("RAMMING", "standard");
+            }
+        } else if ("Com Jammers".equals(name)){
+
+            changes.put("COM_JAMMING", "true");
+        } else if ("Droid Jammer".equals(name)){
+
+            changes.put("DROID_JAMMER", "true");
+        } else if ("Regenerating Shields".equals(name)){
+
+            changes.put("REGENERATING_SHIELDS", "5");
+        } else if ("Anti-Boarding Systems".equals(name)){
+
+            changes.put("ANTI_BOARDING_SYSTEMS", "5");
+        } else if ("Shieldbuster Torpedo Launcher".equals(name)){
+            if("".equals(specificVariation)){
+                changes.put("AMMO", "Shieldbuster Torpedo:1");
+                changes.put("AMMO_CAPACITY", "4");
+                changes.put("AMMO_CAPACITY_INCREASE", "25%:8");
+            }
+        } else if ("Concussion Missile Launcher".equals(name)){
+            if(List.of("Light", "Medium", "Heavy").contains(specificVariation)){
+                int capacity = "Light".equals(specificVariation) ? 6 : "Medium".equals(specificVariation) ? 16 : 30;
+                changes.put("AMMO", "Concussion Missile, "+specificVariation+":1");
+                changes.put("AMMO_CAPACITY", ""+capacity);
+                changes.put("AMMO_CAPACITY_INCREASE", "20%:" + (capacity * 2));
+            }
+        } else if ("Space Mine Launcher".equals(name)){
+            if(List.of("", "Heavy*").contains(specificVariation)){
+                changes.put("AMMO", "Space Mine"+("Heavy*".equals(specificVariation) ? ", Heavy" : "")+":1");
+                changes.put("AMMO_CAPACITY", "6");
+                changes.put("AMMO_CAPACITY_INCREASE", "25%:12");
+            } else if (List.of("Space MineStandard", "Space MineHeavy*", "Space MineAdvanced").contains(specificVariation)) {
+                if("Space MineAdvanced".equals(specificVariation)){
+                    changes.put("ACTS_AS", "Space Mine");
+                }
+            }
+        } else if ("Proton Grenade Launcher".equals(name)){
+            if("".equals(specificVariation)){
+                changes.put("AMMO", "Proton Grenade:1");
+            }
+        } else if ("Tractor Beam".equals(name)){
+            changes.put("TRACTOR_BEAM", "TRACTOR_BEAM");
+        } else if ("Microtractor-Pressor".equals(name)){
+            changes.put("TRACTOR_BEAM", "TRACTOR_PRESSOR");
+        } else if ("Turbolaser".equals(name)) {
+            changes.put("SIZE RESTRICTION", "Colossal (Frigate) or larger");
+        } else if ("Docking Gun".equals(name)){
+            changes.put("ALLOW_ITEM_DROP", "weapon:ranged");
+        } else if ("Gravity Well Projector".equals(name)){
+            changes.put("GRAVITY_WELL", "standard");
+        } else if ("Defoliator Launcher".equals(name) && "Defoliator Shell".equals(specificVariation)){
+            changes.put("DAMAGE_TYPE", "Defoliator");
+        } else if ("Discord Missile Launcher".equals(name) && "".equals(specificVariation)){
+            changes.put("AMMO", "Discord Missile:1");
+        } else if ("Discord Missile Launcher".equals(name) && "Discord Missile".equals(specificVariation)){
+            changes.put("SPAWN", "Buzz Droid:3");
+        } else if ("Composite Beam Cannon".equals(name)){
+            changes.put("BYPASS_SHIELDS", "5");
+        } else if ("Energy Bomblet Generator".equals(name)){
+            changes.put("AMMO", "Energy Sphere:1");
+            changes.put("AMMO_CAPACITY", "10");
+            changes.put("AMMO_GENERATION", "Energy Sphere:10");
+        } else if ("Chaff Gun".equals(name)) {
+            changes.put("AMMO", "Chaff Canister:1");
+            changes.put("AMMO_CAPACITY", "6");
+            changes.put("AMMO_CAPACITY_INCREASE", "25%:12");
+        } else if ("Harpoon Gun".equals(name)) {
+            changes.put("APPLY_EFFECT", "Harpooned");
+        } else if ("Droid Socket".equals(name)) {
+
+        }
+        return changes;
+    }
+
+    private static boolean isRangeTable(Map<String, Map<String, String>> table) {
+        return table.containsKey("RANGE BY CHARACTER SCALE") || table.containsKey("RANGE BY STARSHIP SCALE");
+    }
+
+    private static List<Map<String, Map<String, String>>> getTables(Element element, String name) {
+        List<Map<String, Map<String, String>>> tables = new ArrayList<>();
+
+        for (Element table : element.select("table.wikitable")) {
+            tables.add(parseTable(name.trim().toUpperCase(), table));
+            //System.out.println(name + " : " + table);
+        }
+        return tables;
+    }
+
+    private static boolean isIgnored(String key) {
+        return List.of("NAME", "LINK").contains(key);
+    }
+
+    private static boolean isPrerequisite(String key) {
+        return "SIZE RESTRICTION".equals(key);
+    }
+
+    private static ChangeKey mapChangeKey(String key) {
+        try{
+            return ChangeKey.valueOf(ChangeKey.class, key.replaceAll(" ", "_"));
+        } catch (Exception e){
+
+           //System.out.println("COULD NOT FIND DIRECT MATCH, CHECKING MAPPING "+ key);
+        }
+
+        switch (key) {
+            case "LONG":
+                return ChangeKey.RANGE_LONG;
+            case "SHORT":
+                return ChangeKey.RANGE_SHORT;
+            case "POINT-BLANK":
+                return ChangeKey.RANGE_POINT_BLANK;
+            case "MEDIUM":
+                return ChangeKey.RANGE_MEDIUM;
+            case "STARSHIP_LONG":
+                return ChangeKey.RANGE_STARSHIP_LONG;
+            case "STARSHIP_SHORT":
+                return ChangeKey.RANGE_STARSHIP_SHORT;
+            case "STARSHIP_POINT-BLANK":
+                return ChangeKey.RANGE_STARSHIP_POINT_BLANK;
+            case "STARSHIP_MEDIUM":
+                return ChangeKey.RANGE_STARSHIP_MEDIUM;
+            case "STARSHIP_SPEED":
+                return ChangeKey.SPEED_STARSHIP_SCALE;
+            case "SHIELDS":
+                return ChangeKey.SHIELD_RATING;
+            default:
+                System.out.println("no mapping found for " + key);
+                return null;
+        }
+    }
+
+    private static String getSpecificVariation(String variation, String name) {
+        return variation.replace(name, "").replaceAll("[()]*", "").replace("Squares", "Square").replace(".75", "0.75").replace(", ", "").trim();
     }
 
 
@@ -184,7 +641,7 @@ public class VehicleSystemsExporter extends BaseExporter {
                             variantSubData = variantData.computeIfAbsent(itemName, i -> new HashMap<>());
                             VehicleSystem currentVariant = variantSubData.computeIfAbsent(variantName, k -> finalCurrent.copy().withName(variantName));
 
-                            if(rowValues.get(0).contains("*")){
+                            if (rowValues.get(0).contains("*")) {
                                 currentVariant.withAsterisk(true);
                             }
                             //System.out.println(variantName);
@@ -203,8 +660,8 @@ public class VehicleSystemsExporter extends BaseExporter {
                                         break;
                                     case "EMPLACEMENT POINTS":
                                     case "DAMAGE":
-                                            currentVariant.with(Change.create(ChangeKey
-                                                    .valueOf(toEnumCase(key.toLowerCase())), value));
+                                        currentVariant.with(Change.create(ChangeKey
+                                                .valueOf(toEnumCase(key.toLowerCase())), value));
                                         break;
                                     case "COST":
                                         currentVariant.withCost(value);
@@ -251,13 +708,13 @@ public class VehicleSystemsExporter extends BaseExporter {
                     found = true;
                     String substring = m.group(1);
 
-                    if(substring.equals("Heavy Weapons") || substring.equals("Grenades")){
+                    if (substring.equals("Heavy Weapons") || substring.equals("Grenades")) {
                         substring = "Weapon Systems";
                     }
 
-                    if(isVariant){
+                    if (isVariant) {
                         current.withSubtype(substring);
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.withSubtype(substring);
                         }
@@ -267,9 +724,9 @@ public class VehicleSystemsExporter extends BaseExporter {
                 m = SOURCE_PATTERN.matcher(cursor.text());
                 if (m.find()) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
                         current.withSource(m.group(1));
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.withSource(m.group(1));
                         }
@@ -280,9 +737,9 @@ public class VehicleSystemsExporter extends BaseExporter {
 
                 if (m.find()) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
                         current.with(Change.create(ChangeKey.EMPLACEMENT_POINTS, m.group(1)));
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.with(Change.create(ChangeKey.EMPLACEMENT_POINTS, m.group(1)));
                         }
@@ -294,9 +751,9 @@ public class VehicleSystemsExporter extends BaseExporter {
 
                 if (m.find()) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
                         current.withAvailability(m.group(1));
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.withAvailability(m.group(1));
                         }
@@ -306,9 +763,9 @@ public class VehicleSystemsExporter extends BaseExporter {
                 m = COST_PATTERN.matcher(cursor.text());
                 if (m.find()) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
                         current.withCost(m.group(1));
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.withCost(m.group(1));
                         }
@@ -319,14 +776,14 @@ public class VehicleSystemsExporter extends BaseExporter {
                 m = DAMAGE_PATTERN.matcher(cursor.text());
                 if (m.find()) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
 
                         final Change damage = Change.create(ChangeKey.DAMAGE, m.group(1).trim());
                         if (m.group(2) != null) {
                             damage.withModifier(m.group(2).trim());
                         }
                         current.with(damage);
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             final Change damage = Change.create(ChangeKey.DAMAGE, m.group(1).trim());
                             if (m.group(2) != null) {
@@ -344,10 +801,10 @@ public class VehicleSystemsExporter extends BaseExporter {
                 m = SEE_ALSO_PATTERN.matcher(cursor.text());
                 if (m.find()) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
 
                         current.with(Change.create(ChangeKey.SEE_ALSO, m.group(1)));
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.with(Change.create(ChangeKey.SEE_ALSO, m.group(1)));
                         }
@@ -359,10 +816,10 @@ public class VehicleSystemsExporter extends BaseExporter {
                 m = SIZE_REQUIREMENT_PATTERN.matcher(cursor.text());
                 if (m.find()) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
                         current.with(Prerequisite.create(m.group(1).trim()));
 
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.with(Prerequisite.create(m.group(1).trim()));
                         }
@@ -370,26 +827,26 @@ public class VehicleSystemsExporter extends BaseExporter {
                     }
                 }
 
-                if(cursor.text().startsWith("*")){
-                    if(isVariant){
-                        if(current.hasAsterisk()){
+                if (cursor.text().startsWith("*")) {
+                    if (isVariant) {
+                        if (current.hasAsterisk()) {
                             current.withPrerequisite(Prerequisite.create(cursor.text()));
                         }
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
-                            if(variant.hasAsterisk()){
+                            if (variant.hasAsterisk()) {
                                 variant.withPrerequisite(Prerequisite.create(cursor.text()));
                             }
                         }
                     }
                 }
 
-                if (!cursor.text().contains(":") && !cursor.text().contains("*")  && cursor.text().length() > 100) {
+                if (!cursor.text().contains(":") && !cursor.text().contains("*") && cursor.text().length() > 100) {
                     found = true;
-                    if(isVariant){
+                    if (isVariant) {
                         current.withDescription(cursor);
 
-                    } else{
+                    } else {
                         for (VehicleSystem variant : variantData.computeIfAbsent(itemName, k -> new HashMap<>()).values()) {
                             variant.withDescription(cursor);
                         }
@@ -572,17 +1029,14 @@ public class VehicleSystemsExporter extends BaseExporter {
         Matcher hyperdriveMatcher = HYPERDRIVE.matcher(system.getName());
 
         if (hyperdriveMatcher.find()) {
-            if(system.getName().equals("Class 3 Hyperdrive"))
-            {
+            if (system.getName().equals("Class 3 Hyperdrive")) {
                 systems.add(system.copy().withName("Class 2.5 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "2.5")));
             }
-            if(system.getName().equals("Class 8 Hyperdrive"))
-            {
+            if (system.getName().equals("Class 8 Hyperdrive")) {
                 systems.add(system.copy().withName("Class 7 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "7")));
                 systems.add(system.copy().withName("Class 9 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "9")));
             }
-            if(system.getName().equals("Class 15 Hyperdrive"))
-            {
+            if (system.getName().equals("Class 15 Hyperdrive")) {
                 systems.add(system.copy().withName("Class 12 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "12")));
                 systems.add(system.copy().withName("Class 14 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "14")));
                 systems.add(system.copy().withName("Class 16 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "16")));
@@ -592,8 +1046,7 @@ public class VehicleSystemsExporter extends BaseExporter {
                 systems.add(system.copy().withName("Class 25 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "25")));
                 systems.add(system.copy().withName("Class 30 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "25")));
             }
-            if(system.getName().equals("Class 0.75 Hyperdrive"))
-            {
+            if (system.getName().equals("Class 0.75 Hyperdrive")) {
                 systems.add(system.copy().withName("Class 0.9 Hyperdrive").with(Change.create(ChangeKey.HYPERDRIVE, "0.9")));
                 systems.add(system.copy().withName("Class 0.5 Hyperdrive")
                         .with(Change.create(ChangeKey.HYPERDRIVE, "0.5")).withAvailability("Illegal")

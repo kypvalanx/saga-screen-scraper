@@ -207,21 +207,32 @@ public class SpeciesExporter extends BaseExporter {
                 provided.add(ProvidedItem.create("Medium", TRAIT));
                 provided.add(Effect.create("Humanoid", "Metamorph", List.of(
                         Change.create(ChangeKey.SPEED, "Base Speed 4")
-                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))).enabled());
+                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE)))
+                        .enabled()
+                        .tokenAccessible()
+                        .withImage("systems/swse/icon/status/humanoid.png"));
                 provided.add(Effect.create("Quadrupedal", "Metamorph", List.of(
                         Change.create(ChangeKey.SIZE_BONUS, 1),
                         Change.create(ChangeKey.SPEED, "Base Speed 2"),
                         Change.create(ChangeKey.DISABLE, "Run"),
                         Change.create(ChangeKey.DISABLE, "Charge"),
-                        Change.create(ChangeKey.RESIST, "Prone:5")
-                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
+                        Change.create(ChangeKey.RESIST, "Prone:5"),
+                        Change.create(ChangeKey.TOKEN_HEIGHT, 2),
+                        Change.create(ChangeKey.TOKEN_WIDTH, 2)
+                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE)))
+                        .tokenAccessible()
+                        .withImage("systems/swse/icon/status/quadrupedal.png"));
                 provided.add(Effect.create("Treelike", "Metamorph", List.of(
                         Change.create(ChangeKey.SIZE_BONUS, 2),
                         Change.create(ChangeKey.SPEED, "Stationary 0"),
                         Change.create(ChangeKey.DISABLE, "Run"),
                         Change.create(ChangeKey.DISABLE, "Charge"),
-                        Change.create(ChangeKey.RESIST, "Prone:15")
-                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE))));
+                        Change.create(ChangeKey.RESIST, "Prone:15"),
+                        Change.create(ChangeKey.TOKEN_HEIGHT, 3),
+                        Change.create(ChangeKey.TOKEN_WIDTH, 3)
+                ), List.of(Link.create("Metamorph", LinkType.EXCLUSIVE)))
+                        .tokenAccessible()
+                        .withImage("systems/swse/icon/status/tree-like.png"));
                 break;
             case "Replica Droid":
                 skipSizes = true;
@@ -248,7 +259,8 @@ public class SpeciesExporter extends BaseExporter {
             }
             if(SIZES.contains(category.getValue())){
                 if(skipSizes) continue;
-                provided.add(Change.create(ChangeKey.SIZE, category.getValue()));
+                //provided.add(Change.create(ChangeKey.SIZE, category.getValue()));
+                provided.add(ProvidedItem.create(category.getValue(), TRAIT));
                 continue;
             }
             provided.add(ProvidedItem.create(category.getValue(), TRAIT));
@@ -628,18 +640,18 @@ public class SpeciesExporter extends BaseExporter {
         }
         if ("Replica Droid".equals(speciesName)) {
             Choice replicaSpecies = new Choice("Select the Species that this Droid will replicate");
-            replicaSpecies.withOption("AVAILABLE_SPECIES", new Option().withPayload("AVAILABLE_SPECIES"));
+            replicaSpecies.withOption("AVAILABLE_REPLICA_SPECIES", new Option().withPayload("AVAILABLE_REPLICA_SPECIES"));
             choices.add(replicaSpecies);
 
             Choice replicaOptionalComponents = new Choice("Select two optional components")
                     .withShowSelectionInName(false)
                     .withAvailableSelections(2)
-                    .withOption(Option.create("Internal Comlink"))
-                    .withOption(Option.create("Darkvision"))
-                    .withOption(Option.create("Diagnosis Package"))
-                    .withOption(Option.create("Improved Sensor Package"))
-                    .withOption(Option.create("Internal Storage (Subject to size limitations)", "Internal Storage"))
-                    .withOption(Option.create("Translator Unit (DC 15)"));
+                    .withOption(Option.create("Internal Comlink").withProvidedItem(ProvidedItem.create("Internal Comlink", ItemType.ITEM).withEquip("equipped")))
+                    .withOption(Option.create("Darkvision").withProvidedItem(ProvidedItem.create("Darkvision", ItemType.ITEM).withEquip("equipped")))
+                    .withOption(Option.create("Diagnostics Package").withProvidedItem(ProvidedItem.create("Diagnostics Package", ItemType.ITEM).withEquip("equipped")))
+                    .withOption(Option.create("Improved Sensor Package").withProvidedItem(ProvidedItem.create("Improved Sensor Package", ItemType.ITEM).withEquip("equipped")))
+                    .withOption(Option.create("Compartment Space").withProvidedItem(ProvidedItem.create("Compartment Space", ItemType.ITEM).withEquip("equipped")))
+                    .withOption(Option.create("Translator Unit (DC 15)").withProvidedItem(ProvidedItem.create("Translator Unit (DC 15)", ItemType.ITEM).withEquip("equipped")));
             choices.add(replicaOptionalComponents);
 
             return choices;

@@ -12,6 +12,7 @@ import swse.forceTechniques.TechniquesExporter;
 import swse.item.ItemExporter;
 import swse.language.LanguageExporter;
 import swse.species.SpeciesExporter;
+import swse.starshipManeuvers.StarshipManeuverExporter;
 import swse.talents.TalentExporter;
 import swse.templates.TemplateExporter;
 import swse.traits.TraitExporter;
@@ -23,23 +24,28 @@ import java.io.IOException;
 public class RefreshItemCompendiums
 {
     public static void main(String[] args) throws IOException {
-        CharacterClassExporter.main(args);
-        FeatExporter.main(args);
-        ForcePowersExporter.main(args);
-        ForceRegimensExporter.main(args);
-        ForceSecretsExporter.main(args);
-        TechniquesExporter.main(args);
-        AffiliationExporter.main(args);
-        ItemExporter.main(args);
-        SpeciesExporter.main(args);
-        TalentExporter.main(args);
-        TemplateExporter.main(args);
-        TraitExporter.main(args);
-        VehicleBaseTypeExporter.main(args);
-        VehicleSystemsExporter.main(args);
-        LanguageExporter.main(args);
-        BackgroundExporter.main(args);
-        DestinyExporter.main(args);
+//        CharacterClassExporter.main(args);
+//        FeatExporter.main(args);
+//        ForcePowersExporter.main(args);
+//        ForceRegimensExporter.main(args);
+//        ForceSecretsExporter.main(args);
+//        TechniquesExporter.main(args);
+//        AffiliationExporter.main(args);
+//        ItemExporter.main(args);
+//        SpeciesExporter.main(args);
+//        TalentExporter.main(args);
+//        TemplateExporter.main(args);
+//        TraitExporter.main(args);
+//        VehicleBaseTypeExporter.main(args);
+//        VehicleSystemsExporter.main(args);
+//        LanguageExporter.main(args);
+//        BackgroundExporter.main(args);
+//        DestinyExporter.main(args);
+
+
+       ForcePowersExporter.main(args);
+
+        StarshipManeuverExporter.main(args);
 
     }
 }

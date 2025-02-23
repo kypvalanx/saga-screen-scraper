@@ -23,6 +23,7 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
     protected String group;
     protected List<Link> links;
     protected Map<String, Object> flags;
+    private String img;
 
     public T withId(String id) {
         this.id = id;
@@ -99,6 +100,9 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
         effect.put("changes", Change.constructChangeList(changes));
         effect.put("flags", getJsonFlags());
         effect.put("statuses", getStatuses());
+        if(null != img){
+            effect.put("img", img);
+        }
         return effect;
     }
 
@@ -162,5 +166,10 @@ public class FoundryEffect<T> implements Copyable<FoundryEffect<T>> {
 
     protected void resolveDynamicValues() {
 
+    }
+
+    public FoundryEffect<T> withImage(String img) {
+        this.img = img;
+        return this;
     }
 }

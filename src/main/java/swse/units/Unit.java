@@ -32,11 +32,13 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
         return new Unit(name);
     }
 
+
     @Nonnull
     @Override
     public JSONObject toJSON() {
         JSONObject json = super.toJSON();
         JSONObject system = json.getJSONObject("system");
+
         system.put("size", size);
         system.put("sizeOverride", size); //size is provided most of the time.  this should be used to double-check that the size has been resolved correctly.
         system.put("speciesSubType", speciesSubType);
@@ -109,6 +111,8 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
 
     @Override
     public void preJSON(){
+
+        System.out.println(changes);
 //        if(this.hitPoints != null){
 //
 //        }

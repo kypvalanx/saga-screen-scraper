@@ -4,8 +4,12 @@ public enum ChangeKey {
     ACTION("action"),
     AID_ANOTHER_BONUS("aidAnotherBonus"),
     AMMO("ammo"),
+    AMMO_GENERATION("ammoGeneration"),
     AMMO_USE_MULTIPLIER("ammoUseMultiplier"),
+    AMMO_CAPACITY_INCREASE("ammoCapacityIncrease"),
+    AMMO_CAPACITY("ammoCapacity"),
     AMMO_USE("ammoUse"),
+    APPLY_EFFECT("applyEffect"),
     APPENDAGES("appendages"),
     APPLICATION("application"),
     ARMOR_PROFICIENCY("armorProficiency"),
@@ -132,6 +136,7 @@ public enum ChangeKey {
     SHAPER_LORE("shaperLore"),
     SHIELD_RATING("shieldRating"),
     SHIELD_RATING_ADVANCED("advancedShieldRating"),
+    BYPASS_SHIELDS("bypassShields"),
     SHIP_SKILL_MODIFIER("shipSkillModifier"),
     SKILL_CHECK("skillCheck"),
     SKILL_FOCUS("skillFocus"),
@@ -204,6 +209,8 @@ public enum ChangeKey {
     ALLOWS_BLOCK("allowsBlock"),
     ALLOWS_DEFLECT("allowsDeflect"),
     ALLOWS_REDIRECT_SHOT("allowsRedirectShot"),
+    ALLOW_ITEM_DROP("allowItemDrop"),
+    GRAVITY_WELL("gravityWell"),
     SIZE_BONUS("sizeBonus"),
     SIZE("size"),
     RANGE_MULTIPLIER("rangeMultiplier"),
@@ -278,7 +285,7 @@ public enum ChangeKey {
     SKILL_MODIFIER("skillModifier"),
     SENTINEL_STRIKE("sentinelStrike"),
     MULTIPLE_ATTACK_MODIFIER("multipleAttackModifier"),
-    FORCE_POWER_DESCRIPTION("forcePowerShortDescription"),
+    SHORT_DESCRIPTION("shortDescription"),
     CHECK("check"), TEMPORARY_FORCE_POINT("tempForcePoint"), CHECK_TRIGGER("checkTrigger"), DISABLE("disable"), RESIST("resist"),
 
     /**
@@ -289,18 +296,57 @@ public enum ChangeKey {
     FOLLOWER_CREATION_PROVIDES("followerCreationProvides"),
     FOLLOWER_PROVIDES("followerProvides"), CREATE_FOLLOWER("createFollower"), SPACEHOUND("spacehound"),
     GRAVITY("gravity"), TRANSFER("transfer"), ROLLABLE("rollable"), SPEED_MULTIPLIER("speedMultiplier"),
-    ION_SHIELDED("ionShielded"), CYBERNETIC("cybernetic"), IMPLANT_TRAINING("implantTraining"), IMPLANT_DISRUPTION("implantDisruption"), EXCEPTIONAL_SKILL("exceptionalSkill"), TELEKINETIC_PRODIGY("telekineticProdigy");
+    ION_SHIELDED("ionShielded"),
+    CYBERNETIC("cybernetic"),
+    IMPLANT_TRAINING("implantTraining"),
+    IMPLANT_DISRUPTION("implantDisruption"),
+    EXCEPTIONAL_SKILL("exceptionalSkill"), TELEKINETIC_PRODIGY("telekineticProdigy"),
+    TOKEN_HEIGHT("tokenHeight"),
+    TOKEN_WIDTH("tokenWidth"), TAG("tag"), TARGET("target"), ROLL_TYPE("rollType"), CUMULATIVE("cumulative"),
+    RANGE_LONG("rangeLong"),
+    RANGE_SHORT("rangeShort"),
+    RANGE_POINT_BLANK("rangePointBlank"),
+    RANGE_MEDIUM("rangeMedium"),
+    RANGE_STARSHIP_LONG("rangeStarshipLong"),
+    RANGE_STARSHIP_SHORT("rangeStarshipShort"),
+    RANGE_STARSHIP_POINT_BLANK("rangeStarshipPointBlank"),
+    RANGE_STARSHIP_MEDIUM("rangeStarshipMedium"),
+    EFFECTIVE_SIZE_WHEN_TARGETED("effectiveSizeWhenTargeted"),
+    DOGFIGHTING("dogfighting"),
+    ATMOSPHERIC_THRUSTER_BONUS("atmosphericThrusterBonus"),
+    ASTROGATION_BONUS("astrogationBonus"),
+    SUBLIGHT_ACCELERATOR_MOTOR("subLightAcceleratorMotor"),
+    JUMP_LIMIT("jumpLimit"),
+    JAMMING_ARRAY("jammingArray"),
+    JAMMING_SUITE("jammingSuite"),
+    SECURITY_BRACING("securityBracing"),
+    RAMMING("ramming"),
+    COM_JAMMING("comJamming"),
+    DROID_JAMMER("droidJammer"),
+    REGENERATING_SHIELDS("regeneratingShields"),
+    ANTI_BOARDING_SYSTEMS("standard"),
+    TRACTOR_BEAM("tractorBeam"),
+    SPAWN("spawn");
 
     private final String value;
+    private final String description;
 
     ChangeKey(String string) {
         this.value = string;
+        this.description = null;
+    }
+    ChangeKey(String string, String description) {
+        this.value = string;
+        this.description = description;
     }
 
 
 
     public String value() {
         return value;
+    }
+    public String description() {
+        return description;
     }
 
 
@@ -314,6 +360,8 @@ public enum ChangeKey {
         System.out.println();
         for(ChangeKey key : keys){
             System.out.println(key.value());
+            System.out.println("\t");
+            System.out.println(key.description());
         }
     }
 }

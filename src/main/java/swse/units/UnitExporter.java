@@ -150,10 +150,6 @@ public class UnitExporter extends BaseExporter {
             return new ArrayList<>();
         }
 
-//        if(!itemLink.equals("Rancor")){
-//            return List.of();
-//        }
-
         Matcher variant = VARIANT_QUALIFIER.matcher(itemLink);
         String variantQualifier = "";
         if (variant.find()) {
@@ -1593,7 +1589,6 @@ StringBuilder buffered = new StringBuilder();
         String size = getUnitSize(text);
         current.withSize(size);
         speciesAnswers.add(getSizeAnswer(size));
-        current.with(ProvidedItem.create(size, ItemType.TRAIT));
 
 
         String species = getSpecies(text, isBeast);
@@ -1644,6 +1639,8 @@ StringBuilder buffered = new StringBuilder();
             ProvidedItem providedItem = ProvidedItem.create(species, ItemType.SPECIES);
             providedItem.withAnswers(speciesAnswers);
             current.with(providedItem);
+        } else {
+            current.with(ProvidedItem.create(size, ItemType.TRAIT));
         }
 
         m = ageTypePattern.matcher(text);

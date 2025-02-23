@@ -24,4 +24,8 @@ public class Effect extends FoundryEffect<Effect>{
     }
 
 
+    public Effect tokenAccessible() {
+        this.flags.put("tokenAccessible", Boolean.TRUE);
+        return this;
+    }
 }
