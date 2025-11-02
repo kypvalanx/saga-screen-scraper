@@ -39,4 +39,8 @@ public class SimplePrerequisite extends Prerequisite
     public Prerequisite copy() {
         return new SimplePrerequisite(plainText, type, requirement);
     }
+
+    public String getRequirement() {
+        return this.requirement;
+    }
 }

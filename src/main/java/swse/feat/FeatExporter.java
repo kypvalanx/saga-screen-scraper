@@ -128,7 +128,8 @@ public class FeatExporter extends BaseExporter {
         }
         Document doc = null;
         try {
-            doc = Jsoup.connect(ROOT + itemLink).get();
+            doc = Jsoup.connect(ROOT + itemLink).userAgent("Mozilla").get();
+        //System.out.println("success: " + itemLink);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -351,8 +352,8 @@ public class FeatExporter extends BaseExporter {
                 changes.add(Change.create(ChangeKey.BONUS_SECOND_WIND, "1"));
                 break;
             case "Point-Blank Shot":
-                changes.add(Change.create(ChangeKey.BONUS_DAMAGE, "1:RANGE:Point-Blank"));
-                changes.add(Change.create(ChangeKey.TO_HIT_MODIFIER, "1:RANGE:Point-Blank"));
+                changes.add(Change.create(ChangeKey.BONUS_DAMAGE, "1|P:RANGE:Point-Blank"));
+                changes.add(Change.create(ChangeKey.TO_HIT_MODIFIER, "1|P:RANGE:Point-Blank"));
             case "Implant Training":
                 changes.add(Change.create(ChangeKey.IMPLANT_TRAINING, true));
             default:

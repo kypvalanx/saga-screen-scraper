@@ -3,12 +3,7 @@ package swse.traits;
 import com.google.common.collect.Lists;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -18,7 +13,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import swse.beasts.BeastComponent;
-import swse.beasts.BeastComponentExporter;
 import swse.common.Change;
 import swse.common.ChangeKey;
 import swse.common.BaseExporter;
@@ -59,6 +53,41 @@ public class TraitExporter extends BaseExporter {
             new Option("Intelligence").withChange(Change.create(ChangeKey.INTELLIGENCE_BONUS, -2)),
             new Option("Wisdom").withChange(Change.create(ChangeKey.WISDOM_BONUS, -2)),
             new Option("Charisma").withChange(Change.create(ChangeKey.CHARISMA_BONUS, -2))};
+    private static final Set<String> SIZES = Set.of("Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)", "Colossal", "Gargantuan", "Huge", "Large", "Medium", "Small", "Tiny", "Diminutive", "Fine");
+
+
+    public static void main2(String[] args) {
+        List<Change> changes = getSizeModifiers("Fine");
+        Map<String, List<Change>> sorted = new HashMap<>();
+
+        for (Change change : changes){
+            String requirement = ((SimplePrerequisite) change.getParentPrerequisite()).getRequirement();
+
+            List<Change> list = sorted.computeIfAbsent(requirement, s -> new ArrayList<>());
+            list.add(change);
+        }
+        printSizeMap(sorted);
+    }
+
+    private static void printSizeMap(Map<String, List<Change>> sorted) {
+        System.out.println("{");
+
+        for (Map.Entry<String, List<Change>> entity:
+             sorted.entrySet()) {
+            printEntry(entity);
+        }
+
+        System.out.println("}");
+    }
+
+    private static void printEntry(Map.Entry<String, List<Change>> entity) {
+        System.out.println("\"" + entity.getKey() + "\" : [");
+        for (Change change :
+                entity.getValue()) {
+            System.out.println("{\"key\" : \"" + change.getKey() + "\",\"value\" : \"" + change.getValue() + "\",\"mode\" : " + change.getMode() + "},");
+        }
+        System.out.println("],");
+    }
 
     public static void main(String[] args) {
         Timer timer = new Timer();
@@ -105,7 +134,7 @@ public class TraitExporter extends BaseExporter {
         for (String size : sizes) {
             response.add(Trait
                     .create(size)
-                    .with(Change.create(ChangeKey.SIZE_INDEX, i++))
+                    .with(Change.create(ChangeKey.SIZE, size))
                     .with(getSizeModifiers(size))
                     .toJSON());
 
@@ -839,107 +868,21 @@ public class TraitExporter extends BaseExporter {
         return changes;
     }
 
+
+
+
     private static List<Change> getSizeModifiers(String itemName) {
         List<Change> changes = new ArrayList<>();
-        switch (itemName) {
-            case "Colossal (Frigate)":
-            case "Colossal (Cruiser)":
-            case "Colossal (Station)":
-            case "Colossal":
-            case "Gargantuan":
-            case "Huge":
-            case "Large":
-            case "Medium":
-            case "Small":
-            case "Tiny":
-            case "Diminutive":
-            case "Fine":
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +100).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +25).withParentPrerequisite(new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +200).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +30).withParentPrerequisite(new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +500).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +35).withParentPrerequisite(new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -10).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d8").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-20").withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +50).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Colossal Size", "SIZE", "Colossal")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "16 squares").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -5).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "2d6").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-15").withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +20).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +15).withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "9 squares").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -2).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d8").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-10").withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "4 squares").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, -1).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d6").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:-5").withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d4").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:0").withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +1).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d3").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:5").withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +2).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1d2").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:10").withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +5).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:15").withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-
-                changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER, +10).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE, "1 square").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(ChangeKey.UNARMED_DAMAGE, "1").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(ChangeKey.SKILL_BONUS, "stealth:20").withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER, +0).withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                break;
+        if (SIZES.contains(itemName)) {
+            changes.add(Change.create(ChangeKey.REFLEX_DEFENSE_BONUS.scalable(), +0));
+            changes.add(Change.create(ChangeKey.CHARACTER_FIGHTING_SPACE.scalable(), "1 square"));
+            changes.add(Change.create(ChangeKey.SHIP_SKILL_MODIFIER.scalable(), +0));
+            changes.add(Change.create(ChangeKey.UNARMED_DAMAGE.scalable(), "1d4"));
+            changes.add(Change.create(ChangeKey.SKILL_BONUS.scalable(), "stealth:0"));
+            changes.add(Change.create(ChangeKey.DAMAGE_THRESHOLD_SIZE_MODIFIER.scalable(), +0));
+            changes.add(Change.create(ChangeKey.VEHICLE_FIGHTING_SPACE.scalable(), "0 squares"));
+            changes.add(Change.create(ChangeKey.GRAPPLE_SIZE_MODIFIER.scalable(), 0));
         }
-
-
         return changes;
     }
 

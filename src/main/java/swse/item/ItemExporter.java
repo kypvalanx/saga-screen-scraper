@@ -49,12 +49,15 @@ public class ItemExporter extends BaseExporter {
             "Kathracite Crystal", "Krayt Dragon Pearl", "Lambent Crystal", "Mantle of the Force", "Mephite Crystal",
             "Opila Crystal", "Phond Crystal", "Pontite Crystal", "Rubat Crystal", "Sigil Crystal", "Solari Crystal",
             "Standard Synthetic Crystal", "Unstable Crystal");
+    public static final List<String> LAUNCHABLE_GRENADES = List.of("Frag Grenade", "Ion Grenade", "Stun Grenade",
+            "Adhesive Grenade", "CryoBan Grenade", "Remote Grenade", "EMP Grenade",
+            "Flash Canister", "Concussion Grenade", "Gas Grenade", "Radiation Grenade", "Smoke Grenade");
     private Set<String> duplicates = new HashSet<>();
 
 
     public static void main(String[] args) {
         List<String> filter = List.of();
-        if(args.length > 0){
+        if (args.length > 0) {
             filter = List.of(args[0]);
         }
 
@@ -163,11 +166,11 @@ public class ItemExporter extends BaseExporter {
             drawProgressBar(i.getAndIncrement() * 100 / size);
         }
 
-        entries.addAll(getManualItems( filter));
+        entries.addAll(getManualItems(filter));
 
 
         Multimap<String, JSONObject> entryMaps = ArrayListMultimap.create();
-        for(JSONObject entry : entries){
+        for (JSONObject entry : entries) {
             entryMaps.put(entry.getString("type"), entry);
         }
 
@@ -182,10 +185,10 @@ public class ItemExporter extends BaseExporter {
         //System.out.println(entryMaps.size());
 
 
-        for(String key : entryMaps.keySet()){
+        for (String key : entryMaps.keySet()) {
             System.out.println(key + " : " + entryMaps.get(key).size());
-            if(entryMaps.get(key).size() > 0){
-                writeToJSON(new File(JSON_TEMP_OUTPUT+key+".json"), entryMaps.get(key), hasArg(args, "d"), toTitleCase(key));
+            if (entryMaps.get(key).size() > 0) {
+                writeToJSON(new File(JSON_TEMP_OUTPUT + key + ".json"), entryMaps.get(key), hasArg(args, "d"), toTitleCase(key));
             }
         }
         //writeToJSON(new File(JSON_OUTPUT), entries, hasArg(args, "d"));
@@ -194,7 +197,7 @@ public class ItemExporter extends BaseExporter {
     private static Collection<JSONObject> parseTraitTable(String itemPageLink, boolean overwrite) {
         Document doc = getDoc(itemPageLink, overwrite);
 
-        if(doc == null){
+        if (doc == null) {
             return List.of();
         }
 
@@ -203,7 +206,7 @@ public class ItemExporter extends BaseExporter {
 
         Elements tables = body.getElementsByClass("wikitable");
 
-        String subtype =null;
+        String subtype = null;
 
         List<JSONObject> of = new ArrayList<>();
         for (Element table : tables) {
@@ -216,16 +219,16 @@ public class ItemExporter extends BaseExporter {
                 }
 
                 Element second = row.children().get(1);
-                Element third = row.children().size()>2 ? row.children().get(2) : null;
+                Element third = row.children().size() > 2 ? row.children().get(2) : null;
 
                 of.add(Item
                         .create(first.text(), getFoundryType(subtype))
-                                .withSubtype(subtype)
-                                .withLink(itemPageLink)
+                        .withSubtype(subtype)
+                        .withLink(itemPageLink)
                         .withDescription(second)
                         .withDescription(third)
                         .withPrerequisite(getPrerequisite(subtype))
-                                .with(getManualAttributes(first.text(), subtype))
+                        .with(getManualAttributes(first.text(), subtype))
                         .toJSON());
             }
         }
@@ -237,7 +240,7 @@ public class ItemExporter extends BaseExporter {
     private Collection<JSONObject> readItemMenuPage(String itemPageLink, boolean overwrite, List<String> filter) {
         Document doc = getDoc(itemPageLink, overwrite);
 
-        if(doc == null){
+        if (doc == null) {
             return List.of();
         }
 
@@ -268,25 +271,25 @@ public class ItemExporter extends BaseExporter {
                     }));
         });
 
-        if(hrefs.size() == 0){
+        if (hrefs.size() == 0) {
             hrefs.add(itemPageLink);
         }
 
 
         return hrefs.stream().map(s -> {
-            if (unique.contains(s)) {
-                return null;
-            }
-            unique.add(s);
-            return s;
-        })
+                    if (unique.contains(s)) {
+                        return null;
+                    }
+                    unique.add(s);
+                    return s;
+                })
                 .filter(Objects::nonNull)
                 .filter(ItemExporter::filterByLink)
                 .flatMap((Function<String, Stream<JSONy>>) itemLink -> parseItem(itemLink, overwrite, filter, null).stream()).map(item -> item.toJSON())
                 .collect(Collectors.toList());
     }
 
-    public static boolean filterByLink(String s){
+    public static boolean filterByLink(String s) {
         return !List.of("/wiki/Illegal", "/wiki/Military", "/wiki/Rare", "/wiki/Restricted", "/wiki/Power_Pack_Bomb", "/wiki/The_Madness_of_Knowledge").contains(s);
     }
 
@@ -312,14 +315,14 @@ public class ItemExporter extends BaseExporter {
 
         itemName = filterName(itemName);
 
-        if(duplicates.contains(itemName) && !List.of("Chain", "Holoshroud", "Jump Servos").contains(itemName)){
-            System.out.println("https://swse.fandom.com/"+itemLink + " " + itemName);
+        if (duplicates.contains(itemName) && !List.of("Chain", "Holoshroud", "Jump Servos").contains(itemName)) {
+            System.out.println("https://swse.fandom.com/" + itemLink + " " + itemName);
             return new ArrayList<>();
         }
         duplicates.add(itemName);
 
         Context.setValue("name", itemName);
-        Context.setValue("link", "https://swse.fandom.com/"+itemLink);
+        Context.setValue("link", "https://swse.fandom.com/" + itemLink);
 
         Element content = doc.getElementsByClass("mw-parser-output").first();
 
@@ -327,7 +330,6 @@ public class ItemExporter extends BaseExporter {
         content.select("div.toc").remove();
         content.select("img,figure").remove();
         removeComments(content);
-
 
 
         Set<Category> categories = new HashSet<>(Category.getCategories(doc, null));
@@ -633,7 +635,7 @@ public class ItemExporter extends BaseExporter {
         attributes.addAll(getModes(rateOfFire, itemName));
         String damageDie = getDamageDie(itemName, damage);
 
-        if(itemType.equals("upgrade")){
+        if (itemType.equals("upgrade")) {
             attributes.add(Change.create(ChangeKey.ITEM_MOD, true));
         }
 
@@ -720,13 +722,13 @@ public class ItemExporter extends BaseExporter {
         if (List.of("Probe", "Instrument", "Tool", "Claw", "Hand").contains(itemName)) {
             item.with(getDroidAppendageAttributes(itemName));
         }
-        if(List.of("cybernetic devices", "implants", "advanced cybernetics").contains(itemSubType.toLowerCase())){
+        if (List.of("cybernetic devices", "implants", "advanced cybernetics").contains(itemSubType.toLowerCase())) {
             item.with(Change.create(ChangeKey.CYBERNETIC, true));
         }
-        if("implant".equalsIgnoreCase(itemType)){
+        if ("implant".equalsIgnoreCase(itemType)) {
             item.with(Change.create(ChangeKey.SKILL_BONUS, "Use the Force:-1:IMPLANT"));
         }
-        if("implants".equalsIgnoreCase(itemSubType)){
+        if ("implants".equalsIgnoreCase(itemSubType)) {
             item.with(Change.create(ChangeKey.IMPLANT_DISRUPTION, true));
         }
         if ("Stormtrooper Armor".equals(itemName)) {
@@ -741,24 +743,25 @@ public class ItemExporter extends BaseExporter {
     }
 
     private static String getItemSubTypeByItemName(String itemName) {
-        if(List.of("Beckon Call",
-        "Blade Lock",
-        "Concealed Compartment",
+        if (List.of("Beckon Call",
+                "Blade Lock",
+                "Concealed Compartment",
                 "Electrum Detail",
                 "Fiber Cord",
                 "Force-Activated",
                 "Interlocking Hilt",
                 "Pressure Grip",
                 "Trapped Grip",
-        "Waterproof Casing").contains(itemName)){
+                "Waterproof Casing").contains(itemName)) {
             return "Lightsaber Modifications";
-        };
+        }
+        ;
 
         return null;
     }
 
     private static Prerequisite getPrerequisite(String itemSubType) {
-        if(List.of("Adegan Crystals", "Rare Crystals", "Synthetic Crystals", "Traditional Jewels", "Lightsaber Crystals", "Lightsaber Modifications").contains(itemSubType)){
+        if (List.of("Adegan Crystals", "Rare Crystals", "Synthetic Crystals", "Traditional Jewels", "Lightsaber Crystals", "Lightsaber Modifications").contains(itemSubType)) {
             return simple("Lightsabers", "SUBTYPE", "lightsabers");
         }
         return null;
@@ -773,100 +776,19 @@ public class ItemExporter extends BaseExporter {
         provided.add(Change.create(ChangeKey.APPENDAGES, "1"));
         provided.add(Change.create(ChangeKey.APPENDAGE_TYPE, itemName));
 
-        switch(itemName){
+        switch (itemName) {
             case "Probe":
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
-                        .withParentPrerequisite(OrPrerequisite.or(
-                                new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
-                                new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"),
-                                new SimplePrerequisite("Tiny Size", "SIZE", "Tiny"),
-                                new SimplePrerequisite("Small Size", "SIZE", "Small"))));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
-                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
-                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
-                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
-                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
-                        .withParentPrerequisite(OrPrerequisite.or(
-                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
-                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
-                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
-                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE.scalable(), "1"));
                 break;
             case "Instrument":
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
-                        .withParentPrerequisite(OrPrerequisite.or(
-                                new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
-                                new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"),
-                                new SimplePrerequisite("Tiny Size", "SIZE", "Tiny"))));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
-                        .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
-                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
-                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
-                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
-                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
-                        .withParentPrerequisite(OrPrerequisite.or(
-                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
-                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
-                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
-                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE.scalable(), "1d2"));
                 break;
             case "Tool":
             case "Hand":
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
-                        .withParentPrerequisite(OrPrerequisite.or(
-                                new SimplePrerequisite("Fine Size", "SIZE", "Fine"),
-                                new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive"))));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
-                        .withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
-                        .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
-                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
-                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
-                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
-                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
-                        .withParentPrerequisite(OrPrerequisite.or(
-                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
-                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
-                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
-                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE.scalable(), "1d3"));
                 break;
             case "Claw":
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 0)
-                        .withParentPrerequisite(new SimplePrerequisite("Fine Size", "SIZE", "Fine")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, 1)
-                        .withParentPrerequisite(new SimplePrerequisite("Diminutive Size", "SIZE", "Diminutive")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d2")
-                        .withParentPrerequisite(new SimplePrerequisite("Tiny Size", "SIZE", "Tiny")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d3")
-                        .withParentPrerequisite(new SimplePrerequisite("Small Size", "SIZE", "Small")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d4")
-                        .withParentPrerequisite(new SimplePrerequisite("Medium Size", "SIZE", "Medium")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d6")
-                        .withParentPrerequisite(new SimplePrerequisite("Large Size", "SIZE", "Large")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "1d8")
-                        .withParentPrerequisite(new SimplePrerequisite("Huge Size", "SIZE", "Huge")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "2d6")
-                        .withParentPrerequisite(new SimplePrerequisite("Gargantuan Size", "SIZE", "Gargantuan")));
-                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE, "2d8")
-                        .withParentPrerequisite(OrPrerequisite.or(
-                                new SimplePrerequisite("Colossal Size", "SIZE", "Colossal"),
-                                new SimplePrerequisite("Colossal (Frigate) Size", "SIZE", "Colossal (Frigate)"),
-                                new SimplePrerequisite("Colossal (Cruiser) Size", "SIZE", "Colossal (Cruiser)"),
-                                new SimplePrerequisite("Colossal (Station) Size", "SIZE", "Colossal (Station)"))));
+                provided.add(Change.create(ChangeKey.DROID_UNARMED_DAMAGE_DIE.scalable(), "1d4"));
                 break;
         }
         return provided;
@@ -952,25 +874,24 @@ public class ItemExporter extends BaseExporter {
         Pattern fortitudeEquipmentBonus = Pattern.compile("\\+(\\d*) Equipment bonus to your Fortitude Defense");
 
         Matcher m = fortitudeEquipmentBonus.matcher(text);
-        if(m.find()){
+        if (m.find()) {
             attributes.add(Change.create(ChangeKey.FORTITUDE_DEFENSE_BONUS_EQUIPMENT, standardizeTypes(m.group(1), null, itemName)));
         }
 
 
-
-        if (attributes.size() == 0){
+        if (attributes.size() == 0) {
             //printUnique(text);
             //System.out.println();
         }
         return attributes;
     }
 
-    private static Collection<?> addLightsaberCrystalAttributes( String itemName) {
+    private static Collection<?> addLightsaberCrystalAttributes(String itemName) {
         List<Object> attributes = new ArrayList<>();
         List<Change> attunementBonuses = new ArrayList<>();
         AuraEffect auraEffect = new AuraEffect();
 
-        switch (itemName){
+        switch (itemName) {
             case "Ankarres Sapphire":
                 attunementBonuses.add(Change.create(ChangeKey.SKILL_BONUS, "treat injury:5").withParentPrerequisite(simple("Dark Side Score of 0", "DARK SIDE SCORE", "0")));
                 attunementBonuses.add(Change.create(ChangeKey.SKILL_BONUS, "use the force:5").withModifier("Activate Vital Transfer Force Power").withParentPrerequisite(simple("Dark Side Score of 0", "DARK SIDE SCORE", "0")));
@@ -1093,11 +1014,9 @@ public class ItemExporter extends BaseExporter {
             default:
                 //System.out.println("case \"" + itemName+"\":");
         }
-        if(attunementBonuses.size() == 0){
+        if (attunementBonuses.size() == 0) {
             return attributes;
         }
-
-
 
 
         attributes.add(Effect.create("Attuned", attunementBonuses));
@@ -1113,111 +1032,87 @@ public class ItemExporter extends BaseExporter {
 
 
         List<Object> attributes = new LinkedList<>();
-        if(isLightsaberCrystal(itemName)){
+        if (isLightsaberCrystal(itemName)) {
             attributes.addAll(addLightsaberCrystalAttributes(itemName));
         }
 
-        if("Lightsabers".equals(itemSubType)){
+        if ("Lightsabers".equals(itemSubType)) {
             attributes.add(Choice.create("Lightsaber Crystal").withShowSelectionInName(false).withOption("AVAILABLE_LIGHTSABER_CRYSTALS", new Option().withPayload("AVAILABLE_LIGHTSABER_CRYSTALS")));
             //attributes.add(Effect.create("Self-Built", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, 1))));
             //attributes.add(Effect.create("Ignited", List.of(Change.create(ChangeKey.AURA_COLOR, "#FF0000"))).disabled());
-        }
-        else if ("Energy Lance".equals(itemName)) {
+        } else if ("Energy Lance".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:50"));
-        }
-        else if ("E-5s Blaster Rifle".equals(itemName)) {
+        } else if ("E-5s Blaster Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:5"));
-        }
-        else if ("SG-4 Blaster Rifle".equals(itemName)) {
+        } else if ("SG-4 Blaster Rifle".equals(itemName)) {
             attributes.add(Effect.create("Blaster", "POWER", List.of(Change.create(ChangeKey.AMMO, "Power Pack:50"))));
             attributes.add(Effect.create("Harpoon", "POWER", List.of(Change.create(ChangeKey.AMMO, "Harpoon:1"))));
-        }
-        else if ("HB-9 Blaster Rifle".equals(itemName)) {
+        } else if ("HB-9 Blaster Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:25"));
             attributes.add(Change.create(ChangeKey.AMMO, "Gas Canister:200"));
-        }
-        else if ("Commando Special Rifle".equals(itemName)) {
+        } else if ("Commando Special Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:25"));
-        }
-        else if ("Variable Blaster Rifle".equals(itemName)) {
+        } else if ("Variable Blaster Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:500"));
             attributes.add(Effect.create("3d4", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d4"))).enabled());
             attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d6"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "5"))));
             attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"))));
-        }
-        else if ("Heavy Assault Blaster".equals(itemName)) {
+        } else if ("Heavy Assault Blaster".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.BONUS_CRITICAL_DAMAGE_DIE_TYPE, 1));
-        }
-        else if ("Heavy Variable Blaster Rifle".equals(itemName)) {
+        } else if ("Heavy Variable Blaster Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:500"));
             attributes.add(Effect.create("Ascension gun", "POWER", List.of(Change.create(ChangeKey.AMMO, "Syntherope:2"))));
             attributes.add(Effect.create("3d6", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d6"))).enabled());
             attributes.add(Effect.create("3d8", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"))));
             attributes.add(Effect.create("3d10", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d10"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "20"))));
             attributes.add(Effect.create("3d10", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d10"), Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "20"))));
-        }
-        else if ("Sonic Blaster".equals(itemName)) {
+        } else if ("Sonic Blaster".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Proprietary Power Pack:15:11:0.2"));
-        }
-        else if ("Heavy Blaster Pistol".equals(itemName)) {
+        } else if ("Heavy Blaster Pistol".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:50"));
-        }
-        else if ("Snap-Shot Blaster Pistol".equals(itemName)) {
+        } else if ("Snap-Shot Blaster Pistol".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:1"));
             attributes.add(Change.create(ChangeKey.CONCEALMENT_BONUS, "5"));
-        }
-        else if ("Sidearm Blaster Pistol".equals(itemName)) {
+        } else if ("Sidearm Blaster Pistol".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:250"));
-        }
-        else if ("Gee-Tech 12 Defender".equals(itemName)) {
+        } else if ("Gee-Tech 12 Defender".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:2"));
             attributes.add(Change.create(ChangeKey.CONCEALMENT_BONUS, "5"));
-        }
-        else if ("Thunderbolt Repeater Blaster".equals(itemName)) {
+        } else if ("Thunderbolt Repeater Blaster".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.TO_HIT_MODIFIER, "-5"));
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:20"));
             attributes.add(Effect.create("Braced", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, "0"))));
-        }
-        else if ("Z-6 Rotary Blaster".equals(itemName)) {
+        } else if ("Z-6 Rotary Blaster".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:1"));
             attributes.add(Change.create(ChangeKey.TO_HIT_MODIFIER, "-5"));
             attributes.add(Effect.create("Braced", List.of(Change.create(ChangeKey.TO_HIT_MODIFIER, "0"))));
-        }
-        else if ("Retrosaber".equals(itemName)) {
+        } else if ("Retrosaber".equals(itemName)) {
             attributes.add(Effect.create("Overcharge", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "2d10"))));
             attributes.add(Effect.create("Burnout", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "2d4"))));
-        }
-        else if ("Slugthrower Pistol".equals(itemName)) {
+        } else if ("Slugthrower Pistol".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Slug Clip:10:40:0.2"));
-        }
-        else if ("Slugthrower Rifle".equals(itemName)) {
+        } else if ("Slugthrower Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Slug Clip:20:40:0.2"));
-        }
-        else if ("WESTAR-M5 Blaster Rifle".equals(itemName)) {
+        } else if ("WESTAR-M5 Blaster Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:100"));
             attributes.add(Change.create(ChangeKey.AMMO, "Gas Canister:500"));
             attributes.add(Effect.create("Anti-Personnel", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"))));
             attributes.add(Effect.create("Anti-Vehicle", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d10"),
                     Change.create(ChangeKey.AMMO_USE_MULTIPLIER, "10"), Change.create(ChangeKey.PENETRATION, "5"))));
-        }
-        else if ("DC-19 \"Stealth\" Carbine".equals(itemName)) {
+        } else if ("DC-19 \"Stealth\" Carbine".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:10"));
             attributes.add(Change.create(ChangeKey.AMMO, "Stealth Mixture Gas Canister:500:500:0.25"));
-        }
-        else if ("Amban Phase-Pulse Blaster".equals(itemName)) {
+        } else if ("Amban Phase-Pulse Blaster".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:1"));
-        }
-        else if ("Scatter Gun".equals(itemName)) {
+        } else if ("Scatter Gun".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "10 Shells:10:20:1"));
             attributes.add(Effect.create("Point-Blank Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "3d8"))));
             attributes.add(Effect.create("Short Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "2d8"))));
             attributes.add(Effect.create("Medium Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "0"))));
             attributes.add(Effect.create("Long Range", "POWER", List.of(Change.create(ChangeKey.DAMAGE, "0"))));
-        }
-        else if ("DC-15x Sniper Rifle".equals(itemName)) {
+        } else if ("DC-15x Sniper Rifle".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.AMMO, "Power Pack:5"));
-        }
-        else if ("DC-17m IWS".equals(itemName)) {
+        } else if ("DC-17m IWS".equals(itemName)) {
             attributes.add(Effect.create("Blaster Rifle", "POWER", List.of(
                     Change.create(ChangeKey.DAMAGE, "3d8"),
                     Change.create(ChangeKey.DAMAGE_TYPE, "Energy"),
@@ -1247,21 +1142,32 @@ public class ItemExporter extends BaseExporter {
             attributes.add(Effect.create("Stun", List.of(
                     Change.create(ChangeKey.DAMAGE, "3d8").withMode(ActiveEffectMode.OVERRIDE),
                     Change.create(ChangeKey.DAMAGE_TYPE, "Stun").withMode(ActiveEffectMode.OVERRIDE))).withLinks(Link.create("Blaster Rifle", LinkType.CHILD), Link.create("Fire Mode", LinkType.EXCLUSIVE)));
-        }
-        else if ("Credit Chip".equals(itemName)){
+        } else if ("Credit Chip".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.CREDIT, 0));
             attributes.add(Change.create(ChangeKey.CREDIT_TYPE, "CREDIT"));
             attributes.add(Change.create(ChangeKey.CREDIT_ENTITY_TYPE, "CONTAINER"));
-        }
-        else if ("Heuristic Processor".equals(itemName)){
+        } else if ("Heuristic Processor".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Basic Processor"));
-        }
-        else if ("Helmet Package".equals(itemName)){
+        } else if ("Helmet Package".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.SKILL_BONUS, "perception:+2"));
             attributes.add(Change.create(ChangeKey.LOW_LIGHT_VISION, "true"));
             attributes.add(Modification.create(ProvidedItem.create("Hands-Free Comlink", ItemType.ITEM)));
-        } else if ("Ion-Shielding".equals(itemName)){
+        } else if ("Ion-Shielding".equals(itemName)) {
             attributes.add(Change.create(ChangeKey.ION_SHIELDED, true));
+        } else if ("Grenade Launcher".equals(itemName)) {
+            attributes.add(Change.create(ChangeKey.AMMO, "Launchable Grenade:1"));
+            attributes.add(Change.create(ChangeKey.AMMO_CAPACITY, "Launchable Grenade:4"));
+
+        } else if ("MM(X) Grenade Launcher".equals(itemName)) {
+            attributes.add(Change.create(ChangeKey.AMMO, "Launchable Grenade:1"));
+            attributes.add(Change.create(ChangeKey.AMMO_CAPACITY, "Launchable Grenade:4"));
+
+        } else if ("Micro Grenade Launcher".equals(itemName)) {
+            attributes.add(Change.create(ChangeKey.AMMO, "Launchable Micro Grenade:1"));
+            attributes.add(Change.create(ChangeKey.AMMO_CAPACITY, "Launchable Micro Grenade:4"));
+
+        } else if (LAUNCHABLE_GRENADES.contains(itemName)) {
+            attributes.add(Change.create(ChangeKey.ACTS_AS, "Launchable Grenade"));
         }
 
         return attributes;
@@ -1294,7 +1200,7 @@ public class ItemExporter extends BaseExporter {
         if (rateOfFire != null && rateOfFire.contains("Autofire")) {
             Effect fire_mode = EFFECT_AUTOFIRE.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE));
 
-            if(effects.size() == 0){
+            if (effects.size() == 0) {
                 fire_mode.enabled();
             }
 
@@ -1303,7 +1209,7 @@ public class ItemExporter extends BaseExporter {
         if (rateOfFire != null && rateOfFire.contains("Barrage")) {
             Effect fire_mode = EFFECT_BARRAGE.copy().withLinks(Link.create("Fire Mode", LinkType.EXCLUSIVE));
 
-            if(effects.size() == 0){
+            if (effects.size() == 0) {
                 fire_mode.enabled();
             }
             effects.add(fire_mode);
@@ -1336,10 +1242,10 @@ public class ItemExporter extends BaseExporter {
                     Change.create(ChangeKey.PROVIDED_ACTION, "Pin"),
                     Change.create(ChangeKey.PROVIDED_ACTION, "Trip"),
                     Change.create(ChangeKey.SPECIAL, List.of("An Amphistaff may be coaxed by its wielder to spit venom up to 10 squares away " +
-                                    "(As a Standard Action). If this ranged attack hits both the target's Reflex Defense " +
-                                    "and Fortitude Defense, the target moves -1 Persistent step on the Condition Track. " +
-                                    "An Amphistaff can only spit venom once every 24 standard hours.",
-                            "Is a Reach Weapon"
+                                            "(As a Standard Action). If this ranged attack hits both the target's Reflex Defense " +
+                                            "and Fortitude Defense, the target moves -1 Persistent step on the Condition Track. " +
+                                            "An Amphistaff can only spit venom once every 24 standard hours.",
+                                    "Is a Reach Weapon"
                             )
 
                     ))));
@@ -1372,7 +1278,7 @@ public class ItemExporter extends BaseExporter {
             return "Lightsaber";
         }
 
-        if("Ilum Crystals".equals(itemName)){
+        if ("Ilum Crystals".equals(itemName)) {
             return "Ilum Crystal";
         }
         return itemName;
@@ -1419,16 +1325,16 @@ public class ItemExporter extends BaseExporter {
             return "equipment";
         }
 
-        printUnique("\"" + subType.toLowerCase()+"\"");
+        printUnique("\"" + subType.toLowerCase() + "\"");
         return "equipment";
     }
 
 
     private static String standardizeTypes(String trim, Set<Category> categories, String itemName) {
-        if(trim == null){
-            if(categories != null){
-                for(Category c : categories){
-                    if(List.of("Traditional Jewels", "Synthetic Crystals", "Rare Crystals", "Adegan Crystals", "Lightsaber Crystals").contains(c.getValue())){
+        if (trim == null) {
+            if (categories != null) {
+                for (Category c : categories) {
+                    if (List.of("Traditional Jewels", "Synthetic Crystals", "Rare Crystals", "Adegan Crystals", "Lightsaber Crystals").contains(c.getValue())) {
                         return "Lightsaber Crystals";
                     }
                 }
@@ -1436,19 +1342,18 @@ public class ItemExporter extends BaseExporter {
 
             trim = getItemSubTypeByItemName(itemName);
 
-                    if(trim == null){
-                         trim = "equipment";
-                    }
+            if (trim == null) {
+                trim = "equipment";
+            }
         }
 
-        try{
+        try {
 
             ItemSubtype subtype = ItemSubtype.getEnum(trim);
             return subtype.toString();
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             System.err.println(trim + " is not a valid subtype");
         }
-
 
 
         if (trim.equalsIgnoreCase("equipment")) {
@@ -1605,7 +1510,7 @@ public class ItemExporter extends BaseExporter {
                         ), 1))
                 .toJSON());
 
-       items.add(Item.create("Ion Shield Generator (SR 5)", "equipment")
+        items.add(Item.create("Ion Shield Generator (SR 5)", "equipment")
                 .with(Change.create(ChangeKey.DROID_PART, true))
                 .with(Change.create(ChangeKey.ACTS_AS_FOR_PROFICIENCY, "Shield Generator"))
                 .withDescription(shieldGeneratorDescription)
@@ -1909,9 +1814,9 @@ public class ItemExporter extends BaseExporter {
                 .toJSON());
 
         items.add(Item.create("Datapad", "equipment")
-                        .withDescription("These handheld personal computers serve as notebooks, day planners, calculators, and sketchpads. In addition to performing basic computer functions, Datapads can interface with larger computer networks directly or via Comlink.\n" +
-                                "\n" +
-                                "A Datapad is a computer with an Intelligence score of 12. Basic Datapads also exist (Intelligence 10, 100 credits), but they are actually just storage devices with display, input, and editing capability; they have no ability to run programs.")
+                .withDescription("These handheld personal computers serve as notebooks, day planners, calculators, and sketchpads. In addition to performing basic computer functions, Datapads can interface with larger computer networks directly or via Comlink.\n" +
+                        "\n" +
+                        "A Datapad is a computer with an Intelligence score of 12. Basic Datapads also exist (Intelligence 10, 100 credits), but they are actually just storage devices with display, input, and editing capability; they have no ability to run programs.")
                 .withSubtype("Computers and Storage Devices")
                 .withCost("1000")
                 .withWeight("0.5 kg")
@@ -1939,7 +1844,7 @@ public class ItemExporter extends BaseExporter {
                         "A Bacta Tank and a supply of Bacta is expensive, so much medical equipment is usually found only in hospitals, aboard Capital Ships, and within major military bases. Each hour of treatment consumes one liter of Bacta, which costs 100 credits. A typical Bacta Tank holds up to 300 liters of Bacta, and the Bacta Tank must hold at least 150 liters at all times to provide any benefit. Only one creature can be immersed in the tank at any given time.")
                 .withSubtype("Medical Gear")
                 .withCost("100000 + bacta * 100")
-                        .withWeight("500 + bacta * 2 kg")
+                .withWeight("500 + bacta * 2 kg")
                 .with(Change.create(ChangeKey.BACTA, 0))
                 .toJSON());
 
@@ -1957,7 +1862,7 @@ public class ItemExporter extends BaseExporter {
                 .with(Change.create(ChangeKey.BACTA, 1))
                 .toJSON());
 
-        if(filter != null && filter.size() > 0){
+        if (filter != null && filter.size() > 0) {
             items = items.stream().filter(jsonObject -> filter.contains(jsonObject.getString("name"))).collect(Collectors.toList());
         }
 

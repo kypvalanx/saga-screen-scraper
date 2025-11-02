@@ -14,6 +14,7 @@ import swse.prerequisite.Prerequisite;
 //identifies a trait that should be added as opposed to a complete trait
 public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
 {
+    private static final List<String> IGNORED_CATEGORIES = List.of("Species Templates");
     private final String name;
     private final ItemType type;
     private final Prerequisite prerequisite;
@@ -76,7 +77,10 @@ public class ProvidedItem implements JSONy, Copyable<ProvidedItem>
     }
 
     public static List<ProvidedItem> getTraits(Element content){
-        return content.select("a.newcategory").stream().map(Element::text).map(text -> text.replace("Condition ", "Conditional ")).map(t -> create(t, ItemType.TRAIT)).collect(Collectors.toList());
+        return content.select("a.newcategory").stream().map(Element::text)
+                .map(text -> text.replace("Condition ", "Conditional "))
+                .filter(text -> !text.isEmpty() && !IGNORED_CATEGORIES.contains(text))
+                .map(t -> create(t, ItemType.TRAIT)).collect(Collectors.toList());
     }
 
     @Nonnull

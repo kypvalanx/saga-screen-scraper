@@ -658,7 +658,8 @@ public class SpeciesExporter extends BaseExporter {
         }
 
         Choice droidChoice = new Choice("Select the size of your droid's chassis:")
-                .withShowSelectionInName(false);
+                .withShowSelectionInName(false)
+                .isFirstLevel(false);
 
         droidChoice.withOption(new Option("Fine (GM Only)", "Fine").withProvidedItem(ProvidedItem.create("Fine", TRAIT)));
         droidChoice.withOption(new Option("Diminutive (GM Only)", "Diminutive").withProvidedItem(ProvidedItem.create("Diminutive", TRAIT)));

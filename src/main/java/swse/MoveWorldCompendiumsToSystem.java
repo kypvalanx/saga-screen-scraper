@@ -11,10 +11,10 @@ import java.util.Objects;
 public class MoveWorldCompendiumsToSystem {
     public static void main(String[] args) throws IOException {
         String target = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems/swse/packs";
-        String source = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world/packs";
+        String source = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world-2/packs";
         String jsonFolder = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\systems/swse/raw_export";
-        String itemDB = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world/data/items";
-        String actorDB = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world/data/actors.db";
+        String itemDB = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world-2/data/items";
+        String actorDB = "C:\\Users\\lijew\\AppData\\Local\\FoundryVTT\\Data\\worlds/test-world-2/data/actors.db";
 
 
         System.out.println("MOVING");

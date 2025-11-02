@@ -894,4 +894,6 @@ public abstract class Prerequisite implements JSONy, Copyable<Prerequisite> {
     public String getType() {
         return type;
     }
+
+
 }

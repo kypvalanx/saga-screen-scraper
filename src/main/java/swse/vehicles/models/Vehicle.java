@@ -18,7 +18,7 @@ public class Vehicle extends FoundryItem<Vehicle> implements Copyable<Vehicle> {
     @Override
     public JSONObject toJSON(){
         JSONObject json = super.toJSON();
-        JSONObject data = json.getJSONObject("data");
+        //JSONObject data = json.getJSONObject("system");
         //json.put("type", "npc-vehicle");
         //data.remove("attributes");
         //data.put("defaultAttributes", createAttributes(attributes.stream().filter(Objects::nonNull).map(Attribute::toJSON).collect(Collectors.toList())));

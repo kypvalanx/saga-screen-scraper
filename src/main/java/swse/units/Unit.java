@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     private String size;
@@ -112,7 +113,7 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     @Override
     public void preJSON(){
 
-        System.out.println(changes);
+        //System.out.println(changes);
 //        if(this.hitPoints != null){
 //
 //        }
@@ -214,5 +215,9 @@ public class Unit extends FoundryItem<Unit> implements Copyable<Unit> {
     public Unit withDefense(String key, int value) {
         this.defenses.put(key, value);
         return this;
+    }
+
+    public boolean isBeast() {
+        return providedItems.stream().anyMatch(providedItem -> providedItem.getName().equals("Beast"));
     }
 }

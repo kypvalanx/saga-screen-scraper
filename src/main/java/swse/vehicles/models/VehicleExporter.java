@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -64,7 +66,7 @@ public class VehicleExporter extends BaseExporter {
 
 
     protected List<JSONy> parseItem(String itemLink, boolean overwrite, List<String> filter, List<String> nameFilter) {
-        if (null == itemLink) {
+        if (null == itemLink || !"/wiki/T-65B_X-Wing_Starfighter".equals(itemLink)) {
             return new ArrayList<>();
         }
 
@@ -85,9 +87,9 @@ public class VehicleExporter extends BaseExporter {
             return new ArrayList<>();
         }
 
-//        if (!title.text().trim().equalsIgnoreCase("T-65B X-Wing Starfighter")) {
-//            return new ArrayList<>();
-//        }
+        if (!title.text().trim().equalsIgnoreCase("T-65B X-Wing Starfighter")) {
+            return new ArrayList<>();
+        }
 
 //        if (!title.text().trim().equalsIgnoreCase("Protodeka Tank Droid")) {
 //            return new ArrayList<>();
@@ -211,9 +213,9 @@ public class VehicleExporter extends BaseExporter {
                     final String primary = matcher.group(1);
                     final String secondary = matcher.group(2);
 
-                    customTemplate.withProvided(ProvidedItem.create(primary+" Hyperdrive", ItemType.VEHICLE_SYSTEM).withEquip("installed"));
+                    customTemplate.withProvided(ProvidedItem.create("Hyperdrive, " + primary, ItemType.VEHICLE_SYSTEM).withEquip("installed"));
                     if(secondary != null) {
-                        customTemplate.withProvided(ProvidedItem.create(secondary + " Hyperdrive", ItemType.VEHICLE_SYSTEM).withEquip("installed"));
+                        customTemplate.withProvided(ProvidedItem.create("Hyperdrive, " + secondary, ItemType.VEHICLE_SYSTEM).withEquip("installed"));
                     }
 
                     //customTemplate.withProvided(Attribute.create("cargoCapacity", toString(getKilograms(value, unit))));
@@ -254,7 +256,7 @@ public class VehicleExporter extends BaseExporter {
                 subHeader = input;
                 found = true;
                 //printUnique(header);
-            } else if ("Weapon Systems".equalsIgnoreCase(subHeader) && "h4".equalsIgnoreCase(cursor.tagName())) {
+            } else if (subHeader.toLowerCase().startsWith("weapon systems") && "h4".equalsIgnoreCase(cursor.tagName())) {
                 //for each weapon i want to extract the name of the intended weapon, and the stats used on the og stat block for possible override.
                 //that should be added to an object that describes the slot to add it to
 
@@ -360,6 +362,8 @@ public class VehicleExporter extends BaseExporter {
         Pattern DAMAGE_OVERRIDE_PATTERN = Pattern.compile("Damage: ([\\s\\d\\w]*)");
         Matcher m = DAMAGE_OVERRIDE_PATTERN.matcher(damage);
 
+        modifiers.addAll( manualWeaponModifiers(itemName, group));
+
         if(group.startsWith("Advanced ")){
             group = group.substring(9);
             modifiers.add("Advanced");
@@ -428,6 +432,14 @@ public class VehicleExporter extends BaseExporter {
         return vehicleWeapon;
     }
 
+    private static List<String> manualWeaponModifiers(String vehicle , String weapon) {
+        if("T-65B X-Wing Starfighter".equals(vehicle) && "Laser Cannons".equals(weapon)){
+            return List.of("Quad");
+        }
+
+        return List.of();
+    }
+
     private static String cleanWeaponName(String name, String itemName) {
         name = name.trim();
         //name = name.replaceAll("Turret", "Cannon");
@@ -465,6 +477,11 @@ public class VehicleExporter extends BaseExporter {
         name = name.equals("Ion Cannon") ? "Medium Ion Cannon" : name;
         name = name.equals("Turbolaser") ? "Medium Turbolaser" : name;
         name = name.equals("Blaster Cannon") ? "Medium Blaster Cannon" : name;
+
+        name = name.equals("Medium Blaster Cannon") ? "Blaster Cannon, Medium" : name;
+
+
+
         if (!SYSTEMS.contains(name) && !List.of("Dovin Basal", "Dovin Basal (Tractor Beam)", "Heavy Yaret-kor").contains(name)) {
             //printUnique(itemName + " : " + name);
             //printUnique(name);
@@ -473,8 +490,8 @@ public class VehicleExporter extends BaseExporter {
         return name;
     }
 
-    private static String nameCleanup(String name) {
-        return name.replaceAll("\\[]", "").replaceAll("\\*", "");
+    static @NotNull String nameCleanup(String name) {
+        return name.replaceAll("\\[]", "").replaceAll("\\*", "").trim();
     }
 
 }

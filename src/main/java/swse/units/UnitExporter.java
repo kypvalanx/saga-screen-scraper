@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
+import static org.apache.commons.lang3.StringUtils.toEncodedString;
 import static swse.talents.TalentExporter.DUPLICATE_TALENT_NAMES;
 import static swse.util.Util.printUnique;
 
@@ -114,7 +115,7 @@ public class UnitExporter extends BaseExporter {
         //entries.addAll(overrides);
 
         List<Integer> filter = List.of();//, 1, 2, 3, 4, 5 );//2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);//0, 1, 2, 3, 4);
-        List<String> nameFilter = List.of();//"Rancor");//"B2-GR-Series Super Battle Droid");//"A9G-Series Archive Droid"); //"B1-Series Battle Droid Squad");
+        List<String> nameFilter = List.of();//"Rancor");//"B2-GR-Series Super Battle Droid");////"A9G-Series Archive Droid"); //"B1-Series Battle Droid Squad");
 
         List<JSONObject> entries = new UnitExporter().getEntriesFromCategoryPage(nonHeroicUnits, false, exclusionByName, nameFilter);
         entries.addAll(new UnitExporter().getEntriesFromCategoryPage(heroicUnits, false, exclusionByName, nameFilter));
@@ -270,10 +271,15 @@ public class UnitExporter extends BaseExporter {
                     continue;
                 }
 
-                if (text.startsWith("Droid Systems:")) {
-                    handleDroidPart(current, cursor);
-                    continue;
-                }
+            if (text.startsWith("Droid Systems:")) {
+                handleDroidPart(current, cursor);
+                continue;
+            }
+
+            if (text.startsWith("Melee:")) {
+                handleBeastAttack(current, cursor);
+                continue;
+            }
 
                 if(text.startsWith("Archive Processor")){
                     handleAction(current, cursor);
@@ -648,8 +654,8 @@ public class UnitExporter extends BaseExporter {
 
                             List<String> possibleTalents = GeneratedLists.TALENTS.stream().filter(t -> t.startsWith(talentName)).collect(Collectors.toList());
 
-                            printUnique("ITEM_TALENT_MAPPING.put(\"" + itemName + "\", \"" + talent + "\", \"" + String.join("|", possibleTalents) + "\");");
-                            printUnique(++i + " https://swse.fandom.com" + itemLink + "      " + talent + " " + String.join("|", possibleTalents));
+                            //printUnique("ITEM_TALENT_MAPPING.put(\"" + itemName + "\", \"" + talent + "\", \"" + String.join("|", possibleTalents) + "\");");
+                            //printUnique(++i + " https://swse.fandom.com" + itemLink + "      " + talent + " " + String.join("|", possibleTalents));
                         }
                         continue;
                     }
@@ -667,7 +673,7 @@ public class UnitExporter extends BaseExporter {
         if (answer != null) {
             providedItem.withAnswers(List.of(answer));
         } else if ("Stolen Form".equals(talent)) {
-            System.out.println(current.getName() + " " + current.getLink());
+            System.out.println("STOLEN FORM" + current.getName() + " " + current.getLink());
         }
 
         current.with(providedItem);
@@ -768,7 +774,7 @@ public class UnitExporter extends BaseExporter {
                         providedItem.withAnswers(Lists.newArrayList("Lightsabers"));
                         break;
                     default:
-                        System.out.println(current.getName() + " " + current.getLink());
+                        System.out.println("CRITICAL STRIKE " + current.getName() + " " + current.getLink());
                 }
             }
 
@@ -894,6 +900,39 @@ public class UnitExporter extends BaseExporter {
             }
 
             printUnique("MISSING FORCE REGIMEN: " + current.getName() + " : " + text);
+        }
+    }
+
+    private void handleBeastAttack(Unit current, Element cursor) {
+        for (String text : cursor.text().split(",(?![^()]*\\))")) {
+
+            text = text.replace("Melee:", "");
+            text = text.trim();
+            if (text.isBlank()) {
+                continue;
+            }
+
+            Pattern clawPattern = Pattern.compile("(Tail Slam|Tail Slap|Tail|Gore|Tendril|Tentacle|Pincer|Sting|Claw|Bite|Slam|Tongue Spur)s? ?(\\(\\d\\))?");
+
+            Matcher matcher = clawPattern.matcher(text);
+            if (matcher.find()) {
+                ProvidedItem object = ProvidedItem.create(matcher.group(1), ItemType.BEAST_ATTACK);
+                if(matcher.group(2) != null) {
+                    String trimmed = matcher.group(2).substring(1, matcher.group(2).length() - 1);
+
+                    object.withQuantity(trimmed);
+                };
+                current.with(object);
+                continue;
+            }
+
+
+            if(current.isBeast() && !current.getName().startsWith("Flesh Raider")){
+               // System.out.println(text + " " + current.getName());
+            }
+
+
+
         }
     }
 
@@ -1391,7 +1430,7 @@ StringBuilder buffered = new StringBuilder();
             if(buffered.length() > 0){
                 buffered.append(trim);
                 trim = buffered.toString();
-                printUnique("RESOLVED ITEM: "+ trim);
+                //printUnique("RESOLVED ITEM: "+ trim);
                 buffered = new StringBuilder();
             }
 
@@ -1465,7 +1504,7 @@ StringBuilder buffered = new StringBuilder();
 //                    }
 
                     //TODO There are missing items
-                    printUnique("MISSING ITEM: " +item + " : " + modifier + " : " + current.getName());
+                    //printUnique("MISSING ITEM: " +item + " : " + modifier + " : " + current.getName());
                 }
 
             } else {

@@ -130,4 +130,12 @@ public class Change implements JSONy, Copyable<Change> {
     public String toString(){
         return toJSON().toString();
     }
+
+    public Prerequisite getParentPrerequisite() {
+        return this.parentPrerequisite;
+    }
+
+    public String getMode() {
+        return String.valueOf(this.mode.getValue());
+    }
 }

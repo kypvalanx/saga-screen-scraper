@@ -37,6 +37,15 @@ public class VehicleSystem extends FoundryItem<VehicleSystem> implements Copyabl
         return this;
     }
 
+    protected void preJSON() {
+        if(subtype == null){
+            System.out.println(name + " does not have a subtype");
+        }
+        if(changes.size() == 0){
+            System.out.println(name + " does not contain changes");
+        }
+    }
+
     public boolean hasAsterisk(){
         return asterisk;
     }

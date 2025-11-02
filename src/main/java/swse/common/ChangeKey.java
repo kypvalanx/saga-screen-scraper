@@ -326,10 +326,11 @@ public enum ChangeKey {
     REGENERATING_SHIELDS("regeneratingShields"),
     ANTI_BOARDING_SYSTEMS("standard"),
     TRACTOR_BEAM("tractorBeam"),
-    SPAWN("spawn");
+    SPAWN("spawn"), REACH("reach"), DAMAGE_SCALABLE("damageScalable");
 
     private final String value;
     private final String description;
+    private String modifier = "";
 
     ChangeKey(String string) {
         this.value = string;
@@ -343,7 +344,7 @@ public enum ChangeKey {
 
 
     public String value() {
-        return value;
+        return value + modifier;
     }
     public String description() {
         return description;
@@ -363,5 +364,10 @@ public enum ChangeKey {
             System.out.println("\t");
             System.out.println(key.description());
         }
+    }
+
+    public ChangeKey scalable() {
+        this.modifier = "Scalable";
+        return this;
     }
 }

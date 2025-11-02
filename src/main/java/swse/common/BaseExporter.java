@@ -23,7 +23,7 @@ import org.jsoup.nodes.*;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 
-import static org.fusesource.leveldbjni.JniDBFactory.*;
+import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 import static swse.util.Util.printUnique;
 
 

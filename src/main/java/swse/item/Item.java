@@ -1,6 +1,9 @@
 package swse.item;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import swse.common.*;
@@ -90,7 +93,16 @@ class Item extends FoundryItem<Item> implements Copyable<Item> {
     }
 
     public Item withBaseSpeed(String baseSpeed) {
-        this.with(Change.create(ChangeKey.BASE_SPEED, baseSpeed));
+        if(baseSpeed != null){
+            List<String> speeds = Arrays.stream(baseSpeed.split(";")).map(String::trim).collect(Collectors.toList());
+            String selectedSpeed;
+            if(speeds.size() == 1){
+                selectedSpeed = speeds.get(0);
+            }else {
+                selectedSpeed = speeds.stream().filter(s -> s.toLowerCase().startsWith("medium")).collect(Collectors.toList()).get(0).split(",")[1].trim();
+            }
+            this.with(Change.create(ChangeKey.BASE_SPEED.scalable(), selectedSpeed));
+        }
         return this;
     }
 
