@@ -326,7 +326,8 @@ public enum ChangeKey {
     REGENERATING_SHIELDS("regeneratingShields"),
     ANTI_BOARDING_SYSTEMS("standard"),
     TRACTOR_BEAM("tractorBeam"),
-    SPAWN("spawn"), REACH("reach"), DAMAGE_SCALABLE("damageScalable");
+    SPAWN("spawn"), REACH("reach"), DAMAGE_SCALABLE("damageScalable"),
+    ENERGY_SHIELD_ARMOR_TYPE("energyShieldArmorType");
 
     private final String value;
     private final String description;

@@ -1,6 +1,7 @@
 package swse.talents;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import connections.DBPaths;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -70,8 +73,7 @@ public class TalentExporter extends BaseExporter
     private static Set<Category> allCategories = new HashSet<Category>();
     private static List<String> allTalents = new ArrayList<>();
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws IOException {
 
         String dir = LOCAL_ROOT + IMAGE_FOLDER + "/talent";
 
@@ -93,7 +95,8 @@ public class TalentExporter extends BaseExporter
         printUniqueNames(entries);
 
         System.out.println("Generated " + entries.size() + " of 1381");
-        writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Talents");
+        writeToDB(DBPaths.TalentsDB, entries, true);
+        //writeToJSON(new File(JSON_OUTPUT), entries,  hasArg(args, "d"), "Talents");
     }
 
 

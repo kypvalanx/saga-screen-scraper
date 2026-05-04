@@ -3,6 +3,7 @@ package swse.common;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
+import connections.DBPaths;
+import connections.LevelDBConnection;
 import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.*;
 import org.json.JSONArray;
@@ -28,14 +31,15 @@ import static swse.util.Util.printUnique;
 
 
 public abstract class BaseExporter {
-    public static final String LOCAL_ROOT = "C:/Users/lijew/AppData/Local/FoundryVTT/Data/";
-    public static final String IMAGE_FOLDER = "systems/swse/icon";
+    public static final String BASE = "/home/andy/swse/generationData";
+    public static String SYSTEM_LOCATION = "/home/andy/foundryuserdata/Data/systems/swse";
+    public static final String LOCAL_ROOT = SYSTEM_LOCATION;
+    public static final String IMAGE_FOLDER = "/icon";
     public static String ROOT = "https://swse.fandom.com";
-public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/Data/systems/swse";
     protected static Map<String, String> availableFiles = new HashMap<>();
     protected static List<String> itemsWithoutImages = new ArrayList<>();
 
-    protected static void writeToDB(File dbFile, List<JSONObject> entries, boolean dryRun) throws IOException {
+    protected static void writeToDB(Path dbPath, List<JSONObject> entries, boolean dryRun) throws IOException {
         if (dryRun) {
             return;
         }
@@ -50,23 +54,24 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 //
 //        data.put("entries", jsonArray);
 //        data.write(writer);
-        DB levelDBStore;
-        Options options = new Options();
-        levelDBStore = factory.open(dbFile, options);
-        try {
 
+        try (LevelDBConnection levelDBConnection = new LevelDBConnection(dbPath)) {
 
-//            WriteBatch batch = levelDBStore.createWriteBatch();
-//
-//            int i = 0;
-//            for (JSONObject entry : entries) {
-//                batch.put(bytes(Integer.toString(i)), bytes(entry.toString()));
-//            }
-//
-//            levelDBStore.write(batch);
-        } finally {
+            Map<String, byte[]> hashes = levelDBConnection.getHashes();
 
-            levelDBStore.close();
+            Map<String, String> nameToId = levelDBConnection.getIds();
+
+            for(JSONObject o : entries){
+                String id = nameToId.get(o.getString("name"));
+                if(id == null){
+                    System.out.println(o);
+                }
+                if(!dryRun){
+                    levelDBConnection.put(id, o);
+                }
+                o.put("_id", id);
+            }
+
         }
 
 
@@ -272,7 +277,7 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
         try {
 
 
-            File local = new File(clean(itemPageLink) + ".html");
+            File local = new File(BASE + clean(itemPageLink) + ".html");
 
             if (overwrite && local.exists()) {
                 local.delete();
@@ -280,9 +285,12 @@ public static String SYSTEM_LOCATION = "C:/Users/lijew/AppData/Local/FoundryVTT/
 
             String root = "https://swse.fandom.com";
             if (!local.exists()) {
-                String[] toks = itemPageLink.split("/");
-                String s = "C:";
+                String s = BASE + "/" +itemPageLink;
+                String[] toks = s.split("/");
                 for (int i = 0; i < toks.length - 1; i++) {
+                    if(toks[i].isEmpty()){
+                        continue;
+                    }
                     s = s.concat("/" + toks[i]);
                     new File(s).mkdir();
                 }
